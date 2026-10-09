@@ -1,0 +1,98 @@
+{
+  "modal": {
+    "close": "Chiudi finestra"
+  },
+  "popup": {
+    "success": "Operazione completata",
+    "warning": "Attenzione",
+    "error": "Si è verificato un errore",
+    "close": "Chiudi notifica"
+  },
+  "languageSelector": {
+    "ariaLabel": "Seleziona lingua",
+    "languages": {
+      "it": "Italiano",
+      "en": "Inglese"
+    }
+  },
+  "accountMenu": {
+    "defaultUsername": "Amministratore",
+    "openMenu": "Apri menu account",
+    "closeMenu": "Chiudi menu account",
+    "menuLabel": "Menu account",
+    "settings": "Impostazioni",
+    "notifications": "Notifiche",
+    "logout": "Esci"
+  },
+  "navbar": {
+    "home": "Home",
+    "analytics": "Analytics",
+    "users": "Utenti",
+    "ppvs": "PPV",
+    "usersManagement": "Gestione utenti",
+    "ppvsManagement": "Gestione PPV",
+    "categoriesManagement": "Gestione categorie",
+    "settings": "Impostazioni",
+    "goToHomepage": "Vai alla home",
+    "menu": "Menu",
+    "closeMenu": "Chiudi menu",
+    "notifications": {
+      "activeAriaLabel": "{{count}} notifiche attive",
+      "emptyAriaLabel": "Nessuna notifica attiva",
+      "menuAriaLabel": "Notifiche attive",
+      "menuTitle": "Notifiche",
+      "menuSubtitle": "{{count}} notifiche da gestire",
+      "loading": "Caricamento notifiche...",
+      "markAsReadAriaLabel": "Segna come letta",
+      "markAsReadTitle": "Segna come letta",
+      "types": {
+        "subscription_reactivation": "Riattivazione abbonamento",
+        "subscription_removal": "Rimozione abbonamento",
+        "content_to_prepare": "Contenuto da preparare",
+        "message": "Messaggio",
+        "other": "Altro",
+        "upsell": "Upsell PPV"
+      },
+      "empty": {
+        "title": "Tutto sotto controllo",
+        "description": "Non ci sono notifiche attive in questo momento."
+      },
+      "success": {
+        "read": "Notifica di {{name}} confermata correttamente"
+      },
+      "error": {
+        "read": "Impossibile confermare la notifica di {{name}}"
+      }
+    },
+    "userSegments": "Segmenti utenti",
+    "ppvSegments": "Segmenti PPV",
+    "dashboard": "Mensile",
+    "entries": "Movimenti",
+    "management": "Management",
+    "annual": "Annuale"
+  },
+  "theme": {
+    "light": "Tema chiaro",
+    "dark": "Tema scuro"
+  },
+  "pagination": {
+    "previous": "Pagina precedente",
+    "next": "Pagina successiva",
+    "navigationLabel": "Navigazione tra le pagine",
+    "goToPage": "Vai alla pagina {{page}}",
+    "results": "{{first}}–{{last}} di {{total}}",
+    "perPage": "Per pagina"
+  },
+  "autocomplete": {
+    "placeholder": "Seleziona",
+    "searchPlaceholder": "Cerca...",
+    "emptyMessage": "Nessun risultato",
+    "loadingMessage": "Caricamento...",
+    "removeSelection": "Rimuovi selezione",
+    "clearSearch": "Cancella ricerca"
+  },
+  "datePicker": {
+    "placeholder": "Seleziona una data",
+    "toggleCalendar": "Apri o chiudi il calendario"
+  }
+}

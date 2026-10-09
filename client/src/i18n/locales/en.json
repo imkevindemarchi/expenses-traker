@@ -1,0 +1,98 @@
+{
+  "modal": {
+    "close": "Close window"
+  },
+  "popup": {
+    "success": "Operation completed",
+    "warning": "Warning",
+    "error": "An error occurred",
+    "close": "Close notification"
+  },
+  "languageSelector": {
+    "ariaLabel": "Select language",
+    "languages": {
+      "it": "Italian",
+      "en": "English"
+    }
+  },
+  "accountMenu": {
+    "defaultUsername": "Administrator",
+    "openMenu": "Open account menu",
+    "closeMenu": "Close account menu",
+    "menuLabel": "Account menu",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "logout": "Log out"
+  },
+  "navbar": {
+    "home": "Home",
+    "analytics": "Analytics",
+    "users": "Users",
+    "ppvs": "PPV",
+    "usersManagement": "User management",
+    "ppvsManagement": "PPV management",
+    "categoriesManagement": "Category management",
+    "settings": "Settings",
+    "goToHomepage": "Go to home",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "notifications": {
+      "activeAriaLabel": "{{count}} active notifications",
+      "emptyAriaLabel": "No active notifications",
+      "menuAriaLabel": "Active notifications",
+      "menuTitle": "Notifications",
+      "menuSubtitle": "{{count}} notifications to manage",
+      "loading": "Loading notifications...",
+      "markAsReadAriaLabel": "Mark as read",
+      "markAsReadTitle": "Mark as read",
+      "types": {
+        "subscription_reactivation": "Subscription reactivation",
+        "subscription_removal": "Subscription removal",
+        "content_to_prepare": "Content to prepare",
+        "message": "Message",
+        "other": "Other",
+        "upsell": "PPV upsell"
+      },
+      "empty": {
+        "title": "Everything is under control",
+        "description": "There are no active notifications at the moment."
+      },
+      "success": {
+        "read": "Notification for {{name}} successfully confirmed"
+      },
+      "error": {
+        "read": "Unable to confirm the notification for {{name}}"
+      }
+    },
+    "userSegments": "User segments",
+    "ppvSegments": "PPV segments",
+    "dashboard": "Monthly",
+    "entries": "Transactions",
+    "management": "Management",
+    "annual": "Annual"
+  },
+  "theme": {
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "navigationLabel": "Page navigation",
+    "goToPage": "Go to page {{page}}",
+    "results": "{{first}}–{{last}} of {{total}}",
+    "perPage": "Per page"
+  },
+  "autocomplete": {
+    "placeholder": "Select",
+    "searchPlaceholder": "Search...",
+    "emptyMessage": "No results",
+    "loadingMessage": "Loading...",
+    "removeSelection": "Clear selection",
+    "clearSearch": "Clear search"
+  },
+  "datePicker": {
+    "placeholder": "Select a date",
+    "toggleCalendar": "Open or close the calendar"
+  }
+}
