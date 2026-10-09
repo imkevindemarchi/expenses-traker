@@ -31,7 +31,7 @@ h1,h2,h3,p{margin:0}h2{font-size:17px;font-weight:700;letter-spacing:-.035em}h3{
 .auth-switch button{font-weight:600;color:var(--accent-ink);cursor:pointer;margin-left:4px}
 .auth-switch button:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;border-radius:4px}
 .auth-card .form-error{text-align:center}
-@media(max-height:900px){.auth-page .auth-card{max-width:576px;padding:32px 48px}.auth-card-content{gap:20px}.auth-logo>svg{width:40px;height:40px}.auth-card h1{font-size:24px}.auth-card .form-stack{gap:16px}}
+@media(max-height:900px){.auth-page .auth-card{max-width:576px;padding:32px 48px}.auth-card-content{gap:20px}.auth-logo>img{width:40px;height:40px}.auth-card h1{font-size:24px}.auth-card .form-stack{gap:16px}}
 @media(max-width:767px){.auth-page{padding:24px 16px}.auth-page .auth-card{padding:32px 24px}.auth-card-content{gap:24px}.auth-logo>span{font-size:25px}.auth-card .auth-submit{width:100%;padding:16px 24px}}
 @media(max-height:760px){.auth-page{align-items:flex-start;padding-top:16px;padding-bottom:16px}.auth-page .auth-card{padding-top:24px;padding-bottom:24px}.auth-card-content{gap:16px}.auth-card .auth-submit{margin-top:4px}}
 

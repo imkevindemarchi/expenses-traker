@@ -14,8 +14,8 @@ import type { User } from "../types";
 export type { Page } from "../routes/routes.config";
 type IRoute = (typeof PROTECTED_ROUTES)[number];
 // assets
-const logoImg = "/expenses-logo.svg";
-const logoDarkImg = "/expenses-logo.svg";
+const logoImg = "/expenses-logo.png?v=2";
+const logoDarkImg = "/expenses-logo.png?v=2";
 import { getLiquidGlassClass } from "../assets/constants";
 
 // components
