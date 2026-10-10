@@ -395,9 +395,17 @@ input:-webkit-autofill:active {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .liquid-glass-panel--open,
+  .liquid-glass-inline--open,
   .liquid-glass-sidebar-motion--open,
   .liquid-glass-sidebar-motion--closed {
     animation-duration: 1ms;
+  }
+
+  .liquid-glass-panel::after,
+  .liquid-glass-inline::after {
+    content: none;
+    animation: none;
   }
 }
 
