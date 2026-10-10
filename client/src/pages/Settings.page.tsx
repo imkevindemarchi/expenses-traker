@@ -5,7 +5,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Settings, Save, LockKeyhole, Eye, EyeOff, Trash2, TriangleAlert, X, UserRound } from 'lucide-react';
 import { api } from '../api';
-import { tr } from '../i18n';
+import { tr, locale } from '../i18n';
 import type { User } from '../types';
 import Glass from '../components/Glass.component';
 import InputNumber from '../components/InputNumber.component';
@@ -54,7 +54,7 @@ export default function SettingsPage({user,onSaved,onNotice,onDeleted}: {user:Us
     <div className="form-stack">
       <Select id="account-currency" label={tr('Valuta dell’account')} value={currency} options={CURRENCIES.map(value=>({value,label:tr('currency.'+value)}))} onChange={setCurrency} disabled={busy}/>
       <p className="muted">{tr('Cambiare valuta non converte gli importi già registrati.')}</p>
-      <InputNumber id="monthly-budget" label={tr('Limite di spesa mensile {{currency}}',{currency})} placeholder="0,00" icon={<span className="text-xs">{currency}</span>} allowDecimal value={amount} disabled={busy} error={error ? tr(error) : undefined} onChange={value=>{setAmount(value);setError('');}} />
+      <InputNumber id="monthly-budget" label={tr('Limite di spesa mensile {{currency}}',{currency})} placeholder={new Intl.NumberFormat(locale(), {minimumFractionDigits:2}).format(0)} icon={<span className="text-xs">{currency}</span>} allowDecimal value={amount} disabled={busy} error={error ? tr(error) : undefined} onChange={value=>{setAmount(value);setError('');}} />
       <p className="muted">{tr('Lascia il campo vuoto per non impostare un limite. Il budget residuo compare solo nella panoramica del mese corrente.')}</p>
       {user.monthlyBudgetCents != null && <p className="muted">{tr('Limite attuale: {{amount}}',{amount:money(user.monthlyBudgetCents)})}</p>}
       

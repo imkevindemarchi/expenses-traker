@@ -140,9 +140,9 @@ export default function App() {
       }
       const rows = [[tr('Data'), tr('Tipo'), tr('Importo {{currency}}',{currency:user?.currency??'EUR'}), tr('Categoria'), tr('Sottocategoria')], ...all.map(item => [item.date, item.kind === 'expense' ? tr('Spesa') : tr('Entrata'), new Intl.NumberFormat(locale(), {minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false}).format(item.amountCents/100), categoryById.get(item.category)?.name ?? '', subcategoryById.get(item.subcategory ?? '')?.name ?? ''])];
       const url = URL.createObjectURL(new Blob(['\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n')], { type: 'text/csv;charset=utf-8;' }));
-      const reportMonth = new Intl.DateTimeFormat('it-IT', {month:'long',year:'numeric'}).format(new Date(`${month}-01T12:00:00`));
-      const reportName = reportMonth.charAt(0).toLocaleUpperCase('it-IT') + reportMonth.slice(1);
-      const anchor = document.createElement('a'); anchor.href = url; anchor.download = `movimenti ${reportName}.csv`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const reportMonth = new Intl.DateTimeFormat(locale(), {month:'long',year:'numeric'}).format(new Date(`${month}-01T12:00:00`));
+      const reportName = reportMonth.charAt(0).toLocaleUpperCase(locale()) + reportMonth.slice(1);
+      const anchor = document.createElement('a'); anchor.href = url; anchor.download = tr('Report movimenti {{month}}', {month:reportName}) + '.csv'; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
       setExportConfirm(false);
     } catch (error) { setNotice({ error: true, message: errorText(error) }); } finally { setBusy(false); }
   };

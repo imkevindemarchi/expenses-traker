@@ -12,7 +12,7 @@ import {
 } from "react";
 import { ChevronDown } from "lucide-react";
 import Calendar from "react-calendar";
-import { format } from "date-fns";
+
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
@@ -176,7 +176,7 @@ const DatePicker: FC<IProps> = ({
       return "";
     }
 
-    return format(parsedDate, "dd/MM/yyyy");
+    return new Intl.DateTimeFormat(i18n.resolvedLanguage === "it" ? "it-IT" : "en-US", {day:"2-digit",month:"2-digit",year:"numeric"}).format(parsedDate);
   };
 
   const updateCalendarPosition = (): void => {

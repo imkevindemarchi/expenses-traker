@@ -253,7 +253,6 @@
   "Aggiorna password": "Update password",
   "Password aggiornata.": "Password updated.",
   "Inserisci la password attuale.": "Enter your current password.",
-  "La password deve avere almeno 10 caratteri e non superare 72 byte.": "Your password must contain at least 10 characters and no more than 72 bytes.",
   "Le nuove password non coincidono.": "The new passwords do not match.",
   "Scegli una password diversa da quella attuale.": "Choose a password different from your current one.",
   "La password attuale non è corretta.": "Your current password is incorrect.",
@@ -261,7 +260,6 @@
   "Elimina account": "Delete account",
   "Elimina definitivamente il tuo account e tutti i dati associati.": "Permanently delete your account and all associated data.",
   "Eliminare il tuo account?": "Delete your account?",
-  "Eliminazione…": "Deleting…",
   "Elimina definitivamente": "Delete permanently",
   "Il tuo account, tutti i movimenti, le categorie e le sottocategorie saranno eliminati. Questa operazione non può essere annullata.": "Your account, all transactions, categories and subcategories will be deleted. This action cannot be undone.",
   "Account eliminato.": "Account deleted.",
@@ -270,5 +268,11 @@
   "Cognome": "Last name",
   "Aggiungi il tuo nome e cognome. Entrambi i campi sono facoltativi.": "Add your first and last name. Both fields are optional.",
   "Nome: usa un massimo di 60 caratteri.": "First name: use no more than 60 characters.",
-  "Cognome: usa un massimo di 60 caratteri.": "Last name: use no more than 60 characters."
+  "Cognome: usa un massimo di 60 caratteri.": "Last name: use no more than 60 characters.",
+  "Vuoi scaricare il report CSV dei movimenti selezionati?": "Download the CSV report for the selected transactions?",
+  "Report movimenti {{month}}": "Transactions {{month}}",
+  "{{count}} movimenti registrati_one": "{{count}} recorded transaction",
+  "{{count}} movimenti registrati_other": "{{count}} recorded transactions",
+  "{{count}} movimenti · {{month}}_one": "{{count}} transaction · {{month}}",
+  "{{count}} movimenti · {{month}}_other": "{{count}} transactions · {{month}}"
 }

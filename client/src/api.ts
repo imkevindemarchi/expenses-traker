@@ -1,4 +1,4 @@
-import { tr, locale } from './i18n';
+import { locale } from './i18n';
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) { super(message); this.status = status; }
@@ -8,11 +8,11 @@ export async function api<T>(path: string, options?: { method?: string; body?: u
     method: options?.method ?? 'GET', credentials: 'same-origin',
     headers: options?.body ? { 'Content-Type': 'application/json' } : undefined,
     body: options?.body ? JSON.stringify(options.body) : undefined,
-  }).catch(() => { throw new ApiError(tr("Il server non è raggiungibile. Verifica la connessione e che il back-end sia avviato."), 0); });
+  }).catch(() => { throw new ApiError("Il server non è raggiungibile. Verifica la connessione e che il back-end sia avviato.", 0); });
   const data = await response.json().catch(() => ({ message: 'Il server non è raggiungibile. Verifica di avere avviato il back-end.' }));
   if (!response.ok) {
     if (response.status === 401 && !path.startsWith('/auth')) window.dispatchEvent(new Event('session-expired'));
-    throw new ApiError(data.message ?? tr("Richiesta non riuscita."), response.status);
+    throw new ApiError(data.message ?? "Richiesta non riuscita.", response.status);
   }
   return data as T;
 }

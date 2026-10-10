@@ -1,9 +1,11 @@
+import {useTranslation} from 'react-i18next';
 import {SkeletonBlock} from './LoadingSkeleton.component';
 import {useMoney} from '../contexts/currency.context';
 import {ArrowDownLeft,ArrowUpRight,Wallet} from 'lucide-react';
 import {tr} from '../i18n';
 import type {Summary} from '../types';
 export default function FilteredBalance({summary,kind,loading}:{summary:Summary;kind:string;loading:boolean}) {
+ useTranslation();
   const money=useMoney();
  const income=kind==='income',expense=kind==='expense';
  const amount=income?summary.income:expense?summary.expense:summary.balance;
