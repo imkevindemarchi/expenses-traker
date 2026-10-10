@@ -319,7 +319,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
           />
 
           <div
-            className={`relative z-10 mb-2 flex shrink-0 items-center justify-center gap-3 rounded-[22px] p-2.5 transition-[opacity,translate] duration-200 ease-out ${isSidebarOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+            className={`relative z-10 mb-2 flex shrink-0 items-center justify-between gap-3 rounded-[22px] p-2.5 transition-[opacity,translate] duration-200 ease-out ${isSidebarOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
           >
             <NavLink
               to="/"
@@ -348,7 +348,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
           <div
             className={`relative z-20 mt-2 flex shrink-0 items-center justify-between overflow-visible rounded-[22px] border p-2.5 transition-[opacity,translate] duration-200 ease-out ${isSidebarOpen ? "translate-y-0 opacity-100 delay-40" : "translate-y-1 opacity-0 delay-0"} ${theme === "light" ? "border-white/85 bg-white/48 shadow-[0_12px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5 shadow-[0_14px_30px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
           >
-            <LanguageSelector placement="top" alignment="left" />
+            <LanguageSelector className="[&>button]:size-12 [&>button]:justify-center [&>button]:gap-0 [&>button]:p-0 [&>button>svg]:hidden [&>button>span:nth-child(2)]:hidden" placement="top" alignment="left" />
             <AccountMenu
               username={user.name} surname={user.surname} email={user.email}
               onLogout={onLogout}

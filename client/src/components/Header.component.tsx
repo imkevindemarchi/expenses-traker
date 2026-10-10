@@ -128,7 +128,7 @@ const Header: FC<IProps> = ({
   }, [isCompact]);
 
   return (
-    <div className="relative z-40 w-full">
+    <div className={`relative w-full ${isCompact ? "z-60" : "z-40"}`}>
       <div className="flex w-full flex-col">
         <div className="relative flex min-h-14 w-full items-center">
           <div
