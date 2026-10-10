@@ -268,8 +268,42 @@ const AccountMenu: FC<IProps> = ({
           }`}
         >
           <div className="account-menu-profile" role="presentation"><div className="account-menu-identity">{fullName&&<strong>{fullName}</strong>}<span className="account-menu-email"><Mail size={13}/><span title={email}>{email}</span></span></div></div>
-          <div className="account-menu-theme"><span className="account-menu-theme-label">{tr('Tema')}</span><div className="settings-theme-options" role="group" aria-label={tr('Tema')}>{([{value:'system',label:'Sistema',icon:Monitor},{value:'dark',label:'Scuro',icon:Moon},{value:'light',label:'Chiaro',icon:Sun}] as const).map(({value,label,icon:Icon})=><button type="button" key={value} className="settings-theme-option" aria-pressed={preference===value} onClick={()=>setPreference(value)}><Icon size={16}/><span>{tr(label)}</span></button>)}</div></div>
-          <div className="relative z-10 flex flex-col gap-1"><button type="button" role="menuitem" onClick={() => {setIsOpen(false);navigate('/settings');}} className={`group flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left text-sm transition-all duration-300 ${theme === 'light' ? 'text-black hover:border-white/65 hover:bg-white/40' : 'text-white hover:border-white/8 hover:bg-white/6'}`}><span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Settings size={17} strokeWidth={1.7}/></span><span className="font-semibold">{t('accountMenu.settings')}</span></button>
+          <div className="relative z-10 flex flex-col gap-1">
+            <div
+              role="group"
+              aria-label={tr('Tema')}
+              className={`border-b px-3 pt-2 pb-3 ${theme === "light" ? "border-black/7 text-black" : "border-white/8 text-white"}`}
+            >
+              <span className="mb-2 block text-xs font-semibold opacity-65">
+                {tr('Tema')}
+              </span>
+              <div className="grid grid-cols-3 gap-1">
+                {([
+                  { value: "system", label: "Sistema", icon: Monitor },
+                  { value: "dark", label: "Scuro", icon: Moon },
+                  { value: "light", label: "Chiaro", icon: Sun },
+                ] as const).map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={preference === value}
+                    onClick={() => setPreference(value)}
+                    className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${
+                      preference === value
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : theme === "light"
+                          ? "border-transparent hover:bg-black/5"
+                          : "border-transparent hover:bg-white/6"
+                    }`}
+                  >
+                    <Icon size={16} strokeWidth={1.7} />
+                    <span>{tr(label)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button type="button" role="menuitem" onClick={() => {setIsOpen(false);navigate('/settings');}} className={`group flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left text-sm transition-all duration-300 ${theme === 'light' ? 'text-black hover:border-white/65 hover:bg-white/40' : 'text-white hover:border-white/8 hover:bg-white/6'}`}><span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Settings size={17} strokeWidth={1.7}/></span><span className="font-semibold">{t('accountMenu.settings')}</span></button>
             
 
             <button
