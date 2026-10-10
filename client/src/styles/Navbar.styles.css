@@ -1,0 +1,42 @@
+.nav-tab,
+.nav-tab-card {
+  --nav-hover-shadow: 0 8px 18px rgb(24 50 30 / 12%), inset 0 1px 0 rgb(255 255 255 / 65%);
+  transition: transform 320ms cubic-bezier(.22, 1, .36, 1), box-shadow 240ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out;
+}
+.nav-tab[data-nav-theme="dark"],
+.nav-tab-card[data-nav-theme="dark"] {
+  --nav-hover-shadow: 0 8px 20px rgb(0 0 0 / 35%), inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+.nav-tab__icon {
+  transform-origin: 50% 70%;
+  transition: transform 380ms cubic-bezier(.34, 1.56, .64, 1);
+}
+.nav-tab__label { transition: transform 300ms cubic-bezier(.22, 1, .36, 1); }
+.nav-tab__indicator {
+  width: 24px;
+  opacity: 0;
+  transform: scaleX(.2);
+  transition: transform 320ms cubic-bezier(.34, 1.56, .64, 1), opacity 180ms, box-shadow 240ms;
+}
+.nav-tab[aria-current="page"] .nav-tab__indicator { opacity: 1; transform: scaleX(1); }
+.nav-tab:focus-visible,
+.nav-tab-card:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-tab:hover,
+  .nav-tab-card:hover { transform: translateY(-3px); box-shadow: var(--nav-hover-shadow); }
+  .nav-tab:hover .nav-tab__icon,
+  .nav-tab-card:hover .nav-tab__icon { transform: translateY(-2px) rotate(-8deg) scale(1.14); }
+  .nav-tab:hover .nav-tab__label { transform: translateY(-1px); }
+  .nav-tab:hover .nav-tab__indicator { opacity: .75; transform: scaleX(1.15); box-shadow: 0 2px 9px rgb(50 205 50 / 25%); }
+  .nav-tab[aria-current="page"]:hover .nav-tab__indicator { opacity: 1; }
+}
+.nav-tab:active,
+.nav-tab-card:active { transform: translateY(0) scale(.97); transition-duration: 100ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-tab, .nav-tab-card, .nav-tab__icon, .nav-tab__label, .nav-tab__indicator { transition: none; }
+  .nav-tab:hover, .nav-tab:active, .nav-tab-card:hover, .nav-tab-card:active,
+  .nav-tab:hover .nav-tab__icon, .nav-tab-card:hover .nav-tab__icon,
+  .nav-tab:hover .nav-tab__label { transform: none; }
+}

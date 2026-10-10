@@ -4,10 +4,14 @@ import {
   type PropsWithChildren,
   type ReactNode,
   useEffect,
+  useId,
+  useRef,
 } from "react";
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+
+import "../styles/Modal.styles.css";
 
 // hooks
 import { useTheme } from "../hooks";
@@ -45,6 +49,35 @@ const Modal: FC<IProps> = ({
 }) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const titleId = useId();
+  const descriptionId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus({ preventScroll: true });
+    const containFocus = (event: KeyboardEvent): void => {
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      )).filter(element => element.getClientRects().length > 0 && !element.closest('[inert]'));
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first) { event.preventDefault(); dialogRef.current.focus(); return; }
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    dialogRef.current?.addEventListener("keydown", containFocus);
+    const dialog = dialogRef.current;
+    return () => {
+      dialog?.removeEventListener("keydown", containFocus);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [isOpen]);
 
   const handleBackdropClick = (): void => {
     if (!closeOnBackdropClick || !isClosable) {
@@ -88,43 +121,36 @@ const Modal: FC<IProps> = ({
     <div
       role="presentation"
       onMouseDown={handleBackdropClick}
-      className="fixed inset-0 z-1000 overflow-y-auto bg-black/50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-sm animate-in fade-in duration-200 sm:px-5 sm:py-8"
+      className="modal-backdrop fixed inset-0 z-1000 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 sm:py-8"
     >
       <div className="flex min-h-full items-center justify-center">
         <div
           role="dialog"
+          ref={dialogRef}
+          tabIndex={-1}
+          data-modal-theme={theme}
           aria-modal="true"
-          aria-labelledby="modal-title"
-          aria-describedby={description ? "modal-description" : undefined}
+          aria-labelledby={titleId}
+          aria-describedby={description ? descriptionId : undefined}
           onMouseDown={handleModalClick}
-          className={`liquid-glass-panel liquid-glass-panel--open relative origin-top flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden rounded-[28px] border shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl  sm:max-h-[calc(100dvh-4rem)] sm:rounded-3xl ${MAX_WIDTH_CLASSES[maxWidth]} ${
-            theme === "light"
-              ? "border-black/10 bg-white/95"
-              : "border-white/10 bg-[#111111]/95"
-          }`}
+          className={`modal-surface relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
         >
           <div
-            className={`shrink-0 border-b px-4 py-4 sm:px-6 sm:py-5 ${
-              theme === "light" ? "border-black/5" : "border-white/5"
-            }`}
+            className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5"
           >
             <div className="flex items-start justify-between gap-4 sm:gap-5">
               <div className="min-w-0 flex-1">
                 <h2
-                  id="modal-title"
-                  className={`wrap-break-word text-lg font-semibold ${
-                    theme === "light" ? "text-black" : "text-white"
-                  }`}
+                  id={titleId}
+                  className="modal-title wrap-break-word text-xl leading-7 font-semibold tracking-tight sm:text-2xl sm:leading-8"
                 >
                   {title}
                 </h2>
 
                 {description && (
                   <p
-                    id="modal-description"
-                    className={`mt-1.5 wrap-break-word text-sm leading-6 ${
-                      theme === "light" ? "text-darkgray" : "text-gray"
-                    }`}
+                    id={descriptionId}
+                    className="modal-description mt-2 wrap-break-word text-sm leading-6"
                   >
                     {description}
                   </p>
@@ -137,11 +163,7 @@ const Modal: FC<IProps> = ({
                 disabled={!isClosable}
                 aria-label={t("modal.close")}
                 title={t("modal.close")}
-                className={`flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 hover:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ${
-                  theme === "light"
-                    ? "border-black/5 bg-black/2.5 text-darkgray hover:bg-black/5 hover:text-black"
-                    : "border-white/5 bg-white/5 text-gray hover:bg-white/10 hover:text-white"
-                }`}
+                className="modal-close flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-[color,background-color,transform] duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <X size={18} strokeWidth={2} />
               </button>
@@ -149,18 +171,14 @@ const Modal: FC<IProps> = ({
           </div>
 
           {children && (
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
               {children}
             </div>
           )}
 
           {footer && (
             <div
-              className={`shrink-0 border-t px-4 py-3 sm:px-6 sm:py-4 ${
-                theme === "light"
-                  ? "border-black/5 bg-white/85"
-                  : "border-white/5 bg-[#111111]/85"
-              }`}
+              className="modal-footer shrink-0 px-5 py-4 sm:px-7 sm:py-5"
             >
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 {footer}

@@ -1,0 +1,39 @@
+/* Shared glass based on the original month/year selector surface. */
+.glass-surface {
+  --glass-blur: 4px;
+  --glass-saturation: 1.25;
+  --glass-fill: rgb(255 255 255 / 35%);
+  border-color: rgb(255 255 255 / 70%);
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  box-shadow: 0 12px 32px rgb(15 23 42 / 14%), inset 0 1px 0 rgb(255 255 255 / 75%);
+}
+
+.glass-surface[data-glass-theme="dark"],
+.glass-surface.glass-surface--dark {
+  --glass-fill: rgb(0 0 0 / 35%);
+  border-color: rgb(255 255 255 / 15%);
+  background-color: var(--glass-fill);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 45%), inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+
+.glass-surface:not(.fixed, .absolute, .month-picker-panel) {
+  position: relative;
+}
+
+/* Clear dropdowns keep a static glass surface while opening. */
+.glass-surface.glass-surface--clear::after {
+  content: none;
+  animation: none;
+}
+
+@media (min-width: 768px) {
+  .glass-surface { --glass-blur: 8px; --glass-saturation: 1.5; }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-surface { --glass-fill: rgb(245 245 245 / 88%); background-color: var(--glass-fill); }
+  .glass-surface[data-glass-theme="dark"],
+  .glass-surface.glass-surface--dark { --glass-fill: rgb(22 22 22 / 92%); background-color: var(--glass-fill); }
+}

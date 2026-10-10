@@ -1,0 +1,20 @@
+/* Material is shared with MonthPicker through getLiquidGlassClass. */
+.floating-month-button {
+  transition: transform 280ms cubic-bezier(.22, 1, .36, 1), background-color 220ms, box-shadow 220ms;
+  -webkit-tap-highlight-color: transparent;
+}
+.floating-month-button__icon {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 15%));
+  transition: transform 280ms cubic-bezier(.22, 1, .36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .floating-month-button:hover:not(:disabled) { transform: translateY(-2px) scale(1.035); }
+  .floating-month-button:hover:not(:disabled) .floating-month-button__icon { transform: scale(1.06); }
+}
+.floating-month-button:active:not(:disabled) { transform: scale(.95); }
+.floating-month-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .floating-month-button, .floating-month-button__icon { transition: none; }
+  .floating-month-button:hover:not(:disabled), .floating-month-button:active:not(:disabled),
+  .floating-month-button:hover:not(:disabled) .floating-month-button__icon { transform: none; }
+}

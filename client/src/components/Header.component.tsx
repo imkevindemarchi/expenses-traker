@@ -1,8 +1,7 @@
 import { type ChangeEvent, type FC, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Plus, Search, X } from "lucide-react";
 
-// assets
-import { getLiquidGlassClass } from "../assets/constants";
+import "../styles/LiquidGlass.styles.css";
 
 // components
 import IconButton from "./IconButton.component";
@@ -144,12 +143,11 @@ const Header: FC<IProps> = ({
               type="button"
               onClick={handleTitleClick}
               aria-label={title}
-              className={`relative mx-auto origin-top-left cursor-pointer overflow-hidden border text-center outline-none transition-[background-color,border-color,box-shadow] duration-300 ease-out sm:cursor-default ${
+              data-glass-theme={theme}
+              className={`relative mx-auto w-fit max-w-full origin-top-left cursor-pointer overflow-hidden border px-5 text-center transition-[background-color,border-color,box-shadow] duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:cursor-default ${
                 isCompact
-                  ? `w-fit max-w-full rounded-full px-5 ${getLiquidGlassClass(
-                      theme,
-                    )}`
-                  : "w-fit max-w-full rounded-none border-transparent px-5"
+                  ? "glass-surface rounded-full"
+                  : "rounded-none border-transparent"
               }`}
             >
               <span

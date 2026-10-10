@@ -1,0 +1,5 @@
+/* Layout is preserved in app.css; this control uses the saved month-picker glass. */
+.month-picker-trigger:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}

@@ -16,6 +16,8 @@ import Calendar from "react-calendar";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
+import { getLiquidGlassClass } from "../assets/constants";
+
 // assets
 import "react-calendar/dist/Calendar.css";
 
@@ -403,7 +405,7 @@ const DatePicker: FC<IProps> = ({
             ref={calendarRef}
             role="dialog"
             aria-label={label}
-            className={`liquid-glass-panel liquid-glass-panel--open origin-top fixed z-9999 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border p-3 shadow-[0_20px_60px_rgba(0,0,0,0.25)] backdrop-blur-xl ${theme === "light" ? "border-black/10 bg-white/95 text-black" : "border-white/10 bg-[#111111]/95 text-white"}`}
+            className={`liquid-glass-panel liquid-glass-panel--open origin-top fixed z-9999 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border p-3 ${getLiquidGlassClass(theme)} ${theme === "light" ? "text-black" : "text-white"}`}
             style={
               {
                 top: calendarPosition.top,
