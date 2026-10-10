@@ -1,3 +1,4 @@
+import Bootloader from './components/Bootloader.component';
 import {OverviewSkeleton,CategoriesSkeleton} from './components/LoadingSkeleton.component';
 import EntryModal from './components/EntryModal.component';
 import {CurrencyContext,useMoney} from './contexts/currency.context';
@@ -146,7 +147,7 @@ export default function App() {
       setExportConfirm(false);
     } catch (error) { setNotice({ error: true, message: errorText(error) }); } finally { setBusy(false); }
   };
-  return <CurrencyContext.Provider value={user?.currency??'EUR'}><ThemeContext.Provider value={{theme,preference:themePreference,setPreference:setThemePreference}}>
+  return <CurrencyContext.Provider value={user?.currency??'EUR'}><ThemeContext.Provider value={{theme,preference:themePreference,setPreference:setThemePreference}}><Bootloader>
     {notice && <Popup key={notice.message} popup={{ type: notice.error ? 'error' : 'success', message: tr(notice.message) }} isClosing={false} onClose={() => setNotice(null)} />}
     {boot ? null : !user ? <Routes><Route path="/login" element={<Auth onLogin={account => {setUser(account);setNotice(null);navigate(safeReturnPath(location.state?.from),{replace:true});}} />} /><Route path="/register" element={<Auth onLogin={account => {setUser(account);setNotice(null);navigate(safeReturnPath(location.state?.from),{replace:true});}} />} /><Route path="*" element={<Navigate to="/login" state={{from:location.pathname}} replace />} /></Routes> : (location.pathname === ROUTE_PATHS.login || location.pathname === ROUTE_PATHS.register) ? <Navigate to={safeReturnPath(location.state?.from)} replace /> : <>
       <Navbar user={user} onLogout={() => { void logout(); }} />
@@ -179,7 +180,7 @@ export default function App() {
       </Modal>
       <Modal isOpen={Boolean(deleteAction)} title={tr("Conferma eliminazione")} description={tr("Vuoi eliminare “{{name}}”?", {name:deleteAction?.label ?? ""})} maxWidth="sm" isClosable={!busy} onClose={() => setDeleteAction(null)} footer={<><Button variant="secondary" disabled={busy} onClick={() => setDeleteAction(null)}>{tr("Annulla")}</Button><Button variant="danger" disabled={busy} onClick={async () => { if (deleteAction && await mutate(deleteAction.endpoint, 'DELETE')) { setDeleteAction(null); setListPage(1); } }}>{busy ? tr("Eliminazione…") : tr("Elimina")}</Button></>}><p className="muted">{tr("Le categorie collegate a sottocategorie o movimenti non vengono eliminate: riassegna prima i dati collegati.")}</p></Modal>
     </>}
-  </ThemeContext.Provider></CurrencyContext.Provider>;
+  </Bootloader></ThemeContext.Provider></CurrencyContext.Provider>;
 }
 
 function Auth({ onLogin }: { onLogin: (user: User) => void }) {

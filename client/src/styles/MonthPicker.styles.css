@@ -1,4 +1,42 @@
-/* Layout is preserved in app.css; this control uses the saved month-picker glass. */
+/* Shared appearance for monthly and annual period filters. */
+.month-picker {
+  display: inline-flex;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--soft), color-mix(in srgb, var(--color-primary) 5%, var(--canvas)));
+  box-shadow: 0 8px 24px rgb(15 40 20 / 5%), inset 0 1px 0 rgb(255 255 255 / 20%);
+}
+.month-picker-trigger { min-width: 174px; padding: 8px 10px; }
+.month-picker .month-step { width: 32px; height: 40px; border-radius: 14px; }
+.month-picker-icon { border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent); }
+.app-main .annual-filter { width: fit-content; max-width: 100%; }
+.year-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-ink) transparent;
+}
+.year-picker-list .month-tile {
+  flex-shrink: 0;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.month-step:focus-visible, .month-tile:focus-visible, .month-current:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+@media (max-width: 380px) {
+  .month-picker-trigger { min-width: 150px; }
+}
 .month-picker-panel.liquid-glass-panel--open {
   animation: liquid-glass-pop-open 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
   transform-origin: top center;

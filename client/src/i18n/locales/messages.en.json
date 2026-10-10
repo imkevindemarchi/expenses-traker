@@ -1,4 +1,11 @@
 {
+  "Anno corrente": "Current year",
+  "Torna all’anno corrente": "Back to the current year",
+  "La tua panoramica, un anno alla volta.": "Your overview, one year at a time.",
+  "Anni": "Years",
+  "Seleziona anno: {{year}}": "Select year: {{year}}",
+  "Scegli l’anno": "Choose a year",
+  "Seleziona anno": "Select year",
   "Si è verificato un errore.": "An error occurred.",
   "Sessione scaduta. Accedi di nuovo.": "Your session has expired. Sign in again.",
   "Modifica salvata.": "Changes saved.",

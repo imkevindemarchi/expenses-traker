@@ -2,6 +2,7 @@
 @import "./styles/DatePicker.styles.css";
 @import "./app.css";
 @import "./styles/LiquidGlass.styles.css";
+@import "./styles/MonthPicker.styles.css";
 
 @theme {
   --color-primary: #32cd32;

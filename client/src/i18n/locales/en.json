@@ -1,4 +1,5 @@
 {
+  "loader": { "loading": "Loading..." },
   "modal": {
     "close": "Close window"
   },
