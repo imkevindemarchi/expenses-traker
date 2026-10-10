@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "./styles/DatePicker.styles.css";
 @import "./app.css";
-@import "./styles/LiquidGlass.styles.css";
 
 @theme {
   --color-primary: #32cd32;
@@ -169,7 +168,7 @@ input:-webkit-autofill:active {
 @media (hover: hover) and (pointer: fine) {
   .liquid-glass-interaction:hover:not(:disabled) {
     scale: 1.035;
-
+    box-shadow: 0 14px 35px rgb(0 0 0 / 16%);
   }
 }
 

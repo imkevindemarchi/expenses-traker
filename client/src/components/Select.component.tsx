@@ -291,9 +291,7 @@ const Select = <TValue extends string = string>({
               : `translateY(${isMenuAbove ? "8px" : "-8px"}) scale(0.96)`,
             transformOrigin: `${menuOrigin.x}px ${menuOrigin.y}px`,
           }}
-          className={`liquid-glass-panel ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} fixed z-9999 isolate overflow-hidden border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[transform,opacity] ${getLiquidGlassClass(theme)} ${
-            theme === "light" ? "border-black/7" : "border-white/8"
-          } ${
+          className={`liquid-glass-panel glass-surface--clear ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} fixed z-9999 isolate overflow-hidden border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[transform,opacity] ${getLiquidGlassClass(theme)} ${
             isOpen
               ? "pointer-events-auto rounded-[22px] opacity-100"
               : "pointer-events-none rounded-[22px] opacity-0"
@@ -317,9 +315,7 @@ const Select = <TValue extends string = string>({
                   onClick={(): void => handleOptionClick(option.value)}
                   className={`flex w-full cursor-pointer items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-[background-color,border-color,color,box-shadow] duration-300 ${
                     isSelected
-                      ? theme === "light"
-                        ? "border-white/80 bg-white/60 text-primary shadow-[0_8px_24px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]"
-                        : "border-white/12 bg-white/9 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.10)]"
+                      ? `${getLiquidGlassClass(theme)} text-primary`
                       : theme === "light"
                         ? "border-transparent text-black hover:border-white/65 hover:bg-white/40"
                         : "border-transparent text-white hover:border-white/8 hover:bg-white/6"
@@ -360,7 +356,7 @@ const Select = <TValue extends string = string>({
                   <span
                     className={`flex size-6 shrink-0 items-center justify-center rounded-full transition-[opacity,transform] duration-300 ${
                       isSelected
-                        ? "scale-100 bg-primary text-white opacity-100 shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
+                        ? `${getLiquidGlassClass(theme)} scale-100 border text-primary opacity-100`
                         : "scale-75 opacity-0"
                     }`}
                   >

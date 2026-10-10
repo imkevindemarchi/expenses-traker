@@ -17,6 +17,8 @@ type IRoute = (typeof PROTECTED_ROUTES)[number];
 const logoImg = "/expenses-logo.png?v=2";
 const logoDarkImg = "/expenses-logo.png?v=2";
 import { getLiquidGlassClass } from "../assets/constants";
+import "../styles/LiquidGlass.styles.css";
+import "../styles/Navbar.styles.css";
 
 // components
 import AccountMenu from "./AccountMenu.component";
@@ -106,8 +108,9 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
             to={protectedRoute.path}
             end={isMainRoute}
             title={t(`navbar.${protectedRoute.name}`)}
+            data-nav-theme={theme}
             className={({ isActive }: { isActive: boolean }) =>
-              `liquid-glass-interaction group relative flex shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-2xl border px-2.5 py-2 font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-300 active:scale-[0.94] xl:px-3 xl:py-2.5 ${getLiquidGlassClass(theme)} ${isActive ? (theme === "light" ? "border-white/90 text-primary" : "border-white/12 text-primary") : theme === "light" ? "border-white/40 text-darkgray hover:border-white/80 hover:bg-white/45 hover:text-primary" : "border-white/6 text-gray hover:border-white/14 hover:bg-white/8 hover:text-primary"}`
+              `nav-tab group relative flex shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-2xl border px-2.5 py-2 font-medium xl:px-3 xl:py-2.5 ${getLiquidGlassClass(theme)} ${isActive ? (theme === "light" ? "border-white/90 text-primary" : "border-white/12 text-primary") : theme === "light" ? "border-white/40 text-darkgray hover:border-white/80 hover:bg-white/45 hover:text-primary" : "border-white/6 text-gray hover:border-white/14 hover:bg-white/8 hover:text-primary"}`
             }
           >
             {({ isActive }: { isActive: boolean }) => (
@@ -115,17 +118,18 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
                 <RouteIcon
                   size={16}
                   strokeWidth={2}
-                  className={`relative z-10 shrink-0 transition-transform duration-300 group-hover:scale-105 ${isActive ? "text-primary" : ""}`}
+                  className={`nav-tab__icon relative z-10 shrink-0 ${isActive ? "text-primary" : ""}`}
                 />
 
                 <span
-                  className={`relative z-10 whitespace-nowrap text-[12px] transition-transform duration-300 group-hover:scale-[1.03] xl:text-[13px] 2xl:text-sm ${isActive ? "text-primary" : theme === "light" ? "text-black" : "text-white"}`}
+                  className={`nav-tab__label relative z-10 whitespace-nowrap text-[12px] xl:text-[13px] 2xl:text-sm ${isActive ? "text-primary" : theme === "light" ? "text-black" : "text-white"}`}
                 >
                   {t(`navbar.${protectedRoute.name}`)}
                 </span>
 
                 <span
-                  className={`absolute bottom-1 left-1/2 z-10 h-0.75 -translate-x-1/2 rounded-full bg-primary/80 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-300 ${isActive ? "w-6 opacity-100" : "w-0 opacity-0 group-hover:w-5 group-hover:opacity-50"}`}
+                  aria-hidden="true"
+                  className="nav-tab__indicator absolute bottom-1 left-1/2 z-10 h-0.75 -translate-x-1/2 rounded-full bg-primary/80"
                 />
               </>
             )}
@@ -154,8 +158,9 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
             end={isMainRoute}
             onClick={handleCloseSidebar}
             style={routeAnimationStyle}
+            data-nav-theme={theme}
             className={({ isActive }: { isActive: boolean }) =>
-              `group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] ${isSidebarOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-2 scale-[0.98] opacity-0"} ${isActive ? "border-primary/60 bg-primary text-white shadow-[0_18px_42px_rgba(189,150,82,0.28),inset_0_1px_0_rgba(255,255,255,0.28)]" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
+              `nav-tab-card group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] ${isSidebarOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-2 scale-[0.98] opacity-0"} ${isActive ? "border-primary/60 bg-primary text-white shadow-[0_18px_42px_rgba(189,150,82,0.28),inset_0_1px_0_rgba(255,255,255,0.28)]" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
             }
           >
             {({ isActive }: { isActive: boolean }) => (
@@ -167,7 +172,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
                     <span
                       className={`flex size-9 shrink-0 items-center justify-center rounded-[14px] border transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:-translate-y-0.5 group-hover:scale-105 ${isActive ? "border-white/25 bg-white/18 text-white shadow-[0_8px_20px_rgba(0,0,0,0.12)]" : theme === "light" ? "border-white bg-white/80 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)]" : "border-white/12 bg-white/8 text-primary"}`}
                     >
-                      <RouteIcon size={18} strokeWidth={2} />
+                      <RouteIcon className="nav-tab__icon" size={18} strokeWidth={2} />
                     </span>
 
                     <span
@@ -207,7 +212,8 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
             to="/"
             end
             aria-label={t("navbar.goToHomepage")}
-            className={`liquid-glass-interaction group absolute bottom-4 left-5 inline-flex size-16 items-center justify-center overflow-hidden rounded-[20px] border p-2.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-0.5 active:scale-[0.94] ring-1 ring-inset ring-white/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/80 hover:border-white hover:bg-white/50" : "border-white/20 hover:border-white/35 hover:bg-white/10"}`}
+            className="glass-surface group absolute bottom-4 left-5 inline-flex size-16 rounded-[20px] items-center justify-center overflow-hidden border p-2.5 transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            data-glass-theme={theme}
           >
             <img
               src={theme === "light" ? logoImg : logoDarkImg}
@@ -223,7 +229,8 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
               to="/"
               end
               aria-label={t("navbar.goToHomepage")}
-              className={`liquid-glass-interaction group relative inline-flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[22px] border p-2.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.9] xl:size-18 xl:rounded-3xl xl:p-3 2xl:size-20 hover:-translate-y-0.5 ring-1 ring-inset ring-white/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/80 hover:border-white hover:bg-white/50" : "border-white/20 hover:border-white/35 hover:bg-white/10"}`}
+            className="glass-surface group relative inline-flex size-16 shrink-0 rounded-[22px] xl:size-18 xl:rounded-3xl xl:p-3 2xl:size-20 items-center justify-center overflow-hidden border p-2.5 transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            data-glass-theme={theme}
             >
               <img
                 src={theme === "light" ? logoImg : logoDarkImg}
@@ -255,7 +262,8 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
         aria-label={isSidebarOpen ? t("navbar.closeMenu") : t("navbar.menu")}
         aria-expanded={isSidebarOpen}
         aria-controls="mobile-sidebar"
-        className={`liquid-glass-interaction group fixed right-5 top-[calc(env(safe-area-inset-top)+1.5rem)] z-100 flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus:outline-none active:scale-[0.9] md:hidden ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/60" : "border-white/10"} ${isSidebarOpen ? "rotate-90" : "rotate-0"}`}
+        data-glass-theme={theme}
+        className={`glass-surface group fixed right-5 top-[calc(env(safe-area-inset-top)+1.5rem)] z-100 flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border transition-transform duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:scale-[0.9] md:hidden ${isSidebarOpen ? "rotate-90" : "rotate-0"}`}
       >
         {/* <span className="pointer-events-none absolute inset-px rounded-[17px] bg-linear-to-b from-white/35 via-white/5 to-transparent opacity-70" />
         <span className="pointer-events-none absolute -left-7 -top-9 size-16 rounded-full bg-white/45 blur-2xl transition-transform duration-700 group-hover:translate-x-14 group-hover:translate-y-10" />
@@ -321,12 +329,13 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
               className="group flex min-w-0 items-center gap-3"
             >
               <span
-                className={`flex size-20 items-center justify-center overflow-hidden rounded-[15px] `}
+                data-glass-theme={theme}
+                className="glass-surface relative flex size-20 items-center justify-center overflow-hidden rounded-[15px]"
               >
                 <img
                   src={theme === "light" ? logoImg : logoDarkImg}
                   alt="Expenses Traker"
-                  className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
+                  className="relative z-10 h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
                 />
               </span>
             </NavLink>

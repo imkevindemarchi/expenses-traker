@@ -186,6 +186,7 @@ const AccountMenu: FC<IProps> = ({
     <>
       <div
         ref={accountMenuRef}
+        data-glass-theme={theme}
         className={`group relative isolate overflow-hidden rounded-full ${getLiquidGlassClass(theme)} ${className}`}
       >
         {/* <span className="pointer-events-none absolute inset-px rounded-full bg-linear-to-b from-white/30 via-white/5 to-transparent opacity-70 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:inset-0 group-hover:opacity-100" />
@@ -211,8 +212,8 @@ const AccountMenu: FC<IProps> = ({
                 : "border-white/8 hover:border-white/15"
           } ${
             theme === "light"
-              ? "bg-black/[0.018] text-black"
-              : "bg-white/2.5 text-white"
+              ? "text-black"
+              : "text-white"
           }`}
         >
           <span
@@ -249,6 +250,7 @@ const AccountMenu: FC<IProps> = ({
       {createPortal(
         <div
           ref={menuRef}
+        data-glass-theme={theme}
           inert={!isOpen}
           role="menu"
           aria-label={t("accountMenu.menuLabel")}
@@ -259,7 +261,7 @@ const AccountMenu: FC<IProps> = ({
               : `translateY(${isMenuOnTop ? "8px" : "-8px"}) scale(0.96)`,
             transformOrigin: `${menuOrigin.x}px ${menuOrigin.y}px`,
           }}
-          className={`liquid-glass-panel ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} fixed z-9999 isolate overflow-hidden rounded-[22px] border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[transform,opacity] ${
+          className={`liquid-glass-panel glass-surface--clear ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} fixed z-9999 isolate overflow-hidden rounded-[22px] border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[transform,opacity] ${
             theme === "light" ? "border-black/7" : "border-white/8"
           } ${getLiquidGlassClass(theme)} ${
             isOpen

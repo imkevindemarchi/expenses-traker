@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { getLiquidGlassClass } from '../assets/constants';
-import '../styles/MonthPicker.styles.css';
 import { useTheme } from '../hooks';
 import { locale, tr } from '../i18n';
 import { today } from '../api';
@@ -48,11 +47,11 @@ export default function MonthPicker({value,onChange}: {value:string;onChange:(va
       </button>
       <button type="button" className="month-step" aria-label={tr('Mese successivo')} title={tr('Mese successivo')} disabled={value==='2100-12'} onClick={()=>shift(1)}><ChevronRight size={18} strokeWidth={1.8}/></button>
     </div>
-    {open&&createPortal(<div ref={panel} id={id} role="dialog" aria-label={tr('Seleziona mese')} style={position} className={`month-picker-panel ${glass}`}>
+    {open&&createPortal(<div ref={panel} id={id} role="dialog" aria-label={tr('Seleziona mese')} style={position} className={`month-picker-panel ${glass} ${theme==='dark'?'month-picker-dark':''}`}>
       <div className="month-picker-panel-heading"><span className="month-picker-icon"><CalendarDays size={19} strokeWidth={1.7}/></span><div><h3>{tr('Scegli il mese')}</h3><p>{tr('La tua panoramica, un mese alla volta.')}</p></div></div>
       <div className="month-year-bar"><button type="button" disabled={year<=2000} aria-label={tr('Anno precedente')} className="month-step" onClick={()=>setYear(current=>current-1)}><ChevronLeft size={17}/></button><span aria-live="polite">{year}</span><button type="button" disabled={year>=2100} aria-label={tr('Anno successivo')} className="month-step" onClick={()=>setYear(current=>current+1)}><ChevronRight size={17}/></button></div>
       <div role="listbox" aria-label={tr('Mesi')} className="month-grid">{months.map((month,index)=>{const monthValue=`${year}-${String(index+1).padStart(2,'0')}`;const active=value===monthValue;return <button key={index} data-month={index} type="button" role="option" aria-selected={active} onKeyDown={event=>key(event,index)} onClick={()=>select(monthValue)} className={`month-tile ${active?'is-selected':''} ${current===monthValue?'is-current':''}`}><span>{month}</span>{active?<Check size={13} strokeWidth={2.4}/>:current===monthValue?<span className="month-current-dot" aria-label={tr('Mese corrente')}/>:null}</button>;})}</div>
-      {value!==current&&<button type="button" className="month-current" onClick={()=>select(current)}><RotateCcw size={14} strokeWidth={1.8}/>{tr('Torna al mese corrente')}</button>}
+      <button type="button" className="month-current" onClick={()=>select(current)}><RotateCcw size={14} strokeWidth={1.8}/>{tr('Torna al mese corrente')}</button>
     </div>,document.body)}
   </>;
 }

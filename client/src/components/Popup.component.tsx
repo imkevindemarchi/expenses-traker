@@ -193,35 +193,8 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
           isDragging
             ? "transition-none"
             : "transition-all duration-300 ease-out"
-        } ${getLiquidGlassClass(theme)} ${borderClassName} ${
-          theme === "light"
-            ? "bg-white/78 shadow-[0_18px_50px_rgba(15,23,42,0.18)]"
-            : "bg-[#0b0b0d]/82 shadow-[0_18px_50px_rgba(0,0,0,0.38)]"
-        } pointer-events-auto relative isolate flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 select-none sm:max-w-md`}
+        } ${getLiquidGlassClass(theme)} ${borderClassName} pointer-events-auto relative isolate flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 select-none sm:max-w-md`}
       >
-        <span
-          className={`pointer-events-none absolute inset-px rounded-[23px] bg-linear-to-b ${
-            theme === "light"
-              ? "from-white/80 via-white/28 to-white/8 opacity-95"
-              : "from-white/16 via-white/5 to-transparent opacity-90"
-          }`}
-        />
-
-        <span
-          className={`pointer-events-none absolute -left-12 -top-14 size-32 rounded-full blur-3xl ${style.glowClassName}`}
-        />
-
-        <span
-          className={`pointer-events-none absolute -right-10 -top-14 size-28 rounded-full blur-3xl ${
-            theme === "light" ? "bg-white/45" : "bg-white/12"
-          }`}
-        />
-
-        <span
-          className={`pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ${
-            theme === "light" ? "ring-white/65" : "ring-white/18"
-          }`}
-        />
 
         <span
           className={`pointer-events-none absolute inset-y-3 left-1.5 w-1 rounded-full ${style.accentClassName}`}
