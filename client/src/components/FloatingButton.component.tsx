@@ -32,7 +32,8 @@ const FloatingButton: FC<IProps> = ({
   ...buttonProps
 }) => {
   const { theme } = useTheme();
-  const visible = useMobileFloatingVisibility(alwaysVisibleOnMobile);
+  const persistent = alwaysVisibleOnMobile || type === "submit";
+  const visible = useMobileFloatingVisibility(persistent);
   const buttonRef = useRef<HTMLButtonElement>(null);
   useImperativeHandle(ref, () => buttonRef.current!, []);
 
@@ -40,7 +41,7 @@ const FloatingButton: FC<IProps> = ({
     <button
       {...buttonProps}
       ref={buttonRef}
-      data-mobile-persistent={alwaysVisibleOnMobile || undefined}
+      data-mobile-persistent={persistent || undefined}
       data-mobile-hidden={!visible || undefined}
       inert={!visible || undefined}
       type={type}

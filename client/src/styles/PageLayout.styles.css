@@ -1,0 +1,34 @@
+html,
+body,
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  min-width: 0;
+}
+
+main {
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-width: 0;
+}
+
+.overview-grid,
+.charts-grid {
+  min-width: 0;
+}
+
+.overview-grid > *,
+.charts-grid > *,
+.section-heading > * {
+  min-width: 0;
+}
+
+.section-heading {
+  flex-wrap: wrap;
+}
+
+.analytics-surface:not(.stat-card):not(.balance-card) {
+  background-color: var(--canvas);
+}
