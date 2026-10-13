@@ -1,10 +1,11 @@
+import { ChartSkeleton, RowSkeleton, Placeholder } from "./UiSkeleton.component";
 import { useTranslation } from "react-i18next";
 import Glass from "./Glass.component";
 import { tr } from "../i18n";
 export function SkeletonBlock({ className = "" }: { className?: string }) {
   return <span aria-hidden="true" className={`skeleton-block ${className}`} />;
 }
-export function OverviewSkeleton({ budget = false }: { budget?: boolean }) {
+export function OverviewSkeleton({ budget = false, annual = false }: { budget?: boolean; annual?: boolean }) {
   useTranslation();
   return (
     <div role="status" aria-label={tr("Caricamento riepilogo")}>
@@ -33,25 +34,17 @@ export function OverviewSkeleton({ budget = false }: { budget?: boolean }) {
         <Glass className="panel">
           <div className="skeleton-stack">
             <SkeletonBlock className="skeleton-label" />
-            <div className="skeleton-chart">
-              {[40, 65, 50, 85, 35, 70, 55, 95, 45, 75, 60, 80].map((height, index) => (
-                <SkeletonBlock
-                  key={index}
-                  className={`skeleton-column skeleton-column-${height}`}
-                />
-              ))}
-            </div>
+            <ChartSkeleton kind={annual ? "bars" : "line"} />
           </div>
         </Glass>
         <Glass className="panel">
           <div className="skeleton-stack">
             <SkeletonBlock className="skeleton-label" />
-            <SkeletonBlock className="skeleton-donut" />
-            <SkeletonBlock className="skeleton-bar" />
-            <SkeletonBlock className="skeleton-bar" />
+            <ChartSkeleton kind="donut" />
           </div>
         </Glass>
       </div>
+      {annual && <Glass className="panel"><Placeholder className="sk-section-title"/><RowSkeleton/><RowSkeleton/><RowSkeleton/></Glass>}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { startGlobalLoading, stopGlobalLoading } from "../stores/loader.store";
 import { locale } from "../i18n";
 export class ApiError extends Error {
   status: number;
@@ -10,6 +11,9 @@ export async function api<T>(
   path: string,
   options?: { method?: string; body?: unknown },
 ): Promise<T> {
+  const showLoading = (options?.method && options.method !== "GET" && !(options.method === "PATCH" && path.startsWith("/workouts/"))) || path === "/backup";
+  if (showLoading) startGlobalLoading();
+  try {
   const response = await fetch(`/api${path}`, {
     method: options?.method ?? "GET",
     credentials: "same-origin",
@@ -30,6 +34,7 @@ export async function api<T>(
     throw new ApiError(data.message ?? "Richiesta non riuscita.", response.status);
   }
   return data as T;
+  } finally { if (showLoading) stopGlobalLoading(); }
 }
 export const money = (cents: number, currency = "EUR") =>
   new Intl.NumberFormat(locale(), { style: "currency", currency }).format(cents / 100);

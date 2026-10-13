@@ -62,7 +62,7 @@ export default function AnnualPage({
           {tr(error)}
         </p>
       ) : !summary ? (
-        <OverviewSkeleton />
+        <OverviewSkeleton annual />
       ) : (
         <>
           <div className="overview-grid">

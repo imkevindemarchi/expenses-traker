@@ -28,7 +28,7 @@ const Stepper: FC<IProps> = ({ steps, activeStep, ariaLabel, className = "" }) =
           const isLast: boolean = index === steps.length - 1;
 
           return (
-            <div key={`${step.label}-${index}`} className="flex min-w-0 flex-1 items-start">
+            <div key={`${step.label}-${index}`} className={`${isActive ? "flex" : "hidden sm:flex"} min-w-0 flex-1 items-start`}>
               <div className="flex min-w-0 flex-1 flex-col items-center text-center">
                 <div className="flex w-full items-center">
                   <span

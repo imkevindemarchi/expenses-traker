@@ -1,7 +1,8 @@
 import Select from "../components/Select.component";
 import { CURRENCIES } from "../contexts/currency.context";
 import { useMoney } from "../contexts/currency.context";
-import { useState, type FormEvent } from "react";
+import { useState, useId, type FormEvent } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Settings,
@@ -15,16 +16,24 @@ import {
   UserRound,
   Database,
   Download,
+  ChevronLeft,
+  ChevronDown,
 } from "lucide-react";
 import { api } from "../api";
 import { tr, locale } from "../i18n";
 import type { User } from "../types";
-import Glass from "../components/Glass.component";
+
 import InputNumber from "../components/InputNumber.component";
-import Accordion from "../components/Accordion.component";
+import type { ReactNode } from "react";
+import "../styles/Settings.styles.css";
 import Input from "../components/Input.component";
 import Button from "../components/Button.component";
 import FloatingButton from "../components/FloatingButton.component";
+function SettingsSection({header,children,ariaLabel,collapsible=false}:{header:ReactNode;children:ReactNode;ariaLabel:string;collapsible?:boolean;className?:string;contentClassName?:string}) {
+ const [open,setOpen]=useState(!collapsible);
+ const contentId=useId();
+ return <section className="settings-section" aria-label={ariaLabel}><div className="settings-section-heading">{header}</div><div className="settings-section-body">{collapsible && <button type="button" className="settings-password-toggle" aria-expanded={open} aria-controls={contentId} onClick={()=>setOpen(value=>!value)}>{ariaLabel}<ChevronDown className={open ? "is-open" : ""} size={18} /></button>}<div id={contentId} hidden={!open} className={collapsible ? "settings-password-fields" : undefined}>{children}</div></div></section>;
+}
 export default function SettingsPage({
   user,
   onSaved,
@@ -37,6 +46,7 @@ export default function SettingsPage({
   onDeleted: () => void;
 }) {
   const money = useMoney();
+  const navigate = useNavigate();
   useTranslation();
   const [amount, setAmount] = useState(
     user.monthlyBudgetCents == null ? "" : (user.monthlyBudgetCents / 100).toFixed(2),
@@ -144,15 +154,21 @@ export default function SettingsPage({
   };
   return (
     <>
+      <div className="settings-layout">
+      <nav className="settings-navigation" aria-label={tr("Impostazioni")}>
+        <p className="settings-navigation-label">{tr("Impostazioni")}</p>
+        {["Profilo", "Valuta e budget mensile", "Password", "Gestione dati"].map((label,index)=><a key={label} href={`#expense-settings-${index}`}>{tr(label)}</a>)}
+      </nav>
       <form
         id="account-settings-form"
-        className="settings-sections"
+        className="settings-sections settings-redesign"
         onSubmit={save}
         noValidate
         aria-busy={busy}
       >
-        <Glass className="panel settings-panel">
-          <Accordion
+        <div className="settings-identity"><span className="settings-avatar" aria-hidden="true">{user.name.slice(0,1).toUpperCase()}{user.surname?.slice(0,1).toUpperCase()}</span><div><strong>{[user.name,user.surname].filter(Boolean).join(" ")}</strong><p>{user.email}</p></div></div>
+        <div id="expense-settings-0" className="settings-panel">
+          <SettingsSection
             className="settings-accordion"
             contentClassName="settings-accordion-content"
             ariaLabel={tr("Profilo")}
@@ -198,10 +214,10 @@ export default function SettingsPage({
                 />
               </div>
             </div>
-          </Accordion>
-        </Glass>
-        <Glass className="panel settings-panel">
-          <Accordion
+          </SettingsSection>
+        </div>
+        <div id="expense-settings-1" className="settings-panel">
+          <SettingsSection
             className="settings-accordion"
             contentClassName="settings-accordion-content"
             ariaLabel={tr("Valuta e budget mensile")}
@@ -260,13 +276,14 @@ export default function SettingsPage({
                 </p>
               )}
             </div>
-          </Accordion>
-        </Glass>
-        <Glass className="panel settings-panel">
-          <Accordion
+          </SettingsSection>
+        </div>
+        <div id="expense-settings-2" className="settings-panel">
+          <SettingsSection
             className="settings-accordion"
             contentClassName="settings-accordion-content"
             ariaLabel={tr("Cambia password")}
+            collapsible
             header={
               <div className="settings-heading">
                 <span className="round-icon">
@@ -319,10 +336,10 @@ export default function SettingsPage({
                 />
               ))}
             </div>
-          </Accordion>
-        </Glass>
-        <Glass className="panel settings-panel">
-          <Accordion
+          </SettingsSection>
+        </div>
+        <div id="expense-settings-3" className="settings-panel">
+          <SettingsSection
             className="settings-accordion"
             contentClassName="settings-accordion-content"
             ariaLabel={tr("I tuoi dati")}
@@ -437,15 +454,17 @@ export default function SettingsPage({
                 </p>
               )}
             </div>
-          </Accordion>
-        </Glass>
+          </SettingsSection>
+        </div>
         {error && (
           <p className="form-error settings-panel" role="alert">
             {tr(error)}
           </p>
         )}
       </form>
-      <div className="mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 -translate-x-1/2">
+      </div>
+      <div className="mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
+        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={24} />} onClick={()=>navigate("/")} disabled={busy || deleteBusy || exportBusy} />
         <FloatingButton
           type="submit"
           form="account-settings-form"

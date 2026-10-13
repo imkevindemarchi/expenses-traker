@@ -260,11 +260,12 @@ export default function EntryModal({
   return (
     <Modal
       isOpen
-      title={editing ? tr("Modifica movimento") : tr("Nuovo movimento")}
+      appearance={step === 0 ? "choices" : "default"}
+      title={tr("Nuovo movimento")}
       maxWidth="lg"
       isClosable={!busy}
       onClose={onClose}
-      footer={
+      footer={step === 0 ? undefined :
         <>
           <Button
             variant="secondary"
@@ -297,20 +298,20 @@ export default function EntryModal({
         className="entry-wizard"
         aria-busy={busy}
       >
-        <Stepper
+        {step > 0 && <Stepper
           steps={["Tipo", "Categoria", "Sottocategoria", "Importo"].map((label) => ({
             label: tr(label),
           }))}
           activeStep={step}
           ariaLabel={tr("Passaggi del movimento")}
-        />
+        />}
         <fieldset disabled={busy} className="entry-step">
           <legend className="sr-only">
             {tr(["Tipo", "Categoria", "Sottocategoria", "Importo e data"][step])}
           </legend>
           {step === 0 && (
             <>
-              <h3>{tr("Che movimento vuoi registrare?")}</h3>
+              <h3 className="sr-only">{tr("Che movimento vuoi registrare?")}</h3>
               <div className="entry-create-kind" role="group" aria-label={tr("Tipo")}>
                 {(["expense", "income"] as const).map((kind) => (
                   <button

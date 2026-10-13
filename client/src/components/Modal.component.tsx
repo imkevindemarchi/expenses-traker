@@ -23,6 +23,7 @@ type TModalMaxWidth = "sm" | "md" | "lg" | "xl";
 
 interface IProps extends PropsWithChildren {
   isOpen: boolean;
+  appearance?: "default" | "choices";
   title: string;
   description?: string;
   /** Optional actions. Omit for dialogs whose content triggers the action directly. */
@@ -42,6 +43,7 @@ const MAX_WIDTH_CLASSES: Record<TModalMaxWidth, string> = {
 
 const Modal: FC<IProps> = ({
   isOpen,
+  appearance = "default",
   title,
   description,
   footer,
@@ -165,7 +167,7 @@ const Modal: FC<IProps> = ({
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
           onMouseDown={handleModalClick}
-          className={`modal-surface ${getLiquidGlassClass(theme)} relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
+          className={`modal-surface ${appearance === "choices" ? "modal-choice-surface" : ""} ${getLiquidGlassClass(theme)} relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
         >
           <div className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5">
             <div className="flex items-start justify-between gap-4 sm:gap-5">
@@ -187,7 +189,7 @@ const Modal: FC<IProps> = ({
                 )}
               </div>
 
-              <button
+              {appearance !== "choices" && <button
                 type="button"
                 onClick={onClose}
                 disabled={!isClosable}
@@ -196,7 +198,7 @@ const Modal: FC<IProps> = ({
                 className="modal-close flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-[color,background-color,transform,box-shadow] duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <X size={18} strokeWidth={2} />
-              </button>
+              </button>}
             </div>
           </div>
 

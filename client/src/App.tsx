@@ -1,3 +1,4 @@
+import AuthShell from "./components/AuthShell.component";
 import Bootloader from "./components/Bootloader.component";
 import { OverviewSkeleton, CategoriesSkeleton } from "./components/LoadingSkeleton.component";
 import EntryModal from "./components/EntryModal.component";
@@ -27,7 +28,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Download,
   ListFilter,
   RotateCcw,
   ChevronLeft,
@@ -46,7 +46,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { ThemeContext, type ThemePreference } from "./contexts/theme.context";
-import { api, ApiError, money as formatMoney, today, displayDate, csvCell } from "./api";
+import { api, ApiError, money as formatMoney, today, displayDate } from "./api";
 import type { User, Category, Subcategory, Entry, Summary } from "./types";
 import Navbar, { type Page } from "./components/Navbar.component";
 import Glass from "./components/Glass.component";
@@ -156,7 +156,6 @@ export default function App() {
   const [entryEdit, setEntryEdit] = useState<{ id?: string; form: EntryForm } | null>(null);
   const [manageEdit, setManageEdit] = useState<ManageForm | null>(null);
   const [deleteAction, setDeleteAction] = useState<DeleteAction | null>(null);
-  const [exportConfirm, setExportConfirm] = useState(false);
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(null), 4000);
@@ -340,63 +339,6 @@ export default function App() {
       setSummary(emptySummary);
       navigate(ROUTE_PATHS.login, { replace: true });
       setNotice(null);
-    }
-  };
-  const exportCsv = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const all: Entry[] = [];
-      const query = new URLSearchParams({ month });
-      if (filterCategory) query.set("category", filterCategory);
-      if (filterKind) query.set("kind", filterKind);
-      if (search.trim()) query.set("q", search.trim());
-      for (let cursor = 1; ; cursor++) {
-        query.set("page", String(cursor));
-        const result = await api<{ entries: Entry[]; totalPages: number }>(`/entries?${query}`);
-        all.push(...result.entries);
-        if (cursor >= result.totalPages) break;
-      }
-      const rows = [
-        [
-          tr("Data"),
-          tr("Tipo"),
-          tr("Importo {{currency}}", { currency: user?.currency ?? "EUR" }),
-          tr("Categoria"),
-          tr("Sottocategoria"),
-        ],
-        ...all.map((item) => [
-          item.date,
-          item.kind === "expense" ? tr("Spesa") : tr("Entrata"),
-          new Intl.NumberFormat(locale(), {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-            useGrouping: false,
-          }).format(item.amountCents / 100),
-          categoryById.get(item.category)?.name ?? "",
-          subcategoryById.get(item.subcategory ?? "")?.name ?? "",
-        ]),
-      ];
-      const url = URL.createObjectURL(
-        new Blob(["\uFEFF" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n")], {
-          type: "text/csv;charset=utf-8;",
-        }),
-      );
-      const reportMonth = new Intl.DateTimeFormat(locale(), {
-        month: "long",
-        year: "numeric",
-      }).format(new Date(`${month}-01T12:00:00`));
-      const reportName = reportMonth.charAt(0).toLocaleUpperCase(locale()) + reportMonth.slice(1);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = tr("Report movimenti {{month}}", { month: reportName }) + ".csv";
-      anchor.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setExportConfirm(false);
-    } catch (error) {
-      setNotice({ error: true, message: errorText(error) });
-    } finally {
-      setBusy(false);
     }
   };
   return (
@@ -856,7 +798,6 @@ export default function App() {
                           setEntryEdit(null);
                           setManageEdit(null);
                           setDeleteAction(null);
-                          setExportConfirm(false);
                           navigate(ROUTE_PATHS.login, { replace: true });
                           setNotice({ error: false, message: "Account eliminato." });
                         }}
@@ -879,17 +820,10 @@ export default function App() {
                   expenses-traker <span>{tr("Uno spazio personale. Una visione chiara.")}</span>
                 </footer>
               </main>
-              {page !== "settings" && (
+              {page !== "settings" && page !== "annual" && (
                 <div className="mobile-floating-actions floating-actions flex items-center gap-3">
                   {page === "entries" && (
                     <>
-                      <FloatingButton
-                        ariaLabel={tr("Esporta CSV")}
-                        title={tr("Esporta CSV")}
-                        icon={<Download size={27} />}
-                        disabled={busy || loading}
-                        onClick={() => setExportConfirm(true)}
-                      />
                       <FilterFloatingMenu
                         ariaLabel={tr("Tipo di movimento")}
                         icon={<ListFilter size={27} />}
@@ -927,6 +861,7 @@ export default function App() {
                     </>
                   )}
                   <FloatingButton
+                    alwaysVisibleOnMobile={page === "management"}
                     ariaLabel={
                       page === "management" ? tr("Crea categoria") : tr("Registra movimento")
                     }
@@ -943,40 +878,6 @@ export default function App() {
                     }
                   />
                 </div>
-              )}
-              {exportConfirm && (
-                <Modal
-                  isOpen
-                  title={tr("Esporta CSV")}
-                  maxWidth="sm"
-                  isClosable={!busy}
-                  onClose={() => setExportConfirm(false)}
-                  footer={
-                    <>
-                      <Button
-                        variant="secondary"
-                        disabled={busy}
-                        onClick={() => setExportConfirm(false)}
-                      >
-                        {tr("Annulla")}
-                      </Button>
-                      <Button
-                        disabled={busy || loading}
-                        icon={<Download size={17} />}
-                        onClick={() => {
-                          void exportCsv();
-                        }}
-                      >
-                        {tr(busy ? "Un momento…" : "Esporta CSV")}
-                      </Button>
-                    </>
-                  }
-                >
-                  <p>{tr("Vuoi scaricare il report CSV dei movimenti selezionati?")}</p>
-                  <p className="muted">
-                    {tr("{{count}} movimenti · {{month}}", { count: totalEntries, month })}
-                  </p>
-                </Modal>
               )}
               {entryEdit && (
                 <EntryModal
@@ -1189,20 +1090,8 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
     }
   };
   return (
-    <main className="auth-page">
-      <div className="auth-language">
-        <LanguageSelector />
-      </div>
-      <Shadowbox className="auth-card">
-        <div className="auth-card-content">
-          <div className="auth-logo">
-            <img src="/expenses-logo.png?v=2" width={48} height={48} alt="" aria-hidden="true" />
-            <span>
-              Expenses <strong>Traker</strong>
-            </span>
-          </div>
-          <h1>{register ? tr("Crea il tuo account") : tr("Accedi al tuo account")}</h1>
-          <form onSubmit={submit} className="form-stack" noValidate aria-busy={busy}>
+    <AuthShell brand="Expenses Traker" logo={<img src="/expenses-logo.png?v=2" alt="" />} title={register ? tr("Crea il tuo account") : tr("Accedi al tuo account")} description={tr(register ? "Crea il tuo account per iniziare." : "Accedi per continuare.")}>
+          <form onSubmit={submit} className="auth-form" noValidate aria-busy={busy}>
             {register && (
               <Input
                 id="auth-name"
@@ -1249,14 +1138,14 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
               onChange={(event) => changeField("password", event.target.value)}
             />
             {register && (
-              <small className="muted">
+              <small className="auth-hint">
                 {tr(
                   "Almeno 10 caratteri. Le tue categorie iniziali saranno Lavoro, Extra e Necessità.",
                 )}
               </small>
             )}
             {error && (
-              <p role="alert" className="form-error">
+              <p role="alert" className="auth-error">
                 {tr(error)}
               </p>
             )}
@@ -1284,9 +1173,7 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
               {register ? tr("Accedi") : tr("Registrati")}
             </button>
           </p>
-        </div>
-      </Shadowbox>
-    </main>
+    </AuthShell>
   );
 }
 function Empty({ text }: { text: string }) {
@@ -1304,7 +1191,7 @@ function Skeleton() {
   return (
     <div role="status" aria-label={tr("Caricamento movimenti")} className="skeleton-list">
       {[1, 2, 3].map((value) => (
-        <div key={value} className="animate-pulse" />
+        <div key={value} className="movement-skeleton-row" aria-hidden="true"><span className="skeleton-block movement-skeleton-icon" /><div><span className="skeleton-block skeleton-label" /><span className="skeleton-block skeleton-bar" /></div><span className="skeleton-block movement-skeleton-amount" /></div>
       ))}
     </div>
   );

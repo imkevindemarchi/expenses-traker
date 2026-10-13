@@ -875,7 +875,7 @@ input:-webkit-autofill:active {
     max-width: calc(100vw - 32px);
     gap: 0 !important;
   }
-  .mobile-floating-actions > div:not(:has([role="menu"])) {
+  .mobile-floating-actions > div:not(:has(> button[aria-haspopup="menu"])) {
     display: contents !important;
   }
   .mobile-floating-actions button:not([role]) {
@@ -1030,3 +1030,28 @@ input:-webkit-autofill:active {
     padding: 16px;
   }
 }
+
+/* Floating action containers never intercept clicks outside their controls. */
+.floating-actions, .mobile-floating-actions { pointer-events: none; }
+.floating-actions button, .mobile-floating-actions button { pointer-events: auto; }
+.floating-month-button::before, .floating-month-button::after { pointer-events: none; }
+.pagination-surface { min-width: 0; max-width: 100%; }
+@media(max-width:639px) {
+ .pagination-surface { padding-inline: 0.25rem; }
+ .pagination-surface > div { min-width: 0; gap: 0.25rem; }
+}
+
+.operation-loader { position:fixed; inset:0; z-index:2147483647; display:grid; place-items:center; padding:24px; cursor:wait; background:rgb(0 0 0 / 12%); }
+.operation-loader-card { display:flex; align-items:center; gap:16px; padding:24px 30px; border-radius:28px; border:1px solid rgb(255 255 255 / 35%); background:rgb(255 255 255 / 75%); color:#242126; backdrop-filter:blur(24px); box-shadow:0 20px 60px rgb(0 0 0 / 15%); }
+[data-theme="dark"] .operation-loader-card { background:rgb(30 28 34 / 80%); color:#fff; }
+.operation-loader-card svg { width:28px; height:28px; color:var(--color-primary); animation:operation-spin 1s linear infinite; }
+@keyframes operation-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .operation-loader-card svg { animation:none; } }
+
+.ui-refresh .category-card { border-left:3px solid color-mix(in srgb,var(--color-primary) 55%,transparent); border-radius:20px; padding:22px; background:color-mix(in srgb,var(--color-primary) 4%,transparent); margin-block:12px; }
+.ui-refresh .category-card:nth-child(even) { background:color-mix(in srgb,var(--color-primary) 9%,transparent); }
+
+.skeleton-list > .movement-skeleton-row { display:flex; align-items:center; gap:14px; height:auto; min-height:90px; border-radius:0; background:transparent; border-bottom:1px solid var(--line); }
+.movement-skeleton-row > div { flex:1; min-width:0; display:grid; gap:12px; }
+.movement-skeleton-icon { width:44px; height:44px; border-radius:14px; flex-shrink:0; }
+.movement-skeleton-amount { width:72px; height:20px; flex-shrink:0; }

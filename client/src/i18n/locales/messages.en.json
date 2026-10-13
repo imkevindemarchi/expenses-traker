@@ -289,5 +289,7 @@
   "Esporta tutti i movimenti, le categorie e le impostazioni in un file JSON.": "Export all transactions, categories and settings to a JSON file.",
   "Esportazione…": "Exporting…",
   "Esporta backup": "Export backup",
-  "Il tuo account, tutte le schede, gli esercizi e gli allenamenti saranno eliminati. Questa operazione non può essere annullata.": "Your account, all routines, exercises and workouts will be deleted. This action cannot be undone."
+  "Il tuo account, tutte le schede, gli esercizi e gli allenamenti saranno eliminati. Questa operazione non può essere annullata.": "Your account, all routines, exercises and workouts will be deleted. This action cannot be undone.",
+  "Gestione dati": "Data management",
+  "Crea il tuo account per iniziare.": "Create your account to get started."
 }
