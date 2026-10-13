@@ -3,7 +3,7 @@ import {
   type CSSProperties,
   type FC,
   useCallback,
-  useEffect,
+  useEffect, useLayoutEffect,
   useRef,
   useState,
   useContext,
@@ -90,7 +90,11 @@ const AccountMenu: FC<IProps> = ({
 
     const menuWidth: number = Math.min(Math.max(triggerRect.width, MENU_MIN_WIDTH), availableWidth);
 
-    const menuHeight: number = menuRef.current?.scrollHeight ?? 120;
+    // Measure the rendered menu after its mobile width has been applied.
+    const availableHeight = Math.max(0, isMenuOnTop
+      ? triggerRect.top - MENU_GAP - VIEWPORT_PADDING
+      : window.innerHeight - triggerRect.bottom - MENU_GAP - VIEWPORT_PADDING);
+    const menuHeight = Math.min(menuRef.current?.offsetHeight ?? 120, availableHeight);
 
     const preferredLeft: number = isMenuAlignedLeft
       ? triggerRect.left
@@ -114,15 +118,23 @@ const AccountMenu: FC<IProps> = ({
       ? triggerRect.left + 28
       : triggerRect.right - 28;
 
-    setMenuOrigin({
+    setMenuOrigin(previous => {
+      const next: { x: number; y: number } = {
       x: Math.min(Math.max(triggerAnchorX - clampedLeft, 0), menuWidth),
       y: isMenuOnTop ? menuHeight : 0,
+    };
+      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
     });
 
-    setMenuStyle({
+    setMenuStyle(previous => {
+      const next: CSSProperties = {
       left: clampedLeft,
       top: clampedTop,
       width: menuWidth,
+      maxHeight: availableHeight,
+      overflowY: "auto",
+    };
+      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
     });
   }, [isMenuAlignedLeft, isMenuOnTop]);
 
@@ -168,19 +180,32 @@ const AccountMenu: FC<IProps> = ({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
+  useLayoutEffect(() => {
+    if (!isOpen) return;
     updateMenuPosition();
-
+    const observer = new ResizeObserver(updateMenuPosition);
+    if (menuRef.current) observer.observe(menuRef.current);
+    if (triggerRef.current) observer.observe(triggerRef.current);
+    const viewport = window.visualViewport;
     window.addEventListener("resize", updateMenuPosition);
     window.addEventListener("scroll", updateMenuPosition, true);
-
-    return (): void => {
+    viewport?.addEventListener("resize", updateMenuPosition);
+    viewport?.addEventListener("scroll", updateMenuPosition);
+    // The sidebar contents may still be finishing their opening motion.
+    let frame = 0;
+    const until = performance.now() + 300;
+    const followAnchor = () => {
+      updateMenuPosition();
+      if (performance.now() < until) frame = requestAnimationFrame(followAnchor);
+    };
+    frame = requestAnimationFrame(followAnchor);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", updateMenuPosition);
       window.removeEventListener("scroll", updateMenuPosition, true);
+      viewport?.removeEventListener("resize", updateMenuPosition);
+      viewport?.removeEventListener("scroll", updateMenuPosition);
     };
   }, [isOpen, updateMenuPosition]);
 

@@ -13,6 +13,8 @@ import {
   TriangleAlert,
   X,
   UserRound,
+  Database,
+  Download,
 } from "lucide-react";
 import { api } from "../api";
 import { tr, locale } from "../i18n";
@@ -52,8 +54,28 @@ export default function SettingsPage({
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [exportBusy, setExportBusy] = useState(false);
+  const exportData = async () => {
+    if (busy || deleteBusy || exportBusy) return;
+    setExportBusy(true);
+    try {
+      const data = await api<unknown>("/backup");
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+      );
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `expensestraker-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (cause) {
+      onNotice(true, cause instanceof Error ? cause.message : "Si è verificato un errore.");
+    } finally {
+      setExportBusy(false);
+    }
+  };
   const removeAccount = async () => {
-    if (!deleteConfirm || deleteBusy || busy) return;
+    if (!deleteConfirm || deleteBusy || busy || exportBusy) return;
     setDeleteBusy(true);
     setDeleteError("");
     try {
@@ -67,7 +89,7 @@ export default function SettingsPage({
   };
   const save = async (event: FormEvent) => {
     event.preventDefault();
-    if (busy || deleteBusy) return;
+    if (busy || deleteBusy || exportBusy) return;
     setError("");
     if (
       amount !== "" &&
@@ -156,7 +178,7 @@ export default function SettingsPage({
                   placeholder={tr("Nome")}
                   autoComplete="given-name"
                   maxLength={60}
-                  disabled={busy || deleteBusy}
+                  disabled={busy || deleteBusy || exportBusy}
                   value={profile.name}
                   onChange={(event) =>
                     setProfile((value) => ({ ...value, name: event.target.value }))
@@ -168,7 +190,7 @@ export default function SettingsPage({
                   placeholder={tr("Cognome")}
                   autoComplete="family-name"
                   maxLength={60}
-                  disabled={busy || deleteBusy}
+                  disabled={busy || deleteBusy || exportBusy}
                   value={profile.surname}
                   onChange={(event) =>
                     setProfile((value) => ({ ...value, surname: event.target.value }))
@@ -284,7 +306,7 @@ export default function SettingsPage({
                   placeholder={tr(label)}
                   type={showPasswords ? "text" : "password"}
                   autoComplete={autoComplete}
-                  disabled={busy || deleteBusy}
+                  disabled={busy || deleteBusy || exportBusy}
                   value={passwords[key]}
                   icon={<LockKeyhole size={17} />}
                   endIcon={showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -303,21 +325,49 @@ export default function SettingsPage({
           <Accordion
             className="settings-accordion"
             contentClassName="settings-accordion-content"
-            ariaLabel={tr("Elimina account")}
+            ariaLabel={tr("I tuoi dati")}
             header={
               <div className="settings-heading">
-                <span className="round-icon expense-text">
-                  <Trash2 size={22} />
+                <span className="round-icon">
+                  <Database size={22} />
                 </span>
                 <div>
-                  <h2>{tr("Elimina account")}</h2>
+                  <h2>{tr("I tuoi dati")}</h2>
                   <p className="muted">
-                    {tr("Elimina definitivamente il tuo account e tutti i dati associati.")}
+                    {tr("Gestisci una copia dei tuoi dati e il tuo account.")}
                   </p>
                 </div>
               </div>
             }
           >
+            <div className="settings-data-card">
+              <div className="settings-data-heading">
+                <span className="settings-data-icon">
+                  <Database size={22} />
+                </span>
+                <div className="settings-data-copy">
+                  <h3>{tr("Backup dei dati")}</h3>
+                  <p className="muted">
+                    {tr(
+                      "Esporta tutti i movimenti, le categorie e le impostazioni in un file JSON.",
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="settings-data-actions">
+                <Button
+                  variant="secondary"
+                  disabled={busy || deleteBusy || exportBusy}
+                  icon={<Download size={17} />}
+                  onClick={() => void exportData()}
+                >
+                  {tr(exportBusy ? "Esportazione…" : "Esporta backup")}
+                </Button>
+              </div>
+              <p className="muted settings-data-note">
+                {tr("Scarica una copia dei tuoi dati prima di eliminare l’account.")}
+              </p>
+            </div>
             <div className={`settings-delete-box ${deleteConfirm ? "is-confirming" : ""}`}>
               <div className="settings-delete-row">
                 <span className="settings-delete-icon">
@@ -358,7 +408,7 @@ export default function SettingsPage({
                     </Button>
                     <Button
                       variant="danger"
-                      disabled={deleteBusy || busy}
+                      disabled={deleteBusy || busy || exportBusy}
                       icon={<Trash2 size={16} />}
                       onClick={() => {
                         void removeAccount();
@@ -370,7 +420,7 @@ export default function SettingsPage({
                 ) : (
                   <Button
                     variant="danger"
-                    disabled={busy || deleteBusy}
+                    disabled={busy || deleteBusy || exportBusy}
                     icon={<Trash2 size={16} />}
                     onClick={() => {
                       setDeleteError("");
@@ -401,7 +451,7 @@ export default function SettingsPage({
           form="account-settings-form"
           ariaLabel={tr(busy ? "Salvataggio…" : "Salva impostazioni")}
           icon={<Save size={27} />}
-          disabled={busy || deleteBusy}
+          disabled={busy || deleteBusy || exportBusy}
         />
       </div>
     </>

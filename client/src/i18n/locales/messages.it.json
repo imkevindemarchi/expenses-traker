@@ -281,5 +281,13 @@
   "Cognome": "Cognome",
   "Aggiungi il tuo nome e cognome. Entrambi i campi sono facoltativi.": "Aggiungi il tuo nome e cognome. Entrambi i campi sono facoltativi.",
   "Nome: usa un massimo di 60 caratteri.": "Nome: usa un massimo di 60 caratteri.",
-  "Cognome: usa un massimo di 60 caratteri.": "Cognome: usa un massimo di 60 caratteri."
+  "Cognome: usa un massimo di 60 caratteri.": "Cognome: usa un massimo di 60 caratteri.",
+  "I tuoi dati": "I tuoi dati",
+  "Backup dei dati": "Backup dei dati",
+  "Scarica una copia dei tuoi dati prima di eliminare l’account.": "Scarica una copia dei tuoi dati prima di eliminare l’account.",
+  "Gestisci una copia dei tuoi dati e il tuo account.": "Gestisci una copia dei tuoi dati e il tuo account.",
+  "Esporta tutti i movimenti, le categorie e le impostazioni in un file JSON.": "Esporta tutti i movimenti, le categorie e le impostazioni in un file JSON.",
+  "Esportazione…": "Esportazione…",
+  "Esporta backup": "Esporta backup",
+  "Il tuo account, tutte le schede, gli esercizi e gli allenamenti saranno eliminati. Questa operazione non può essere annullata.": "Il tuo account, tutte le schede, gli esercizi e gli allenamenti saranno eliminati. Questa operazione non può essere annullata."
 }

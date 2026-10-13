@@ -1,25 +1,35 @@
+/* Shared frosted overlay values for sidebars and modal backdrops. */
+:root {
+  --overlay-glass-light: rgb(255 255 255 / 50%);
+  --overlay-glass-dark: rgb(0 0 0 / 50%);
+  --overlay-glass-blur: 12px;
+  --overlay-glass-saturation: 1.25;
+}
+@media (min-width: 768px) { :root { --overlay-glass-saturation: 1.5; } }
 /* Shared glass based on the original month/year selector surface. */
 .glass-surface {
   --glass-blur: 4px;
   --glass-saturation: 1.25;
   --glass-fill: rgb(255 255 255 / 35%);
-  border-color: rgb(255 255 255 / 70%);
+  --glass-rim: rgb(255 255 255 / 70%);
+  --glass-highlight: rgb(255 255 255 / 75%);
+  --glass-shadow: 0 12px 32px rgb(15 23 42 / 14%), inset 0 1px 0 var(--glass-highlight);
+  border-color: var(--glass-rim);
   background-color: var(--glass-fill);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
-  box-shadow:
-    0 12px 32px rgb(15 23 42 / 14%),
-    inset 0 1px 0 rgb(255 255 255 / 75%);
+  box-shadow: var(--glass-shadow);
 }
 
 .glass-surface[data-glass-theme="dark"],
 .glass-surface.glass-surface--dark {
   --glass-fill: rgb(0 0 0 / 35%);
-  border-color: rgb(255 255 255 / 15%);
+  --glass-rim: rgb(255 255 255 / 15%);
+  --glass-highlight: rgb(255 255 255 / 10%);
+  --glass-shadow: 0 12px 32px rgb(0 0 0 / 45%), inset 0 1px 0 var(--glass-highlight);
+  border-color: var(--glass-rim);
   background-color: var(--glass-fill);
-  box-shadow:
-    0 12px 32px rgb(0 0 0 / 45%),
-    inset 0 1px 0 rgb(255 255 255 / 10%);
+  box-shadow: var(--glass-shadow);
 }
 
 .glass-surface:not(.fixed, .absolute, .month-picker-panel) {
@@ -43,4 +53,22 @@
     --glass-fill: rgb(22 22 22 / 92%);
     background-color: var(--glass-fill);
   }
+}
+
+/* Frosted large surfaces need more diffusion than compact filter menus. */
+.liquid-glass-sidebar-surface.glass-surface {
+  --glass-fill: var(--overlay-glass-light);
+  --glass-blur: var(--overlay-glass-blur);
+  border-color: var(--glass-rim);
+  box-shadow: var(--glass-shadow);
+}
+.liquid-glass-sidebar-surface.glass-surface--dark { --glass-fill: var(--overlay-glass-dark); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-glass-sidebar-surface.glass-surface { --glass-fill: #fafcfe; }
+  .liquid-glass-sidebar-surface.glass-surface--dark { --glass-fill: #181d24; }
+}
+.liquid-glass-sidebar-content > span:first-child { opacity: .35; }
+@media (prefers-reduced-transparency: reduce) {
+  .glass-surface, .liquid-glass-sidebar-surface.glass-surface { --glass-fill: #fafcfe; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .glass-surface.glass-surface--dark, .glass-surface[data-glass-theme="dark"], .liquid-glass-sidebar-surface.glass-surface--dark { --glass-fill: #181d24; }
 }

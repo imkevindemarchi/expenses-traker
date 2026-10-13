@@ -267,7 +267,7 @@
   "Elimina account": "Delete account",
   "Elimina definitivamente il tuo account e tutti i dati associati.": "Permanently delete your account and all associated data.",
   "Eliminare il tuo account?": "Delete your account?",
-  "Elimina definitivamente": "Delete permanently",
+  "Elimina definitivamente": "Permanently delete",
   "Il tuo account, tutti i movimenti, le categorie e le sottocategorie saranno eliminati. Questa operazione non può essere annullata.": "Your account, all transactions, categories and subcategories will be deleted. This action cannot be undone.",
   "Account eliminato.": "Account deleted.",
   "Conferma l’eliminazione dell’account.": "Confirm account deletion.",
@@ -281,5 +281,13 @@
   "{{count}} movimenti registrati_one": "{{count}} recorded transaction",
   "{{count}} movimenti registrati_other": "{{count}} recorded transactions",
   "{{count}} movimenti · {{month}}_one": "{{count}} transaction · {{month}}",
-  "{{count}} movimenti · {{month}}_other": "{{count}} transactions · {{month}}"
+  "{{count}} movimenti · {{month}}_other": "{{count}} transactions · {{month}}",
+  "I tuoi dati": "Your data",
+  "Backup dei dati": "Data backup",
+  "Scarica una copia dei tuoi dati prima di eliminare l’account.": "Download a copy of your data before deleting your account.",
+  "Gestisci una copia dei tuoi dati e il tuo account.": "Manage a copy of your data and your account.",
+  "Esporta tutti i movimenti, le categorie e le impostazioni in un file JSON.": "Export all transactions, categories and settings to a JSON file.",
+  "Esportazione…": "Exporting…",
+  "Esporta backup": "Export backup",
+  "Il tuo account, tutte le schede, gli esercizi e gli allenamenti saranno eliminati. Questa operazione non può essere annullata.": "Your account, all routines, exercises and workouts will be deleted. This action cannot be undone."
 }

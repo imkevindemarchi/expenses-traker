@@ -1,7 +1,9 @@
-import { type CSSProperties, type FC, type TouchEvent, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type FC, type TouchEvent, useEffect, useMemo, useRef, useState } from "react";
 import { CircleCheck, CircleX, TriangleAlert, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+
+import "../styles/Popup.styles.css";
 
 // assets
 import { getLiquidGlassClass } from "../assets/constants";
@@ -79,7 +81,23 @@ const POPUP_STYLES: Record<TPopupType, TPopupStyle> = {
 
 const SWIPE_CLOSE_THRESHOLD = 18;
 
-const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
+const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => {
+  const [locallyClosing, setLocallyClosing] = useState(false);
+  const isClosing = externallyClosing || locallyClosing;
+  const closeCallback = useRef(onClose);
+  closeCallback.current = onClose;
+  const requestClose = () => {
+    if (isClosing) return;
+    touchStartYRef.current = null;
+    setIsDragging(false);
+    setLocallyClosing(true);
+  };
+  useEffect(() => {
+    if (!locallyClosing) return;
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200;
+    const timer = window.setTimeout(() => closeCallback.current(), delay);
+    return () => window.clearTimeout(timer);
+  }, [locallyClosing]);
   const { t } = useTranslation();
   const { theme } = useTheme();
 
@@ -145,7 +163,7 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
     setIsDragging(false);
 
     if (translateY <= -SWIPE_CLOSE_THRESHOLD) {
-      onClose();
+      requestClose();
       return;
     }
 
@@ -165,25 +183,22 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
   };
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-x-3 top-20 z-9999 flex justify-center sm:inset-x-auto sm:right-5 sm:top-5 sm:justify-end">
+    <div className="popup-shell pointer-events-none fixed inset-x-3 top-20 z-9999 flex justify-center sm:inset-x-auto sm:right-5 sm:top-5 sm:justify-end">
       <div
         role={role}
-        aria-live="polite"
+        aria-live={popup.type === "success" ? "polite" : "assertive"}
+        aria-atomic="true"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchCancel}
         style={popupStyle}
-        className={`liquid-glass-panel ${!isClosing && !isDragging ? "liquid-glass-panel--shine" : ""} ${
+        className={`popup-surface ${
           isClosing ? "animate-popup-exit" : translateY === 0 ? "animate-popup-enter" : ""
         } ${
-          isDragging ? "transition-none" : "transition-all duration-300 ease-out"
+          isDragging && !isClosing ? "transition-none" : "transition-all duration-300 ease-out"
         } ${getLiquidGlassClass(theme)} ${borderClassName} pointer-events-auto relative isolate flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 select-none sm:max-w-md`}
       >
-        <span
-          className={`pointer-events-none absolute inset-y-3 left-1.5 w-1 rounded-full ${style.accentClassName}`}
-        />
-
         <div
           className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border ${iconClassName}`}
         >
@@ -203,7 +218,9 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
           type="button"
           aria-label={t("popup.close")}
           disabled={isClosing}
-          onClick={onClose}
+          onTouchStart={(event) => event.stopPropagation()}
+          onTouchEnd={(event) => event.stopPropagation()}
+          onClick={requestClose}
           className={`group relative z-10 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[11px] border transition-all duration-300 hover:rotate-90 active:scale-90 disabled:pointer-events-none ${closeButtonClassName}`}
         >
           <span className="pointer-events-none absolute inset-px rounded-[10px] bg-linear-to-b from-white/25 to-transparent opacity-70" />

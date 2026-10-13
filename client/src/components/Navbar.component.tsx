@@ -1,4 +1,4 @@
-import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } from "react";
+import { type FC, useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router";
@@ -28,9 +28,6 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
   const { theme } = useTheme();
   const { t } = useTranslation();
   const location = useLocation();
-  const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const sidebarTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const [sidebarAnimationStyle, setSidebarAnimationStyle] = useState<CSSProperties>({});
 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
@@ -43,20 +40,6 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
   const desktopPrimaryRoutes = visibleRoutes;
 
   const handleToggleSidebar = (): void => {
-    const sidebar = sidebarRef.current;
-    const trigger = sidebarTriggerRef.current;
-    if (!isSidebarOpen && sidebar && trigger) {
-      const rect = trigger.getBoundingClientRect();
-      const scaleX = trigger.offsetWidth / sidebar.offsetWidth;
-      const scaleY = trigger.offsetHeight / sidebar.offsetHeight;
-      setSidebarAnimationStyle({
-        transformOrigin: `${rect.left + rect.width / 2 - sidebar.offsetLeft}px ${rect.top + rect.height / 2 - sidebar.offsetTop}px`,
-        "--sidebar-scale-x": scaleX,
-        "--sidebar-scale-y": scaleY,
-        "--sidebar-radius-x": `${28 / scaleX}px`,
-        "--sidebar-radius-y": `${28 / scaleY}px`,
-      } as CSSProperties);
-    }
     setIsSidebarOpen((previousValue: boolean): boolean => !previousValue);
   };
 
@@ -130,13 +113,10 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
 
   const mobileRoutes = (
     <nav aria-label={t("navbar.menu")} className="grid grid-cols-2 gap-2">
-      {visibleRoutes.map((protectedRoute: IRoute, index: number) => {
+      {visibleRoutes.map((protectedRoute: IRoute) => {
         const isMainRoute: boolean = protectedRoute.path === "/";
         const RouteIcon = protectedRoute.icon;
 
-        const routeAnimationStyle: CSSProperties = {
-          transitionDelay: isSidebarOpen ? `${Math.min(index * 12, 72)}ms` : "0ms",
-        };
 
         return (
           <NavLink
@@ -144,10 +124,9 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
             to={protectedRoute.path}
             end={isMainRoute}
             onClick={handleCloseSidebar}
-            style={routeAnimationStyle}
             data-nav-theme={theme}
             className={({ isActive }: { isActive: boolean }) =>
-              `nav-tab-card group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] ${isSidebarOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-2 scale-[0.98] opacity-0"} ${isActive ? "border-primary/60 bg-primary text-white shadow-[0_18px_42px_rgba(189,150,82,0.28),inset_0_1px_0_rgba(255,255,255,0.28)]" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
+              `nav-tab-card group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] opacity-100 ${isActive ? "border-primary/60 bg-primary text-white shadow-[0_18px_42px_rgba(189,150,82,0.28),inset_0_1px_0_rgba(255,255,255,0.28)]" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
             }
           >
             {({ isActive }: { isActive: boolean }) => (
@@ -248,7 +227,6 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
       </header>
 
       <button
-        ref={sidebarTriggerRef}
         type="button"
         onClick={handleToggleSidebar}
         aria-label={isSidebarOpen ? t("navbar.closeMenu") : t("navbar.menu")}
@@ -279,19 +257,17 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
         aria-label={t("navbar.closeMenu")}
         onClick={handleCloseSidebar}
         tabIndex={isSidebarOpen ? 0 : -1}
-        className={`fixed inset-0 z-70 bg-black/25 backdrop-blur-sm transition-opacity duration-200 ease-out md:hidden ${isSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-70 bg-black/25 transition-opacity duration-200 ease-out md:hidden ${isSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
       />
 
       <div
-        ref={sidebarRef}
         inert={!isSidebarOpen}
-        style={sidebarAnimationStyle}
-        className={`liquid-glass-sidebar-motion fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[max(0.75rem,env(safe-area-inset-top))] z-80 md:hidden ${isSidebarOpen ? "liquid-glass-sidebar-motion--open" : sidebarAnimationStyle.transformOrigin ? "liquid-glass-sidebar-motion--closed" : "pointer-events-none opacity-0"}`}
+        className={`liquid-glass-sidebar-motion liquid-glass-sidebar-surface ${getLiquidGlassClass(theme)} fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[max(0.75rem,env(safe-area-inset-top))] z-80 md:hidden ${isSidebarOpen ? "liquid-glass-sidebar-motion--open" : "liquid-glass-sidebar-motion--closed"}`}
       >
         <aside
           id="mobile-sidebar"
           aria-hidden={!isSidebarOpen}
-          className={`liquid-glass-sidebar-surface relative isolate flex h-full w-full flex-col overflow-hidden rounded-4xl border p-3 ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/80" : "border-white/12"}`}
+          className="liquid-glass-sidebar-content relative flex h-full w-full flex-col overflow-hidden rounded-4xl p-3"
         >
           <span
             aria-hidden="true"
@@ -305,13 +281,9 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-8 top-px h-px bg-linear-to-r from-transparent via-white/80 to-transparent"
           />
-          <span
-            aria-hidden="true"
-            className={`liquid-glass-sidebar-sheen pointer-events-none absolute -inset-y-1/4 -left-1/2 z-30 w-1/2 bg-linear-to-r from-transparent via-white/25 to-transparent ${isSidebarOpen ? "liquid-glass-sidebar-sheen--active" : "opacity-0"}`}
-          />
 
           <div
-            className={`relative z-10 mb-2 flex shrink-0 items-center justify-between gap-3 rounded-[22px] p-2.5 transition-[opacity,translate] duration-200 ease-out ${isSidebarOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+            className={`relative z-10 mb-2 flex shrink-0 items-center justify-between gap-3 rounded-[22px] p-2.5 transition-[opacity,translate] duration-200 ease-out opacity-100`}
           >
             <NavLink
               to="/"
@@ -338,7 +310,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
           </div>
 
           <div
-            className={`relative z-20 mt-2 flex shrink-0 items-center justify-between overflow-visible rounded-[22px] border p-2.5 transition-[opacity,translate] duration-200 ease-out ${isSidebarOpen ? "translate-y-0 opacity-100 delay-40" : "translate-y-1 opacity-0 delay-0"} ${theme === "light" ? "border-white/85 bg-white/48 shadow-[0_12px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5 shadow-[0_14px_30px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
+            className={`relative z-20 mt-2 flex shrink-0 items-center justify-between overflow-visible rounded-[22px] border p-2.5 transition-[opacity,translate] duration-200 ease-out opacity-100 ${theme === "light" ? "border-white/85 bg-white/48 shadow-[0_12px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5 shadow-[0_14px_30px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
           >
             <LanguageSelector
               className="[&>button]:size-12 [&>button]:justify-center [&>button]:gap-0 [&>button]:p-0 [&>button>svg]:hidden [&>button>span:nth-child(2)]:hidden"

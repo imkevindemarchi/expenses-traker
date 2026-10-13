@@ -1,136 +1,166 @@
+/* Liquid glass dialogs: reflective chrome and a readable content canvas. */
 .modal-backdrop {
-  background: rgb(0 0 0 / 55%);
-  animation: modal-backdrop-enter 180ms ease-out;
+  isolation: isolate;
+  --modal-backdrop-fill: var(--overlay-glass-light);
 }
+.modal-backdrop[data-modal-theme="dark"] { --modal-backdrop-fill: var(--overlay-glass-dark); }
+/* A stationary frosted layer fades in without moving or animating the blur. */
+.modal-backdrop::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--modal-backdrop-fill);
+  -webkit-backdrop-filter: blur(var(--overlay-glass-blur)) saturate(var(--overlay-glass-saturation));
+  backdrop-filter: blur(var(--overlay-glass-blur)) saturate(var(--overlay-glass-saturation));
+  animation: modal-backdrop-enter 240ms cubic-bezier(.2, .65, .3, 1) both;
 
-.modal-surface {
-  --modal-canvas-light: color-mix(in srgb, var(--color-primary) 4%, white);
-  --modal-canvas-dark: #191e1b;
-  --modal-ink: #181818;
-  --modal-muted: #666;
-  --modal-line: rgb(0 0 0 / 6%);
-  --modal-soft: color-mix(in srgb, var(--color-primary) 8%, var(--modal-canvas-light));
-  --modal-hover: color-mix(in srgb, var(--color-primary) 15%, var(--modal-canvas-light));
+}
+.modal-surface.glass-surface {
+  --modal-canvas-light: color-mix(in srgb, var(--color-primary) 3%, #fafcfd);
+  --modal-canvas-dark: color-mix(in srgb, var(--color-primary) 4%, #171b22);
+  --modal-canvas: var(--modal-canvas-light);
+  --modal-ink: #101820;
+  --modal-muted: #18232f;
+  --modal-line: rgb(24 32 40 / 9%);
+  --modal-rim: var(--glass-rim);
+  --modal-highlight: var(--glass-highlight);
+  --modal-soft: color-mix(in srgb, var(--modal-canvas) 20%, transparent);
+  --modal-hover: color-mix(in srgb, var(--modal-canvas) 40%, transparent);
+  --modal-glass-fill: var(--glass-fill);
   color: var(--modal-ink);
-  background: var(--modal-canvas-light);
-  border: 1px solid var(--modal-line);
-  border-radius: 24px;
+  background: var(--modal-canvas);
+  border: 1px solid var(--modal-rim);
+  border-radius: 32px;
   outline: none;
-  box-shadow:
-    0 24px 80px rgb(0 0 0 / 22%),
-    0 4px 16px rgb(0 0 0 / 8%);
-  animation: modal-enter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  isolation: isolate;
+  box-shadow: var(--glass-shadow);
+  animation: liquid-glass-pop-open 320ms cubic-bezier(.22, 1, .36, 1) both;
 }
-
-.modal-surface[data-modal-theme="dark"] {
-  --modal-ink: #f2f2f2;
-  --modal-muted: #989797;
-  --modal-line: rgb(255 255 255 / 7%);
-  --modal-soft: color-mix(in srgb, var(--color-primary) 8%, var(--modal-canvas-dark));
-  --modal-hover: color-mix(in srgb, var(--color-primary) 15%, var(--modal-canvas-dark));
-  background: var(--modal-canvas-dark);
-  box-shadow:
-    0 24px 80px rgb(0 0 0 / 50%),
-    0 4px 16px rgb(0 0 0 / 24%);
+.modal-surface.glass-surface[data-modal-theme="dark"] {
+  --modal-canvas: var(--modal-canvas-dark);
+  --modal-ink: #f3f6f8;
+  --modal-muted: #d6dfe7;
+  --modal-glass-fill: var(--glass-fill);
+  --modal-line: rgb(255 255 255 / 10%);
+  --modal-rim: var(--glass-rim);
+  --modal-highlight: var(--glass-highlight);
+  box-shadow: var(--glass-shadow);
 }
-
-.modal-header {
-  border-bottom: 1px solid var(--modal-line);
-}
-.modal-title {
-  color: var(--modal-ink);
-}
-.modal-description {
-  color: var(--modal-muted);
-}
-.modal-close {
-  color: var(--modal-muted);
-  background: var(--modal-soft);
-}
-.modal-close:hover:not(:disabled) {
-  color: var(--modal-ink);
-  background: var(--modal-hover);
-}
-.modal-footer {
-  border-top: 1px solid var(--modal-line);
-}
-
-@keyframes modal-backdrop-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .modal-surface.glass-surface {
+    background: var(--modal-glass-fill);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   }
 }
-@keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.modal-header { position: relative; border-bottom: 1px solid var(--modal-line); }
+/* A thin edge reflection, as on the workout dock, leaves the centre transparent. */
+.modal-surface.glass-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 var(--modal-highlight), inset 1px 0 0 color-mix(in srgb, var(--modal-highlight) 35%, transparent);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .modal-backdrop,
-  .modal-surface {
-    animation: none;
-  }
-  .modal-close {
-    transition: none;
-  }
-}
-
-/* Shared content language and keyboard focus. */
-.modal-backdrop {
-  backdrop-filter: blur(7px);
-}
-.modal-surface {
-  border-radius: 28px;
-}
-.modal-header {
-  position: relative;
-  background: linear-gradient(120deg, var(--modal-soft), transparent 75%);
-}
+.modal-header { background: linear-gradient(145deg, color-mix(in srgb, var(--modal-highlight) 24%, transparent), transparent 65%); }
 .modal-header::before {
   content: "";
   display: block;
-  width: 36px;
-  height: 4px;
-  border-radius: 10px;
-  margin-bottom: 14px;
-  background: var(--color-primary);
+  width: 44px;
+  height: 5px;
+  margin-bottom: 18px;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 30%, var(--modal-canvas)));
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
+.modal-title { color: var(--modal-ink); text-wrap: balance; }
+.modal-description { color: var(--modal-muted); text-wrap: pretty; }
+.modal-close {
+  color: var(--modal-muted);
+  background: linear-gradient(145deg, var(--modal-highlight), transparent), color-mix(in srgb, var(--modal-canvas) 25%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  border: 1px solid var(--modal-rim);
+  box-shadow: inset 0 1px 0 var(--modal-highlight), 0 3px 10px rgb(0 0 0 / 5%);
+}
+.modal-close:hover:not(:disabled) { color: var(--modal-ink); background: var(--modal-hover); transform: scale(1.08); }
+.modal-close:active:not(:disabled) { transform: scale(.96); }
 .modal-content {
+  background: transparent;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-primary) transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-primary) 40%, var(--modal-canvas)) transparent;
+  scrollbar-gutter: stable;
 }
 .modal-footer {
-  background: var(--modal-soft);
+  border-top: 1px solid var(--modal-line);
+  background: color-mix(in srgb, var(--modal-highlight) 12%, transparent);
+  box-shadow: inset 0 1px 0 var(--modal-highlight);
 }
-.modal-info {
-  padding: 14px;
-  border: 1px solid var(--modal-line);
-  border-radius: 16px;
-  background: var(--modal-soft);
+.modal-info, .modal-period-preview { border: 1px solid var(--modal-line); border-radius: 18px; background: var(--modal-soft); }
+.modal-info { padding: 16px; }
+.modal-search { border-color: var(--modal-line); background: var(--modal-soft); }
+.modal-search:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent); }
+.modal-content button:focus-visible, .modal-content a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+@keyframes modal-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-enter { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 639px) {
+  .modal-surface.glass-surface { border-radius: 26px; }
+  .modal-header::before { margin-bottom: 14px; }
+  .modal-close { min-width: 44px; min-height: 44px; }
 }
-.modal-search {
-  border-color: var(--modal-line);
-  background: var(--modal-soft);
+@media (prefers-reduced-transparency: reduce) {
+  .modal-backdrop { --modal-backdrop-fill: #fafcfe; }
+  .modal-backdrop[data-modal-theme="dark"] { --modal-backdrop-fill: #181d24; }
+  .modal-backdrop::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .modal-surface.glass-surface { background: var(--modal-canvas); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
-.modal-search:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--modal-soft);
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop::before, .modal-surface.glass-surface { animation: none; }
+  .modal-close { transition: none; }
+  .modal-close:hover:not(:disabled), .modal-close:active:not(:disabled) { transform: none; }
 }
-.modal-period-preview {
-  border: 1px solid var(--modal-line);
-  background: var(--modal-soft);
+
+
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .modal-backdrop { --modal-backdrop-fill: #fafcfe; }
+  .modal-backdrop[data-modal-theme="dark"] { --modal-backdrop-fill: #181d24; }
 }
-.modal-content button:focus-visible,
-.modal-content a:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
+
+/* Dialogs grow to fit their actions; mobile keeps a vertical action group. */
+.modal-surface { --modal-preferred-width: 28rem; }
+.modal-surface[data-modal-size="sm"] { --modal-preferred-width: 24rem; }
+.modal-surface[data-modal-size="lg"] { --modal-preferred-width: 32rem; }
+.modal-surface[data-modal-size="xl"] { --modal-preferred-width: 36rem; }
+.modal-surface:has(.modal-footer) {
+  width: max-content;
+  min-width: min(var(--modal-preferred-width), calc(100vw - 2.5rem));
+  max-width: calc(100vw - 2.5rem);
+}
+.modal-footer { overflow: visible; }
+.modal-actions, .modal-footer div:has(> button) {
+  display: flex; flex-direction: row; flex-wrap: nowrap; gap: 12px;
+  align-items: center; justify-content: flex-end; min-width: 0;
+}
+.modal-actions > div { min-width: 0; width: 100%; }
+.modal-footer div > button {
+  flex: 0 0 auto; width: auto; max-width: none; min-height: 44px; height: auto;
+  padding-block: 10px; white-space: nowrap; overflow-wrap: normal; line-height: 1.4;
+}
+.modal-footer button > span { white-space: inherit; overflow-wrap: inherit; min-width: 0; }
+.modal-footer button > svg { flex-shrink: 0; }
+@media (max-width: 767px) {
+  .modal-surface:has(.modal-footer) { width: 100%; min-width: 0; max-width: 100%; }
+  .modal-footer { max-height: 45dvh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+  .modal-actions, .modal-footer div:has(> button) { flex-direction: column-reverse; align-items: stretch; }
+  .modal-footer div > button { width: 100%; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .modal-actions, .modal-footer div:has(> button) { gap: 8px; }
+  .modal-footer div > button { padding-inline: 12px; font-size: 13px; }
 }

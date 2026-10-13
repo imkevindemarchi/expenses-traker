@@ -140,6 +140,33 @@ app.post(
 );
 app.use("/api", auth);
 const userId = (req) => req.account._id;
+app.get(
+  "/api/backup",
+  asyncRoute(async (req, res) => {
+    const session = await mongoose.startSession();
+    try {
+      let backup;
+      await session.withTransaction(async () => {
+        const filter = { user: userId(req) };
+        const categories = await Category.find(filter).session(session).lean();
+        const subcategories = await Subcategory.find(filter).session(session).lean();
+        const entries = await Entry.find(filter).session(session).lean();
+        backup = {
+          version: 1,
+          app: "expensestraker",
+          exportedAt: new Date().toISOString(),
+          account: publicAccount(req.account),
+          categories,
+          subcategories,
+          entries,
+        };
+      });
+      res.json(backup);
+    } finally {
+      await session.endSession();
+    }
+  }),
+);
 app.patch(
   "/api/account/profile",
   asyncRoute(async (req, res) => {

@@ -4,6 +4,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -96,8 +97,10 @@ const LanguageSelector: FC<IProps> = ({
       availableWidth,
     );
 
-    const dropdownHeight: number =
-      dropdownRef.current?.scrollHeight ?? AVAILABLE_LANGUAGES.length * 53 + 12;
+    const availableHeight = Math.max(0, isDropdownOnTop
+      ? triggerRect.top - DROPDOWN_GAP - VIEWPORT_PADDING
+      : window.innerHeight - triggerRect.bottom - DROPDOWN_GAP - VIEWPORT_PADDING);
+    const dropdownHeight = Math.min(dropdownRef.current?.offsetHeight ?? AVAILABLE_LANGUAGES.length * 53 + 12, availableHeight);
 
     const preferredLeft: number = isDropdownAlignedLeft
       ? triggerRect.left
@@ -121,15 +124,23 @@ const LanguageSelector: FC<IProps> = ({
       ? triggerRect.left + 24
       : triggerRect.right - 24;
 
-    setDropdownOrigin({
+    setDropdownOrigin(previous => {
+      const next: { x: number; y: number } = {
       x: Math.min(Math.max(triggerAnchorX - clampedLeft, 0), dropdownWidth),
       y: isDropdownOnTop ? dropdownHeight : 0,
+    };
+      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
     });
 
-    setDropdownStyle({
+    setDropdownStyle(previous => {
+      const next: CSSProperties = {
       left: clampedLeft,
       top: clampedTop,
       width: dropdownWidth,
+      maxHeight: availableHeight,
+      overflowY: "auto",
+    };
+      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
     });
   }, [isDropdownAlignedLeft, isDropdownOnTop]);
 
@@ -175,19 +186,31 @@ const LanguageSelector: FC<IProps> = ({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
+  useLayoutEffect(() => {
+    if (!isOpen) return;
     updateDropdownPosition();
-
+    const observer = new ResizeObserver(updateDropdownPosition);
+    if (dropdownRef.current) observer.observe(dropdownRef.current);
+    if (triggerRef.current) observer.observe(triggerRef.current);
+    const viewport = window.visualViewport;
     window.addEventListener("resize", updateDropdownPosition);
     window.addEventListener("scroll", updateDropdownPosition, true);
-
-    return (): void => {
+    viewport?.addEventListener("resize", updateDropdownPosition);
+    viewport?.addEventListener("scroll", updateDropdownPosition);
+    let frame = 0;
+    const until = performance.now() + 300;
+    const followAnchor = () => {
+      updateDropdownPosition();
+      if (performance.now() < until) frame = requestAnimationFrame(followAnchor);
+    };
+    frame = requestAnimationFrame(followAnchor);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", updateDropdownPosition);
       window.removeEventListener("scroll", updateDropdownPosition, true);
+      viewport?.removeEventListener("resize", updateDropdownPosition);
+      viewport?.removeEventListener("scroll", updateDropdownPosition);
     };
   }, [isOpen, updateDropdownPosition]);
 

@@ -7,7 +7,6 @@ import {
   Search,
   Check,
   ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { tr, locale } from "../i18n";
 import { CurrencyContext } from "../contexts/currency.context";
@@ -59,19 +58,10 @@ export default function EntryModal({
     setSearch("");
     setError("");
   };
-  const next = () => {
-    if (step === 0 && !chosenKind) return;
-    if (step === 1 && !form.category) return;
-    if (step === 2 && !form.subcategory) return;
-    move(step + 1);
-  };
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (busy) return;
-    if (!editing && step < 3) {
-      next();
-      return;
-    }
+    if (!editing && step < 3) return;
     const amount = Number(form.amount.replace(",", "."));
     if (
       !/^\d{1,7}([.,]\d{1,2})?$/.test(form.amount) ||
@@ -284,20 +274,19 @@ export default function EntryModal({
           >
             {tr(step ? "Indietro" : "Annulla")}
           </Button>
-          <Button
+          {step === 3 && <Button
             type="submit"
             form="entry-wizard"
             disabled={
               busy ||
-              (step === 0 && !chosenKind) ||
-              (step === 1 && !form.category) ||
-              (step === 2 && !form.subcategory) ||
+              !form.category ||
+              !form.subcategory ||
               !categories.length
             }
-            icon={step < 3 ? <ChevronRight size={17} /> : <Check size={17} />}
+            icon={<Check size={17} />}
           >
-            {tr(busy ? "Salvataggio…" : step < 3 ? "Continua" : "Salva movimento")}
-          </Button>
+            {tr(busy ? "Salvataggio…" : "Salva movimento")}
+          </Button>}
         </>
       }
     >

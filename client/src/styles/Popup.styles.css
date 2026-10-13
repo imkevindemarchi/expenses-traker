@@ -1,0 +1,33 @@
+/* Quiet, compact glass notifications. */
+.popup-shell { top: calc(env(safe-area-inset-top, 0px) + 6.5rem); }
+.popup-surface.glass-surface {
+  max-width: 360px;
+  padding: 12px;
+  gap: 10px;
+  border-radius: 20px;
+  border-color: var(--glass-rim);
+  box-shadow: var(--glass-shadow);
+  animation: liquid-glass-pop-open 320ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.popup-surface.glass-surface--dark {
+  border-color: var(--glass-rim);
+  box-shadow: var(--glass-shadow);
+}
+.popup-surface > div:first-of-type { width: 34px; height: 34px; border-radius: 12px; box-shadow: none; }
+.popup-surface h3 { color: #202a34; font-weight: 600; }
+.popup-surface p { color: #253342; }
+.popup-surface.glass-surface--dark h3 { color: #f3f6f8; }
+.popup-surface.glass-surface--dark p { color: #e0e6ed; }
+.popup-surface > button { width: 36px; height: 36px; background: transparent; border-color: transparent; }
+.popup-surface > button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.popup-surface > button:hover { transform: none; background: rgb(127 127 127 / 10%); }
+.popup-surface.animate-popup-exit { animation: popup-soft-exit 200ms ease-in forwards; }
+.popup-surface.glass-surface.transition-none { animation: none; }
+@keyframes popup-soft-enter { from { opacity: 0; translate: 0 -8px; } to { opacity: 1; translate: 0 0; } }
+@keyframes popup-soft-exit { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: 0 -8px; } }
+@media (min-width: 640px) { .popup-shell { top: calc(env(safe-area-inset-top, 0px) + 6.5rem); } }
+@media (pointer: coarse) { .popup-surface > button { width: 44px; height: 44px; } }
+@media (prefers-reduced-transparency: reduce) { .popup-surface.glass-surface { --glass-fill: #fafcfe; backdrop-filter: none; -webkit-backdrop-filter: none; } .popup-surface.glass-surface--dark { --glass-fill: #181d24; } }
+@media (prefers-reduced-motion: reduce) { .popup-surface.glass-surface, .popup-surface.animate-popup-exit { animation: none; transition: none; } .popup-surface *, .popup-surface > button { transition: none; } }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .popup-surface.glass-surface { --glass-fill: #fafcfe; } .popup-surface.glass-surface--dark { --glass-fill: #181d24; } }

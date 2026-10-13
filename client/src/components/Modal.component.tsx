@@ -4,6 +4,7 @@ import {
   type PropsWithChildren,
   type ReactNode,
   useEffect,
+  useLayoutEffect,
   useId,
   useRef,
 } from "react";
@@ -12,6 +13,8 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import "../styles/Modal.styles.css";
+
+import { getLiquidGlassClass } from "../assets/constants";
 
 // hooks
 import { useTheme } from "../hooks";
@@ -134,6 +137,7 @@ const Modal: FC<IProps> = ({
   return createPortal(
     <div
       role="presentation"
+      data-modal-theme={theme}
       onMouseDown={handleBackdropClick}
       className="modal-backdrop fixed inset-0 z-1000 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 sm:py-8"
     >
@@ -143,11 +147,12 @@ const Modal: FC<IProps> = ({
           ref={dialogRef}
           tabIndex={-1}
           data-modal-theme={theme}
+          data-modal-size={maxWidth}
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
           onMouseDown={handleModalClick}
-          className={`modal-surface relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
+          className={`modal-surface ${getLiquidGlassClass(theme)} relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
         >
           <div className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5">
             <div className="flex items-start justify-between gap-4 sm:gap-5">
@@ -175,7 +180,7 @@ const Modal: FC<IProps> = ({
                 disabled={!isClosable}
                 aria-label={t("modal.close")}
                 title={t("modal.close")}
-                className="modal-close flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-[color,background-color,transform] duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
+                className="modal-close flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-[color,background-color,transform,box-shadow] duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <X size={18} strokeWidth={2} />
               </button>
@@ -190,7 +195,7 @@ const Modal: FC<IProps> = ({
 
           {footer && (
             <div className="modal-footer shrink-0 px-5 py-4 sm:px-7 sm:py-5">
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <div className="modal-actions">
                 {footer}
               </div>
             </div>
