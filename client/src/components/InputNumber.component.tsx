@@ -1,3 +1,4 @@
+import { tr } from "../utils/ui-text";
 import { type ChangeEvent, type FC, type InputHTMLAttributes, type ReactNode } from "react";
 
 // hooks
@@ -12,6 +13,8 @@ interface IProps
   className?: string;
   allowDecimal?: boolean;
   compact?: boolean;
+  hideLabel?: boolean;
+  suffix?: string;
   onChange: (value: string) => void;
 }
 
@@ -25,6 +28,8 @@ const InputNumber: FC<IProps> = ({
   name,
   allowDecimal = false,
   compact = false,
+  hideLabel = false,
+  suffix,
   min = 0,
   onChange,
   ...props
@@ -58,7 +63,7 @@ const InputNumber: FC<IProps> = ({
     <div className={`w-full ${className || ""}`}>
       <label
         htmlFor={inputId}
-        className={`${compact ? "mb-1 block text-xs font-semibold" : "mb-2 block text-base font-semibold sm:text-sm"} ${theme === "light" ? "text-black" : "text-white"}`}
+        className={hideLabel ? "sr-only" : `${compact ? "mb-1 block text-xs font-semibold" : "mb-2 block text-base font-semibold sm:text-sm"} ${theme === "light" ? "text-black" : "text-white"}`}
       >
         {label}
       </label>
@@ -87,6 +92,7 @@ const InputNumber: FC<IProps> = ({
           {...props}
         />
 
+        {suffix && <span className="input-number-suffix" aria-hidden="true">{suffix}</span>}
         <div
           className={`absolute bottom-0 left-0 h-px w-full transition-colors duration-300 ${error ? "bg-red-500" : theme === "light" ? "bg-black/20" : "bg-white/20"}`}
         />
@@ -101,7 +107,7 @@ const InputNumber: FC<IProps> = ({
           id={`${inputId}-error`}
           className={`${compact ? "mt-1.5" : "mt-2"} text-xs text-red-500`}
         >
-          {error}
+          {tr(error)}
         </p>
       )}
     </div>

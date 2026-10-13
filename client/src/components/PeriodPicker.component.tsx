@@ -72,7 +72,7 @@ export default function PeriodPicker({
       offsetTop: 0,
     };
     setPosition({
-      ...fitStaticPanel(rect, 344, panel.current?.offsetHeight || 340, viewport),
+      ...fitStaticPanel(rect, 344, panel.current?.offsetHeight || 340, viewport, "below", 12, 8, "left"),
       overflow: "hidden",
     });
   }, []);
@@ -158,8 +158,8 @@ export default function PeriodPicker({
         <button
           type="button"
           className="month-step"
-          aria-label={tr(annual ? "Anno precedente" : "Mese precedente")}
-          title={tr(annual ? "Anno precedente" : "Mese precedente")}
+          aria-label={tr(annual ? tr("Anno precedente") : tr("Mese precedente"))}
+          title={tr(annual ? tr("Anno precedente") : tr("Mese precedente"))}
           disabled={value === (annual ? "2000" : "2000-01")}
           onClick={() => shift(-1)}
         >
@@ -196,8 +196,8 @@ export default function PeriodPicker({
         <button
           type="button"
           className="month-step"
-          aria-label={tr(annual ? "Anno successivo" : "Mese successivo")}
-          title={tr(annual ? "Anno successivo" : "Mese successivo")}
+          aria-label={tr(annual ? tr("Anno successivo") : tr("Mese successivo"))}
+          title={tr(annual ? tr("Anno successivo") : tr("Mese successivo"))}
           disabled={value === (annual ? String(maxYear) : "2100-12")}
           onClick={() => shift(1)}
         >
@@ -210,7 +210,7 @@ export default function PeriodPicker({
             ref={panel}
             id={id}
             role="dialog"
-            aria-label={tr(annual ? "Seleziona anno" : "Seleziona mese")}
+            aria-label={tr(annual ? tr("Seleziona anno") : tr("Seleziona mese"))}
             style={position}
             className={`month-picker-panel ${annual ? "year-picker-panel" : ""} ${compact ? "period-picker-compact" : ""} liquid-glass-panel liquid-glass-panel--open ${glass}`}
           >
@@ -219,12 +219,12 @@ export default function PeriodPicker({
                 <CalendarDays size={19} strokeWidth={1.7} />
               </span>
               <div>
-                <h3>{tr(annual ? "Scegli l’anno" : "Scegli il mese")}</h3>
+                <h3>{tr(annual ? tr("Scegli l’anno") : tr("Scegli il mese"))}</h3>
                 <p>
                   {tr(
                     annual
-                      ? "La tua panoramica, un anno alla volta."
-                      : "La tua panoramica, un mese alla volta.",
+                      ? tr("La tua panoramica, un anno alla volta.")
+                      : tr("La tua panoramica, un mese alla volta."),
                   )}
                 </p>
               </div>
@@ -273,7 +273,7 @@ export default function PeriodPicker({
                     ) : current === monthValue ? (
                       <span
                         className="month-current-dot"
-                        aria-label={tr(annual ? "Anno corrente" : "Mese corrente")}
+                        aria-label={tr(annual ? tr("Anno corrente") : tr("Mese corrente"))}
                       />
                     ) : null}
                   </button>
@@ -283,7 +283,7 @@ export default function PeriodPicker({
             {value !== current && (
               <button type="button" className="month-current" onClick={() => select(current)}>
                 <RotateCcw size={14} strokeWidth={1.8} />
-                {tr(annual ? "Torna all’anno corrente" : "Torna al mese corrente")}
+                {tr(annual ? tr("Torna all’anno corrente") : tr("Torna al mese corrente"))}
               </button>
             )}
           </div>,

@@ -1,4 +1,4 @@
-import { tr } from "../i18n";
+
 import { useTranslation } from "react-i18next";
 import {
   type CSSProperties,
@@ -53,8 +53,8 @@ const Select = <TValue extends string = string>({
   onChange,
 }: IProps<TValue>): ReactElement => {
   const { theme } = useTheme();
-  useTranslation();
-  const translatedPlaceholder = placeholder ?? tr("Seleziona");
+  const { t } = useTranslation();
+  const translatedPlaceholder = placeholder ?? t("autocomplete.placeholder");
 
   const selectRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -271,6 +271,8 @@ const Select = <TValue extends string = string>({
       {createPortal(
         <div
           ref={menuRef}
+          inert={!isOpen}
+          aria-hidden={!isOpen}
           style={{
             ...menuStyle,
             transform: isOpen

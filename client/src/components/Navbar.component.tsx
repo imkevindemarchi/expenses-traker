@@ -1,5 +1,7 @@
-import { type FC, useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
+import useSidebarScrollLock from "../hooks/useSidebarScrollLock.hook";
+import { type FC, useEffect, useMemo, useState } from "react";
+
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router";
 import { PROTECTED_ROUTES } from "../routes/routes.config";
@@ -52,21 +54,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
     handleCloseSidebar();
   }, [location.pathname]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        handleCloseSidebar();
-      }
-    };
-
-    document.body.style.overflow = isSidebarOpen ? "hidden" : "";
-    document.addEventListener("keydown", handleKeyDown);
-
-    return (): void => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isSidebarOpen]);
+  useSidebarScrollLock(isSidebarOpen, handleCloseSidebar);
 
   const desktopRoutes = (
     <nav className="flex min-w-0 items-center justify-center gap-1">

@@ -1,3 +1,4 @@
+import AppBrand, { APP_BRAND_NAME } from "./AppBrand.component";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -42,10 +43,10 @@ export default function Bootloader({ children }: { children: ReactNode }) {
               <div className="bootloader__orbit" />
               <div className="bootloader__orbit bootloader__orbit--inner" />
               <div className="bootloader__glass">
-                <img src="/expenses-logo.png?v=2" alt="" />
+                <AppBrand />
               </div>
             </div>
-            <p className="bootloader__brand">Expenses Traker</p>
+            <p className="bootloader__brand">{APP_BRAND_NAME}</p>
             <div className="bootloader__track" aria-hidden="true">
               <div />
             </div>

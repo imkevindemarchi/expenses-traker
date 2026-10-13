@@ -1,0 +1,40 @@
+/* Shared borderless date controls. */
+.month-picker {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 2px;
+  gap: 4px;
+}
+.month-picker .month-picker-icon,
+.month-picker-panel .month-picker-icon { border: 0; background: transparent; box-shadow: none; color: var(--color-primary); }
+.month-picker .month-picker-trigger { border: 0; border-radius: 12px; min-height: 44px; }
+.month-picker .month-step { width: 44px; height: 44px; border: 0; background: transparent; }
+.month-picker .month-picker-trigger:hover,
+.month-picker .month-picker-trigger.is-open,
+.month-picker .month-step:hover { background: var(--soft); }
+.month-picker-panel.liquid-glass-panel,
+.date-picker-static.liquid-glass-panel {
+  border: 0;
+  background: var(--canvas);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 12%);
+}
+.month-picker-panel .month-tile { border: 0; background: transparent; box-shadow: none; }
+.month-picker-panel .month-tile:hover { background: var(--soft); }
+.month-picker-panel .month-tile.is-selected { background: var(--color-primary); color: white; box-shadow: none; }
+.month-picker-panel .month-current { border: 0; background: transparent; }
+.date-picker-control { border: 0; border-radius: 12px; padding-inline: 10px; background: var(--soft); transition: background-color .2s; }
+.date-picker-control input { padding-block: 14px; min-height: 48px; }
+.date-picker-control[data-error="false"] .date-picker-rule { display: none; }
+.date-picker-control:focus-within { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.date-picker-control > button { border: 0; background: transparent; box-shadow: none; }
+
+/* Calendar inputs and popovers align with the left edge of their field. */
+.date-picker-field { text-align: left; }
+.date-picker-field > label, .date-picker-control input { text-align: left; }
+.date-picker-control { background: color-mix(in srgb, currentColor 4%, transparent); }
+.date-picker-static.liquid-glass-panel { --canvas: var(--color-canvas-light, #faf9f9); }
+[data-theme="dark"] .date-picker-static.liquid-glass-panel { --canvas: var(--color-canvas-dark, #151416); }
+.ui-refresh .month-picker { border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 2px; }
+.ui-refresh .month-picker .month-step { width: 44px; height: 44px; }
+.ui-refresh .month-picker .month-picker-icon { border: 0; background: transparent; box-shadow: none; }

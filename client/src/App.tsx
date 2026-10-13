@@ -455,7 +455,7 @@ export default function App() {
                   void logout();
                 }}
               />
-              <main className="app-main">
+              <main className="app-main ui-refresh">
                 <div className="page-top">
                   <div>
                     <Header

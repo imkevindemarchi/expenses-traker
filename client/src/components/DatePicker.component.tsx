@@ -1,4 +1,5 @@
 import { fitStaticPanel } from "../utils/fitStaticPanel";
+import { tr } from "../utils/ui-text";
 import "../styles/DatePicker.styles.css";
 import {
   type CSSProperties,
@@ -50,7 +51,7 @@ const COLOR_CLASSES: Record<TDatePickerColor, TDatePickerColorClasses> = {
     endIconHover: "hover:bg-primary/10 hover:text-primary",
     underline: "bg-primary",
     shadow: "shadow-primary/20",
-    calendarColor: import.meta.env.VITE_PRIMARY_COLOR || "#32cd32",
+    calendarColor: "var(--color-primary)",
   },
   sky: {
     iconActive: "bg-sky-500 text-white",
@@ -200,7 +201,7 @@ const DatePicker: FC<IProps> = ({
     const dayHeight = Math.max(18, Math.min(44, (viewport.height - 150) / 6));
     const height = calendarRef.current?.offsetHeight ?? 6 * dayHeight + 126;
     setCalendarPosition({
-      ...fitStaticPanel(inputRect, 350, height, viewport),
+      ...fitStaticPanel(inputRect, 350, height, viewport, "below", 12, 8, "left"),
       "--calendar-day-height": dayHeight + "px",
     } as TCalendarPosition & { "--calendar-day-height": string });
   };
@@ -317,7 +318,7 @@ const DatePicker: FC<IProps> = ({
   const formattedValue: string = getFormattedValue(value);
 
   return (
-    <div ref={containerRef} className={`w-full ${className || ""}`}>
+    <div ref={containerRef} className={`date-picker-field w-full ${className || ""}`}>
       <label
         htmlFor={inputId}
         className={`mb-2 block text-base font-semibold sm:text-sm ${theme === "light" ? "text-black" : "text-white"}`}
@@ -327,8 +328,9 @@ const DatePicker: FC<IProps> = ({
 
       <div
         ref={inputContainerRef}
+        data-error={Boolean(error)}
         onClick={handleOpenCalendar}
-        className={`group relative flex items-center gap-3 ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+        className={`date-picker-control group relative flex items-center gap-3 ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
       >
         {icon && (
           <div
@@ -370,19 +372,19 @@ const DatePicker: FC<IProps> = ({
         </button>
 
         <div
-          className={`absolute bottom-0 left-0 h-px w-full transition-colors duration-300 ${error ? "bg-red-500" : theme === "light" ? "bg-black/20" : "bg-white/20"}`}
+          className={`date-picker-rule absolute bottom-0 left-0 h-px w-full transition-colors duration-300 ${error ? "bg-red-500" : theme === "light" ? "bg-black/20" : "bg-white/20"}`}
         />
 
         {!error && (
           <div
-            className={`absolute bottom-0 left-1/2 h-0.5 -translate-x-1/2 transition-all duration-300 ease-out ${colorClasses.underline} ${isOpen ? "w-full" : "w-0 group-focus-within:w-full"}`}
+            className={`date-picker-rule absolute bottom-0 left-1/2 h-0.5 -translate-x-1/2 transition-all duration-300 ease-out ${colorClasses.underline} ${isOpen ? "w-full" : "w-0 group-focus-within:w-full"}`}
           />
         )}
       </div>
 
       {error && (
         <p id={`${inputId}-error`} className="mt-2 text-xs text-red-500">
-          {error}
+          {tr(error)}
         </p>
       )}
 

@@ -44,7 +44,6 @@ const Pagination: FC<IProps> = ({
   onLimitChange,
 }) => {
   const { theme } = useTheme();
-  const isMobile = window.matchMedia("(max-width: 639px)").matches;
   const { t } = useTranslation();
 
   const paginationItems: TPaginationItem[] = useMemo(() => {
@@ -144,10 +143,6 @@ const Pagination: FC<IProps> = ({
     </div>
   );
 
-  if (pagination.total_items === 0) {
-    return null;
-  }
-
   if (justSelect) {
     return renderLiquidGlassSelect(selectId);
   }
@@ -160,7 +155,7 @@ const Pagination: FC<IProps> = ({
         className={`${mobileJustSelect ? "hidden sm:block" : "block"} ${flush ? "mt-0 pt-0" : "mt-0 pt-0 sm:mt-5 sm:pt-5"} ${className}`}
       >
         <div
-          className={`relative overflow-visible rounded-[26px] p-2 ${!isMobile && `${getLiquidGlassClass(theme)} border`}`}
+          className={`pagination-surface relative overflow-visible rounded-[26px] p-2 ${`${getLiquidGlassClass(theme)} border`}`}
         >
           <div className="flex w-full items-center justify-between gap-3 sm:hidden">
             <button

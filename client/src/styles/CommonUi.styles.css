@@ -1,0 +1,213 @@
+/* Shared visual system: open sections, readable type and touch sized actions. */
+:root {
+  --canvas: #faf9f9;
+  --ink: #242126;
+  --muted: #706a72;
+  --line: rgb(36 33 38 / 11%);
+  --soft: rgb(36 33 38 / 3%);
+}
+[data-theme="dark"] {
+  --canvas: #151416;
+  --ink: #f4f2f5;
+  --muted: #aaa4af;
+  --line: rgb(244 242 245 / 12%);
+  --soft: rgb(244 242 245 / 4%);
+}
+html,
+body,
+#root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+body {
+  background-image: none;
+}
+.ui-refresh {
+  --section-space: 28px;
+}
+.app-main.ui-refresh {
+  padding-inline: max(20px, env(safe-area-inset-left), env(safe-area-inset-right));
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+.ui-refresh h2 {
+  font-size: 19px;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+}
+.ui-refresh h3 {
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+}
+.ui-refresh .muted {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.ui-refresh .eyebrow {
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.09em;
+}
+.ui-refresh .legend,
+.ui-refresh .note {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ui-refresh .section-heading {
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.ui-refresh .page-top {
+  margin-bottom: 28px;
+}
+.ui-refresh :is(input, select, textarea) {
+  font-size: 16px;
+}
+.ui-refresh :is(input, textarea) {
+  line-height: 1.5;
+}
+.ui-refresh label {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ui-refresh .quiet-icon,
+.ui-refresh .category-header .quiet-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 12px;
+}
+.ui-refresh .actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ui-refresh .actions > button {
+  min-height: 48px;
+  height: auto;
+  padding-block: 12px;
+}
+.ui-refresh .content-section {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  overflow: visible;
+  isolation: auto;
+}
+.ui-refresh .panel {
+  padding: var(--section-space) 0;
+  border-top: 1px solid var(--line);
+}
+.ui-refresh .empty {
+  min-height: 220px;
+  padding: 32px 16px;
+  gap: 14px;
+}
+.ui-refresh .empty p {
+  font-size: 14px;
+  max-width: 38ch;
+}
+.ui-refresh .empty > span {
+  background: transparent;
+}
+
+/* Shared borderless date controls. */
+.month-picker {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 2px;
+  gap: 4px;
+}
+.month-picker .month-picker-icon,
+.month-picker-panel .month-picker-icon { border: 0; background: transparent; box-shadow: none; color: var(--color-primary); }
+.month-picker .month-picker-trigger { border: 0; border-radius: 12px; min-height: 44px; }
+.month-picker .month-step { width: 44px; height: 44px; border: 0; background: transparent; }
+.month-picker .month-picker-trigger:hover,
+.month-picker .month-picker-trigger.is-open,
+.month-picker .month-step:hover { background: var(--soft); }
+.month-picker-panel.liquid-glass-panel,
+.date-picker-static.liquid-glass-panel {
+  border: 0;
+  background: var(--canvas);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 12%);
+}
+.month-picker-panel .month-tile { border: 0; background: transparent; box-shadow: none; }
+.month-picker-panel .month-tile:hover { background: var(--soft); }
+.month-picker-panel .month-tile.is-selected { background: var(--color-primary); color: white; box-shadow: none; }
+.month-picker-panel .month-current { border: 0; background: transparent; }
+.date-picker-control { border: 0; border-radius: 12px; padding-inline: 10px; background: var(--soft); transition: background-color .2s; }
+.date-picker-control input { padding-block: 14px; min-height: 48px; }
+.date-picker-control[data-error="false"] .date-picker-rule { display: none; }
+.date-picker-control:focus-within { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.date-picker-control > button { border: 0; background: transparent; box-shadow: none; }
+
+/* Keep navigation light; floating actions retain their glass appearance. */
+.app-navigation-tabs.glass-surface {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.app-navigation-tabs .nav-tab.glass-surface {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 48px;
+  border-radius: 12px;
+}
+.app-navigation-tabs .nav-tab.glass-surface[aria-current="page"] {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+.app-navigation-tabs.glass-surface::before,
+.app-navigation-tabs.glass-surface::after,
+.app-navigation-tabs .nav-tab.glass-surface::before,
+.app-navigation-tabs .nav-tab.glass-surface::after {
+  display: none;
+}
+.app-navigation-tabs .nav-tab:hover {
+  transform: none;
+  box-shadow: none;
+}
+.mobile-route-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-route-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 500;
+}
+.mobile-route-link > span {
+  flex: 1;
+}
+.mobile-route-link > svg:last-child {
+  color: var(--muted);
+}
+.mobile-route-link:hover {
+  background: var(--soft);
+}
+.mobile-route-link[aria-current="page"] {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--accent-ink);
+}
+
+/* Pagination uses the same open row on every application. */
+.ui-refresh .pagination-surface {
+  padding: 16px 0; border: 0; border-top: 1px solid var(--line);
+  border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none;
+}
+.ui-refresh .pagination-surface::before, .ui-refresh .pagination-surface::after { display: none; }
+.ui-refresh .pagination-surface button { min-height: 44px; min-width: 44px; }
+.ui-refresh .input-number-suffix { color: var(--muted); font-size: 14px; padding-right: 8px; }
+.ui-refresh .page-section { border: 0; border-radius: 0; background: transparent; box-shadow: none; }

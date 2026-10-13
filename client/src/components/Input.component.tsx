@@ -1,3 +1,4 @@
+import { tr } from "../utils/ui-text";
 import { type FC, type InputHTMLAttributes, type ReactNode } from "react";
 
 // hooks
@@ -60,6 +61,7 @@ const Input: FC<IProps> = ({
           (onEndIconClick ? (
             <button
               type="button"
+              disabled={props.disabled}
               onClick={onEndIconClick}
               aria-label={endIconAriaLabel}
               title={endIconAriaLabel}
@@ -87,7 +89,7 @@ const Input: FC<IProps> = ({
 
       {error && (
         <p id={`${inputId}-error`} className="mt-2 text-xs text-red-500">
-          {error}
+          {tr(error)}
         </p>
       )}
     </div>

@@ -24,7 +24,11 @@
   width: min(680px, 150vw);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(50 205 50 / 17%), transparent 65%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-primary) 17%, transparent),
+    transparent 65%
+  );
   animation: boot-glow 2.3s ease-in-out both;
 }
 .bootloader__content {
@@ -52,8 +56,7 @@
   background: none;
   box-shadow: none;
 }
-
-.bootloader__glass > img {
+.bootloader__glass > :is(img, .gym-brandmark) {
   width: 96px;
   height: 96px;
   object-fit: contain;
@@ -61,16 +64,16 @@
 .bootloader__orbit {
   position: absolute;
   inset: 0;
-  border: 1px solid rgb(50 205 50 / 12%);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, transparent);
   border-top-color: var(--color-primary);
-  border-right-color: rgb(50 205 50 / 45%);
+  border-right-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
   border-radius: 50%;
   animation: boot-orbit 3s linear infinite;
 }
 .bootloader__orbit--inner {
   inset: 9px;
   border-top-color: transparent;
-  border-bottom-color: rgb(50 205 50 / 50%);
+  border-bottom-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
   animation-direction: reverse;
   animation-duration: 4s;
 }
@@ -85,7 +88,7 @@
   height: 2px;
   overflow: hidden;
   border-radius: 2px;
-  background: rgb(50 205 50 / 14%);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 .bootloader__track > div {
   height: 100%;

@@ -2,17 +2,11 @@
 .month-picker {
   display: inline-flex;
   gap: 4px;
-  padding: 6px;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: linear-gradient(
-    135deg,
-    var(--soft),
-    color-mix(in srgb, var(--color-primary) 5%, var(--canvas))
-  );
-  box-shadow:
-    0 8px 24px rgb(15 40 20 / 5%),
-    inset 0 1px 0 rgb(255 255 255 / 20%);
+  padding: 2px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
 }
 .month-picker-trigger {
   min-width: 174px;
@@ -24,7 +18,7 @@
   border-radius: 14px;
 }
 .month-picker-icon {
-  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border: 0;
 }
 .app-main .annual-filter {
   width: fit-content;

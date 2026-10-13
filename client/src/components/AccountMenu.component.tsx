@@ -6,11 +6,11 @@ import {
   useEffect, useLayoutEffect,
   useRef,
   useState,
-  useContext,
+
 } from "react";
 import { ChevronDown, LogOut, Settings, UserRound, Mail, Monitor, Moon, Sun } from "lucide-react";
-import { ThemeContext } from "../contexts/theme.context";
-import { tr } from "../i18n";
+import useAccountIdentity from "../hooks/useAccountIdentity.hook";
+
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
@@ -26,10 +26,10 @@ type TMenuPlacement = "top" | "bottom";
 type TMenuAlignment = "left" | "right";
 
 interface IProps {
-  username: string;
+  username?: string;
   surname?: string;
-  email: string;
-  onLogout: () => void;
+  email?: string;
+  onLogout?: () => void;
   className?: string;
   placement?: TMenuPlacement;
   alignment?: TMenuAlignment;
@@ -40,18 +40,18 @@ const MENU_MIN_WIDTH = 360;
 const VIEWPORT_PADDING = 12;
 
 const AccountMenu: FC<IProps> = ({
-  username,
-  surname = "",
-  email,
-  onLogout,
+  username: suppliedUsername,
+  surname: suppliedSurname,
+  email: suppliedEmail,
+  onLogout: suppliedOnLogout,
   className = "",
   placement = "bottom",
   alignment = "right",
 }) => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  const { theme, preference, setPreference } = useTheme();
   const { t } = useTranslation();
-  const { preference, setPreference } = useContext(ThemeContext);
+  const { username, surname, email, onLogout } = useAccountIdentity({ username: suppliedUsername, surname: suppliedSurname, email: suppliedEmail, onLogout: suppliedOnLogout });
   const fullName = [username, surname]
     .map((value) => value.trim())
     .filter(Boolean)
@@ -255,7 +255,7 @@ const AccountMenu: FC<IProps> = ({
             <span className="block max-w-32 truncate text-sm font-semibold">
               {fullName || email}
             </span>
-            {fullName && (
+            {fullName && email && (
               <span className="block max-w-32 truncate text-[10px] opacity-60">{email}</span>
             )}
           </span>
@@ -299,25 +299,25 @@ const AccountMenu: FC<IProps> = ({
           <div className="account-menu-profile" role="presentation">
             <div className="account-menu-identity">
               {fullName && <strong>{fullName}</strong>}
-              <span className="account-menu-email">
+              {email && <span className="account-menu-email">
                 <Mail size={13} />
                 <span title={email}>{email}</span>
-              </span>
+              </span>}
             </div>
           </div>
           <div className="relative z-10 flex flex-col gap-1">
             <div
               role="group"
-              aria-label={tr("Tema")}
+              aria-label={t("accountMenu.theme")}
               className={`border-b px-3 pt-2 pb-3 ${theme === "light" ? "border-black/7 text-black" : "border-white/8 text-white"}`}
             >
-              <span className="mb-2 block text-xs font-semibold opacity-65">{tr("Tema")}</span>
+              <span className="mb-2 block text-xs font-semibold opacity-65">{t("accountMenu.theme")}</span>
               <div className="grid grid-cols-3 gap-1">
                 {(
                   [
-                    { value: "system", label: "Sistema", icon: Monitor },
-                    { value: "dark", label: "Scuro", icon: Moon },
-                    { value: "light", label: "Chiaro", icon: Sun },
+                    { value: "system", label: t("accountMenu.themeOptions.system"), icon: Monitor },
+                    { value: "dark", label: t("accountMenu.themeOptions.dark"), icon: Moon },
+                    { value: "light", label: t("accountMenu.themeOptions.light"), icon: Sun },
                   ] as const
                 ).map(({ value, label, icon: Icon }) => (
                   <button
@@ -335,7 +335,7 @@ const AccountMenu: FC<IProps> = ({
                     }`}
                   >
                     <Icon size={16} strokeWidth={1.7} />
-                    <span>{tr(label)}</span>
+                    <span>{label}</span>
                   </button>
                 ))}
               </div>

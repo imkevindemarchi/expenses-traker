@@ -3,7 +3,7 @@ import { type ButtonHTMLAttributes, type FC, type ReactNode } from "react";
 // hooks
 import { useTheme } from "../hooks";
 
-type TButtonVariant = "primary" | "secondary" | "danger";
+type TButtonVariant = "primary" | "secondary" | "danger" | "danger-outline";
 
 interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -36,10 +36,18 @@ const Button: FC<IProps> = ({
   const dangerClassName: string =
     "bg-red-500 px-6 font-semibold text-white hover:bg-red-600 disabled:opacity-60";
 
+  const dangerOutlineClassName =
+    theme === "light"
+      ? "border border-red-600/35 bg-red-500/5 px-5 font-semibold text-red-700 hover:border-red-600/60 hover:bg-red-500/10 disabled:opacity-50"
+      : "border border-red-400/45 bg-red-400/5 px-5 font-semibold text-red-300 hover:border-red-400/70 hover:bg-red-400/10 disabled:opacity-50";
+
   const getVariantClassName = (): string => {
     switch (variant) {
       case "secondary":
         return secondaryClassName;
+
+      case "danger-outline":
+        return dangerOutlineClassName;
 
       case "danger":
         return dangerClassName;

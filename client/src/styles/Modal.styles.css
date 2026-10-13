@@ -124,6 +124,33 @@
   .modal-close:hover:not(:disabled), .modal-close:active:not(:disabled) { transform: none; }
 }
 
+/* Keep discarding visually distinct from the primary save action. */
+.workout-finish-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+.workout-finish-actions > button {
+  min-height: 48px;
+  height: auto;
+  padding-block: 12px;
+  line-height: 1.4;
+}
+.workout-finish-actions > button > svg {
+  flex-shrink: 0;
+}
+@media (max-width: 639px) {
+  .workout-finish-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+  .workout-finish-actions > button {
+    width: 100%;
+  }
+}
+
 
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {

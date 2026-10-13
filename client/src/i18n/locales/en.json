@@ -1,5 +1,7 @@
 {
-  "loader": { "loading": "Loading..." },
+  "loader": {
+    "loading": "Loading..."
+  },
   "modal": {
     "close": "Close window"
   },
@@ -23,7 +25,13 @@
     "menuLabel": "Account menu",
     "settings": "Settings",
     "notifications": "Notifications",
-    "logout": "Log out"
+    "logout": "Log out",
+    "theme": "Theme",
+    "themeOptions": {
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light"
+    }
   },
   "navbar": {
     "home": "Home",

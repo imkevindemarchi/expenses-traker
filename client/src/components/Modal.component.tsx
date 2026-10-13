@@ -25,6 +25,7 @@ interface IProps extends PropsWithChildren {
   isOpen: boolean;
   title: string;
   description?: string;
+  /** Optional actions. Omit for dialogs whose content triggers the action directly. */
   footer?: ReactNode;
   isClosable?: boolean;
   closeOnBackdropClick?: boolean;
@@ -55,6 +56,8 @@ const Modal: FC<IProps> = ({
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -115,20 +118,30 @@ const Modal: FC<IProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape" && isClosable) {
-        onClose();
+        onCloseRef.current();
       }
     };
 
-    const previousOverflow: string = document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
 
     return (): void => {
-      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isClosable, isOpen, onClose]);
+  }, [isClosable, isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const root = document.documentElement;
+    const previousGutter = root.style.scrollbarGutter;
+    // Preserve the page width when hiding its existing scrollbar, before paint.
+    if (window.innerWidth > root.clientWidth) root.style.scrollbarGutter = "stable";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      root.style.scrollbarGutter = previousGutter;
+    };
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;

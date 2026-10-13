@@ -19,6 +19,7 @@ export function fitStaticPanel(
   placement: "above" | "below" | "side" = "below",
   padding = 12,
   gap = 8,
+  alignment: "center" | "left" = "center",
 ) {
   const minX = (viewport.offsetLeft ?? 0) + padding,
     minY = (viewport.offsetTop ?? 0) + padding;
@@ -26,7 +27,7 @@ export function fitStaticPanel(
   const maxX = Math.max(minX, minX + viewport.width - padding * 2 - width);
   const maxY = Math.max(minY, minY + viewport.height - padding * 2 - height);
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
-  let left = anchor.left + anchor.width / 2 - width / 2;
+  let left = alignment === "left" ? anchor.left : anchor.left + anchor.width / 2 - width / 2;
   let top = placement === "above" ? anchor.top - height - gap : anchor.bottom + gap;
   if (placement === "side") {
     left = anchor.right + gap;

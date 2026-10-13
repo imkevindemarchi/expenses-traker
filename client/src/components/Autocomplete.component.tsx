@@ -1,4 +1,4 @@
-import { SkeletonBlock } from "./LoadingSkeleton.component";
+import { SkeletonBlock } from "./SkeletonBlock.component";
 import {
   type ChangeEvent,
   type CSSProperties,
@@ -412,6 +412,8 @@ const Autocomplete = <TOption,>({
       {createPortal(
         <div
           ref={menuRef}
+          inert={!isOpen}
+          aria-hidden={!isOpen}
           style={{
             ...menuStyle,
             transform: isOpen

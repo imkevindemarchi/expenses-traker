@@ -1,5 +1,7 @@
 {
-  "loader": { "loading": "Caricamento..." },
+  "loader": {
+    "loading": "Caricamento..."
+  },
   "modal": {
     "close": "Chiudi finestra"
   },
@@ -23,7 +25,13 @@
     "menuLabel": "Menu account",
     "settings": "Impostazioni",
     "notifications": "Notifiche",
-    "logout": "Esci"
+    "logout": "Esci",
+    "theme": "Tema",
+    "themeOptions": {
+      "system": "Sistema",
+      "dark": "Scuro",
+      "light": "Chiaro"
+    }
   },
   "navbar": {
     "home": "Home",
