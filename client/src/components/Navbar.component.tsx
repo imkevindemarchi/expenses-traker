@@ -1,11 +1,4 @@
-import {
-  type CSSProperties,
-  type FC,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router";
@@ -31,17 +24,13 @@ import { useTheme } from "../hooks";
 
 // types
 
-const Navbar: FC<{ user: User; onLogout: () => void }> = ({
-  user,
-  onLogout,
-}) => {
+const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const location = useLocation();
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const sidebarTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const [sidebarAnimationStyle, setSidebarAnimationStyle] =
-    useState<CSSProperties>({});
+  const [sidebarAnimationStyle, setSidebarAnimationStyle] = useState<CSSProperties>({});
 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
@@ -146,9 +135,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
         const RouteIcon = protectedRoute.icon;
 
         const routeAnimationStyle: CSSProperties = {
-          transitionDelay: isSidebarOpen
-            ? `${Math.min(index * 12, 72)}ms`
-            : "0ms",
+          transitionDelay: isSidebarOpen ? `${Math.min(index * 12, 72)}ms` : "0ms",
         };
 
         return (
@@ -212,7 +199,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
             to="/"
             end
             aria-label={t("navbar.goToHomepage")}
-            className="glass-surface group absolute bottom-4 left-5 inline-flex size-16 rounded-[20px] items-center justify-center overflow-hidden border p-2.5 transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            className="app-brand-logo group inline-flex absolute bottom-4 left-5 size-18 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             data-glass-theme={theme}
           >
             <img
@@ -229,8 +216,8 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
               to="/"
               end
               aria-label={t("navbar.goToHomepage")}
-            className="glass-surface group relative inline-flex size-16 shrink-0 rounded-[22px] xl:size-18 xl:rounded-3xl xl:p-3 2xl:size-20 items-center justify-center overflow-hidden border p-2.5 transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            data-glass-theme={theme}
+              className="app-brand-logo group inline-flex relative size-18 shrink-0 xl:size-20 2xl:size-22 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+              data-glass-theme={theme}
             >
               <img
                 src={theme === "light" ? logoImg : logoDarkImg}
@@ -249,7 +236,12 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
 
             <div className="relative z-60 flex shrink-0 items-center justify-end gap-2 overflow-visible xl:gap-3 2xl:gap-4">
               <LanguageSelector />
-              <AccountMenu username={user.name} surname={user.surname} email={user.email} onLogout={onLogout} />
+              <AccountMenu
+                username={user.name}
+                surname={user.surname}
+                email={user.email}
+                onLogout={onLogout}
+              />
             </div>
           </div>
         </div>
@@ -330,7 +322,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
             >
               <span
                 data-glass-theme={theme}
-                className="glass-surface relative flex size-20 items-center justify-center overflow-hidden rounded-[15px]"
+                className="app-brand-logo group inline-flex relative size-22 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
               >
                 <img
                   src={theme === "light" ? logoImg : logoDarkImg}
@@ -348,9 +340,15 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({
           <div
             className={`relative z-20 mt-2 flex shrink-0 items-center justify-between overflow-visible rounded-[22px] border p-2.5 transition-[opacity,translate] duration-200 ease-out ${isSidebarOpen ? "translate-y-0 opacity-100 delay-40" : "translate-y-1 opacity-0 delay-0"} ${theme === "light" ? "border-white/85 bg-white/48 shadow-[0_12px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5 shadow-[0_14px_30px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
           >
-            <LanguageSelector className="[&>button]:size-12 [&>button]:justify-center [&>button]:gap-0 [&>button]:p-0 [&>button>svg]:hidden [&>button>span:nth-child(2)]:hidden" placement="top" alignment="left" />
+            <LanguageSelector
+              className="[&>button]:size-12 [&>button]:justify-center [&>button]:gap-0 [&>button]:p-0 [&>button>svg]:hidden [&>button>span:nth-child(2)]:hidden"
+              placement="top"
+              alignment="left"
+            />
             <AccountMenu
-              username={user.name} surname={user.surname} email={user.email}
+              username={user.name}
+              surname={user.surname}
+              email={user.email}
               onLogout={onLogout}
               placement="top"
               alignment="right"

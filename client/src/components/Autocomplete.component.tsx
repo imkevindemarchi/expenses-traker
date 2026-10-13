@@ -1,4 +1,4 @@
-import {SkeletonBlock} from './LoadingSkeleton.component';
+import { SkeletonBlock } from "./LoadingSkeleton.component";
 import {
   type ChangeEvent,
   type CSSProperties,
@@ -82,14 +82,11 @@ const Autocomplete = <TOption,>({
   const { t } = useTranslation();
   const { theme } = useTheme();
 
-  const resolvedPlaceholder: string =
-    placeholder ?? t("autocomplete.placeholder");
+  const resolvedPlaceholder: string = placeholder ?? t("autocomplete.placeholder");
   const resolvedSearchPlaceholder: string =
     searchPlaceholder ?? t("autocomplete.searchPlaceholder");
-  const resolvedEmptyMessage: string =
-    emptyMessage ?? t("autocomplete.emptyMessage");
-  const resolvedLoadingMessage: string =
-    loadingMessage ?? t("autocomplete.loadingMessage");
+  const resolvedEmptyMessage: string = emptyMessage ?? t("autocomplete.emptyMessage");
+  const resolvedLoadingMessage: string = loadingMessage ?? t("autocomplete.loadingMessage");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -117,21 +114,11 @@ const Autocomplete = <TOption,>({
 
     return options.filter((option: TOption): boolean => {
       const optionLabel: string = getOptionLabel(option).toLowerCase();
-      const optionDescription: string =
-        getOptionDescription?.(option)?.toLowerCase() ?? "";
+      const optionDescription: string = getOptionDescription?.(option)?.toLowerCase() ?? "";
 
-      return (
-        optionLabel.includes(normalizedSearch) ||
-        optionDescription.includes(normalizedSearch)
-      );
+      return optionLabel.includes(normalizedSearch) || optionDescription.includes(normalizedSearch);
     });
-  }, [
-    getOptionDescription,
-    getOptionLabel,
-    normalizedSearch,
-    onSearchChange,
-    options,
-  ]);
+  }, [getOptionDescription, getOptionLabel, normalizedSearch, onSearchChange, options]);
 
   const getInputElement = useCallback((): HTMLInputElement | null => {
     return document.getElementById(autocompleteId) as HTMLInputElement | null;
@@ -159,8 +146,7 @@ const Autocomplete = <TOption,>({
       MENU_MAX_HEIGHT,
     );
 
-    const centeredLeft: number =
-      triggerRect.left + triggerRect.width / 2 - menuWidth / 2;
+    const centeredLeft: number = triggerRect.left + triggerRect.width / 2 - menuWidth / 2;
 
     const clampedLeft: number = Math.min(
       Math.max(centeredLeft, VIEWPORT_PADDING),
@@ -208,13 +194,7 @@ const Autocomplete = <TOption,>({
         inputElement?.select();
       }
     });
-  }, [
-    disabled,
-    getInputElement,
-    searchValue,
-    selectedLabel,
-    updateMenuPosition,
-  ]);
+  }, [disabled, getInputElement, searchValue, selectedLabel, updateMenuPosition]);
 
   const closeMenu = useCallback((): void => {
     setIsOpen(false);
@@ -302,9 +282,7 @@ const Autocomplete = <TOption,>({
           return -1;
         }
 
-        return previousIndex >= visibleOptions.length - 1
-          ? 0
-          : previousIndex + 1;
+        return previousIndex >= visibleOptions.length - 1 ? 0 : previousIndex + 1;
       });
 
       return;
@@ -322,9 +300,7 @@ const Autocomplete = <TOption,>({
           return -1;
         }
 
-        return previousIndex <= 0
-          ? visibleOptions.length - 1
-          : previousIndex - 1;
+        return previousIndex <= 0 ? visibleOptions.length - 1 : previousIndex - 1;
       });
 
       return;
@@ -355,11 +331,7 @@ const Autocomplete = <TOption,>({
     const handlePointerDown = (event: PointerEvent): void => {
       const target: Node = event.target as Node;
 
-      if (
-        isOpen &&
-        !containerRef.current?.contains(target) &&
-        !menuRef.current?.contains(target)
-      ) {
+      if (isOpen && !containerRef.current?.contains(target) && !menuRef.current?.contains(target)) {
         closeMenu();
       }
     };
@@ -399,15 +371,11 @@ const Autocomplete = <TOption,>({
             name={name}
             type="text"
             label={label}
-            placeholder={
-              isOpen ? resolvedSearchPlaceholder : resolvedPlaceholder
-            }
+            placeholder={isOpen ? resolvedSearchPlaceholder : resolvedPlaceholder}
             value={displayedValue}
             icon={
               icon ??
-              (value ? getOptionIcon?.(value) : undefined) ?? (
-                <Search size={18} strokeWidth={1.8} />
-              )
+              (value ? getOptionIcon?.(value) : undefined) ?? <Search size={18} strokeWidth={1.8} />
             }
             endIcon={
               clearable && displayedValue ? (
@@ -466,7 +434,11 @@ const Autocomplete = <TOption,>({
             className="relative z-10 flex max-h-72 flex-col gap-1 overflow-y-auto overscroll-contain"
           >
             {isLoading ? (
-              <div role="status" aria-label={resolvedLoadingMessage} className="skeleton-stack p-4">{[0,1,2].map(index=><SkeletonBlock key={index} className="skeleton-bar"/>)}</div>
+              <div role="status" aria-label={resolvedLoadingMessage} className="skeleton-stack p-4">
+                {[0, 1, 2].map((index) => (
+                  <SkeletonBlock key={index} className="skeleton-bar" />
+                ))}
+              </div>
             ) : visibleOptions.length === 0 ? (
               <div
                 className={`flex min-h-24 items-center justify-center rounded-2xl px-4 text-center text-sm ${
@@ -479,11 +451,9 @@ const Autocomplete = <TOption,>({
               visibleOptions.map((option: TOption, index: number) => {
                 const optionKey: string = getOptionKey(option);
                 const optionLabel: string = getOptionLabel(option);
-                const optionDescription: string | undefined =
-                  getOptionDescription?.(option);
+                const optionDescription: string | undefined = getOptionDescription?.(option);
                 const optionIcon: ReactNode = getOptionIcon?.(option);
-                const isSelected: boolean =
-                  value !== null && getOptionKey(value) === optionKey;
+                const isSelected: boolean = value !== null && getOptionKey(value) === optionKey;
                 const isActive: boolean = index === activeIndex;
 
                 return (
@@ -493,9 +463,7 @@ const Autocomplete = <TOption,>({
                     type="button"
                     role="option"
                     aria-selected={isSelected}
-                    onMouseDown={(
-                      event: MouseEvent<HTMLButtonElement>,
-                    ): void => {
+                    onMouseDown={(event: MouseEvent<HTMLButtonElement>): void => {
                       event.preventDefault();
                     }}
                     onMouseEnter={(): void => setActiveIndex(index)}
@@ -515,9 +483,7 @@ const Autocomplete = <TOption,>({
                     {optionIcon && (
                       <span
                         className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${
-                          isSelected
-                            ? "bg-primary text-white"
-                            : "bg-primary/10 text-primary"
+                          isSelected ? "bg-primary text-white" : "bg-primary/10 text-primary"
                         }`}
                       >
                         {optionIcon}
@@ -525,9 +491,7 @@ const Autocomplete = <TOption,>({
                     )}
 
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold">
-                        {optionLabel}
-                      </span>
+                      <span className="block truncate text-sm font-semibold">{optionLabel}</span>
 
                       {optionDescription && (
                         <span
@@ -545,11 +509,7 @@ const Autocomplete = <TOption,>({
                     </span>
 
                     {isSelected && (
-                      <Check
-                        size={17}
-                        strokeWidth={2.2}
-                        className="shrink-0 text-primary"
-                      />
+                      <Check size={17} strokeWidth={2.2} className="shrink-0 text-primary" />
                     )}
                   </Button>
                 );

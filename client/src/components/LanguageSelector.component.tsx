@@ -10,15 +10,26 @@ import {
 import { Check, ChevronDown } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-const ReactCountryFlag = ({countryCode, style}: {countryCode: string; svg?: boolean; style?: import('react').CSSProperties; 'aria-hidden'?: string}) => <img aria-hidden="true" alt="" src={`/flags/${countryCode === "it" ? "it" : "us"}.svg`} style={{...style, objectFit:"contain"}} />;
+const ReactCountryFlag = ({
+  countryCode,
+  style,
+}: {
+  countryCode: string;
+  svg?: boolean;
+  style?: import("react").CSSProperties;
+  "aria-hidden"?: string;
+}) => (
+  <img
+    aria-hidden="true"
+    alt=""
+    src={`/flags/${countryCode === "it" ? "it" : "us"}.svg`}
+    style={{ ...style, objectFit: "contain" }}
+  />
+);
 
 // assets
 import { getLiquidGlassClass } from "../assets/constants";
-import {
-  AVAILABLE_LANGUAGES,
-  type ILanguage,
-  type TLanguageCode,
-} from "../i18n/languages";
+import { AVAILABLE_LANGUAGES, type ILanguage, type TLanguageCode } from "../i18n/languages";
 
 // hooks
 import { useTheme } from "../hooks";
@@ -58,12 +69,9 @@ const LanguageSelector: FC<IProps> = ({
     y: 0,
   });
 
-  const resolvedLanguage: string =
-    i18n.resolvedLanguage || i18n.language || "en";
+  const resolvedLanguage: string = i18n.resolvedLanguage || i18n.language || "en";
 
-  const currentLanguageCode: TLanguageCode = resolvedLanguage
-    .toLowerCase()
-    .startsWith("it")
+  const currentLanguageCode: TLanguageCode = resolvedLanguage.toLowerCase().startsWith("it")
     ? "it"
     : "en";
 
@@ -133,9 +141,7 @@ const LanguageSelector: FC<IProps> = ({
     setIsOpen((previousValue: boolean): boolean => !previousValue);
   };
 
-  const handleLanguageChange = async (
-    languageCode: TLanguageCode,
-  ): Promise<void> => {
+  const handleLanguageChange = async (languageCode: TLanguageCode): Promise<void> => {
     setIsOpen(false);
 
     await i18n.changeLanguage(languageCode);
@@ -205,27 +211,17 @@ const LanguageSelector: FC<IProps> = ({
               : theme === "light"
                 ? "border-black/7 hover:border-black/12"
                 : "border-white/8 hover:border-white/15"
-          } ${
-            theme === "light"
-              ? "text-black"
-              : "text-white"
-          }`}
+          } ${theme === "light" ? "text-black" : "text-white"}`}
         >
           <span
             className={`flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-6 group-hover:scale-110 ${
-              isOpen
-                ? "bg-primary/15 shadow-[0_6px_18px_rgba(0,0,0,0.14)]"
-                : "bg-primary/10"
+              isOpen ? "bg-primary/15 shadow-[0_6px_18px_rgba(0,0,0,0.14)]" : "bg-primary/10"
             }`}
           >
             <ReactCountryFlag
-              countryCode={
-                currentLanguage.code === "en" ? "us" : currentLanguage.code
-              }
+              countryCode={currentLanguage.code === "en" ? "us" : currentLanguage.code}
               svg
-              aria-label={t(
-                `languageSelector.languages.${currentLanguage.code}`,
-              )}
+              aria-label={t(`languageSelector.languages.${currentLanguage.code}`)}
               style={{
                 width: 20,
                 height: 20,
@@ -254,7 +250,7 @@ const LanguageSelector: FC<IProps> = ({
       {createPortal(
         <div
           ref={dropdownRef}
-        data-glass-theme={theme}
+          data-glass-theme={theme}
           inert={!isOpen}
           role="listbox"
           aria-hidden={!isOpen}
@@ -278,9 +274,7 @@ const LanguageSelector: FC<IProps> = ({
             {AVAILABLE_LANGUAGES.map((language: ILanguage) => {
               const isActive: boolean = language.code === currentLanguageCode;
 
-              const languageLabel: string = t(
-                `languageSelector.languages.${language.code}`,
-              );
+              const languageLabel: string = t(`languageSelector.languages.${language.code}`);
 
               return (
                 <button
@@ -290,9 +284,7 @@ const LanguageSelector: FC<IProps> = ({
                   aria-label={languageLabel}
                   aria-selected={isActive}
                   tabIndex={isOpen ? 0 : -1}
-                  onClick={(
-                    event: ReactMouseEvent<HTMLButtonElement>,
-                  ): void => {
+                  onClick={(event: ReactMouseEvent<HTMLButtonElement>): void => {
                     event.stopPropagation();
                     void handleLanguageChange(language.code);
                   }}
@@ -314,9 +306,7 @@ const LanguageSelector: FC<IProps> = ({
                     }`}
                   >
                     <ReactCountryFlag
-                      countryCode={
-                        language.code === "en" ? "us" : language.code
-                      }
+                      countryCode={language.code === "en" ? "us" : language.code}
                       svg
                       aria-hidden="true"
                       style={{

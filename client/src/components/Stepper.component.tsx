@@ -16,12 +16,7 @@ interface IProps {
   className?: string;
 }
 
-const Stepper: FC<IProps> = ({
-  steps,
-  activeStep,
-  ariaLabel,
-  className = "",
-}) => {
+const Stepper: FC<IProps> = ({ steps, activeStep, ariaLabel, className = "" }) => {
   const { theme } = useTheme();
 
   return (
@@ -33,10 +28,7 @@ const Stepper: FC<IProps> = ({
           const isLast: boolean = index === steps.length - 1;
 
           return (
-            <div
-              key={`${step.label}-${index}`}
-              className="flex min-w-0 flex-1 items-start"
-            >
+            <div key={`${step.label}-${index}`} className="flex min-w-0 flex-1 items-start">
               <div className="flex min-w-0 flex-1 flex-col items-center text-center">
                 <div className="flex w-full items-center">
                   <span
@@ -63,11 +55,7 @@ const Stepper: FC<IProps> = ({
                             : "border-white/10 bg-white/4 text-gray"
                     }`}
                   >
-                    {isCompleted ? (
-                      <Check size={16} strokeWidth={2.6} />
-                    ) : (
-                      index + 1
-                    )}
+                    {isCompleted ? <Check size={16} strokeWidth={2.6} /> : index + 1}
                   </span>
 
                   <span

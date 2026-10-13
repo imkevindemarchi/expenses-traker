@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install:all": "npm --prefix server ci && npm --prefix client ci",
+    "install:all": "npm ci && npm --prefix server ci && npm --prefix client ci",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "build": "npm --prefix client run build",
     "start": "npm --prefix client start",
     "start:server": "npm --prefix server start",
-    "test": "npm --prefix server test"
+    "test": "npm --prefix server test && npm --prefix client test",
+    "preview": "npm --prefix client run preview",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
-  "engines": { "node": ">=22.12.0" }
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
 }

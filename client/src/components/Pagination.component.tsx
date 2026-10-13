@@ -44,7 +44,7 @@ const Pagination: FC<IProps> = ({
   onLimitChange,
 }) => {
   const { theme } = useTheme();
-  const isMobile = window.matchMedia('(max-width: 639px)').matches;
+  const isMobile = window.matchMedia("(max-width: 639px)").matches;
   const { t } = useTranslation();
 
   const paginationItems: TPaginationItem[] = useMemo(() => {
@@ -52,10 +52,7 @@ const Pagination: FC<IProps> = ({
     const currentPage: number = pagination.page;
 
     if (totalPages <= 7) {
-      return Array.from(
-        { length: totalPages },
-        (_: unknown, index: number): number => index + 1,
-      );
+      return Array.from({ length: totalPages }, (_: unknown, index: number): number => index + 1);
     }
 
     if (currentPage <= 4) {
@@ -86,9 +83,7 @@ const Pagination: FC<IProps> = ({
   }, [pagination.page, pagination.total_pages]);
 
   const firstVisibleItem: number =
-    pagination.total_items === 0
-      ? 0
-      : (pagination.page - 1) * pagination.limit + 1;
+    pagination.total_items === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
 
   const lastVisibleItem: number = Math.min(
     pagination.page * pagination.limit,
@@ -104,10 +99,7 @@ const Pagination: FC<IProps> = ({
   };
 
   const handleNextPage = (): void => {
-    if (
-      !pagination.has_next_page ||
-      pagination.page >= pagination.total_pages
-    ) {
+    if (!pagination.has_next_page || pagination.page >= pagination.total_pages) {
       return;
     }
 
@@ -146,12 +138,8 @@ const Pagination: FC<IProps> = ({
 
   const renderLiquidGlassSelect = (id: string, responsiveClassName = "") => (
     <div className={`mx-auto w-fit ${responsiveClassName}`}>
-      <div
-        className={`flex items-center justify-center overflow-visible rounded-[22px] p-2`}
-      >
-        <div className={`w-24 ${selectContainerClassName}`}>
-          {renderLimitSelect(id)}
-        </div>
+      <div className={`flex items-center justify-center overflow-visible rounded-[22px] p-2`}>
+        <div className={`w-24 ${selectContainerClassName}`}>{renderLimitSelect(id)}</div>
       </div>
     </div>
   );
@@ -166,8 +154,7 @@ const Pagination: FC<IProps> = ({
 
   return (
     <>
-      {mobileJustSelect &&
-        renderLiquidGlassSelect(`${selectId}-mobile`, "sm:hidden")}
+      {mobileJustSelect && renderLiquidGlassSelect(`${selectId}-mobile`, "sm:hidden")}
 
       <div
         className={`${mobileJustSelect ? "hidden sm:block" : "block"} ${flush ? "mt-0 pt-0" : "mt-0 pt-0 sm:mt-5 sm:pt-5"} ${className}`}
@@ -279,9 +266,7 @@ const Pagination: FC<IProps> = ({
               </nav>
             </div>
 
-            <div
-              className={`flex shrink-0 items-center gap-2 rounded-[18px] p-1 pl-2`}
-            >
+            <div className={`flex shrink-0 items-center gap-2 rounded-[18px] p-1 pl-2`}>
               <span
                 className={`hidden text-sm font-medium xl:inline ${theme === "light" ? "text-darkgray" : "text-gray"}`}
               >

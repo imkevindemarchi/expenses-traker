@@ -1,11 +1,4 @@
-import {
-  type CSSProperties,
-  type FC,
-  type TouchEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type FC, type TouchEvent, useMemo, useRef, useState } from "react";
 import { CircleCheck, CircleX, TriangleAlert, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -104,8 +97,7 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
   const defaultTitle: string = t(style.titleTranslationKey);
   const title: string = popup.title || defaultTitle;
 
-  const role: "alert" | "status" =
-    popup.type === "success" ? "status" : "alert";
+  const role: "alert" | "status" = popup.type === "success" ? "status" : "alert";
 
   const borderClassName: string =
     theme === "light" ? style.lightBorderClassName : style.darkBorderClassName;
@@ -116,8 +108,7 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
   const titleClassName: string =
     theme === "light" ? style.lightTitleClassName : style.darkTitleClassName;
 
-  const messageClassName: string =
-    theme === "light" ? "text-darkgray/90" : "text-white/88";
+  const messageClassName: string = theme === "light" ? "text-darkgray/90" : "text-white/88";
 
   const closeButtonClassName: string =
     theme === "light"
@@ -184,18 +175,11 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
         onTouchCancel={handleTouchCancel}
         style={popupStyle}
         className={`liquid-glass-panel ${!isClosing && !isDragging ? "liquid-glass-panel--shine" : ""} ${
-          isClosing
-            ? "animate-popup-exit"
-            : translateY === 0
-              ? "animate-popup-enter"
-              : ""
+          isClosing ? "animate-popup-exit" : translateY === 0 ? "animate-popup-enter" : ""
         } ${
-          isDragging
-            ? "transition-none"
-            : "transition-all duration-300 ease-out"
+          isDragging ? "transition-none" : "transition-all duration-300 ease-out"
         } ${getLiquidGlassClass(theme)} ${borderClassName} pointer-events-auto relative isolate flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 select-none sm:max-w-md`}
       >
-
         <span
           className={`pointer-events-none absolute inset-y-3 left-1.5 w-1 rounded-full ${style.accentClassName}`}
         />
@@ -208,13 +192,9 @@ const Popup: FC<IProps> = ({ popup, isClosing, onClose }) => {
         </div>
 
         <div className="relative z-10 min-w-0 flex-1 pt-0.5">
-          <h3 className={`text-sm leading-5 font-bold ${titleClassName}`}>
-            {title}
-          </h3>
+          <h3 className={`text-sm leading-5 font-bold ${titleClassName}`}>{title}</h3>
 
-          <p
-            className={`mt-0.5 wrap-break-word text-[13px] leading-5 ${messageClassName}`}
-          >
+          <p className={`mt-0.5 wrap-break-word text-[13px] leading-5 ${messageClassName}`}>
             {popup.message}
           </p>
         </div>

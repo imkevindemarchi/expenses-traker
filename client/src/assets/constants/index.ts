@@ -1,1 +1,1 @@
-export { getLiquidGlassClass } from './liquid-glass.asset';
+export { getLiquidGlassClass } from "./liquid-glass.asset";

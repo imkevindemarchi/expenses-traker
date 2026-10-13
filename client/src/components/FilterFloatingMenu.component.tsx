@@ -1,21 +1,20 @@
-import { useEffect, useRef, type ReactElement, type ReactNode } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+  type CSSProperties,
+} from "react";
+import { createPortal } from "react-dom";
 import { CircleCheck } from "lucide-react";
-
-// assets
 import { getLiquidGlassClass } from "../assets/constants";
-
-// components
 import FloatingButton from "./FloatingButton.component";
-
-// hooks
 import { useTheme } from "../hooks";
-
-// types
+import { fitStaticPanel } from "../utils/fitStaticPanel";
 import type { TSelectOption } from "../types";
-
-type TMenuPlacement = "side" | "above";
-
 interface IProps<TValue extends string> {
+  alwaysVisibleOnMobile?: boolean;
   ariaLabel: string;
   icon: ReactNode;
   value: TValue;
@@ -23,13 +22,13 @@ interface IProps<TValue extends string> {
   optionCounts?: Partial<Record<TValue, number>>;
   isOpen: boolean;
   disabled?: boolean;
-  placement?: TMenuPlacement;
+  placement?: "side" | "above";
   onToggle: () => void;
-  onClose: () => void;
+  onClose?: () => void;
   onChange: (value: TValue) => void;
 }
-
 const FilterFloatingMenu = <TValue extends string>({
+  alwaysVisibleOnMobile = false,
   ariaLabel,
   icon,
   value,
@@ -43,32 +42,77 @@ const FilterFloatingMenu = <TValue extends string>({
   onChange,
 }: IProps<TValue>): ReactElement => {
   const { theme } = useTheme();
-  const containerRef=useRef<HTMLDivElement>(null);
-  useEffect(()=>{
-    if(!isOpen)return;
-    const outside=(event:PointerEvent)=>{if(!event.composedPath().includes(containerRef.current as EventTarget))onClose();};
-    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')onClose();};
-    document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',escape);
-    return()=>{document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',escape);};
-  },[isOpen,onClose]);
-
-  const menuPositionClassName: string =
-    placement === "above"
-      ? "bottom-[calc(100%+0.75rem)] left-1/2 max-h-[calc(100vh-7rem)] w-[min(19rem,calc(100vw-8rem))] origin-bottom sm:w-72"
-      : "bottom-0 left-[calc(100%+0.75rem)] max-h-[calc(100vh-2rem)] w-[min(19rem,calc(100vw-6.5rem))] origin-left sm:bottom-[calc(100%+0.75rem)] sm:left-1/2 sm:top-auto sm:w-72 sm:origin-bottom";
-
-  const menuVisibilityClassName: string =
-    placement === "above"
-      ? isOpen
-        ? "pointer-events-auto -translate-x-1/2 translate-y-0 scale-100 opacity-100"
-        : "pointer-events-none -translate-x-1/2 translate-y-3 scale-90 opacity-0"
-      : isOpen
-        ? "pointer-events-auto translate-x-0 scale-100 opacity-100 sm:-translate-x-1/2 sm:translate-y-0"
-        : "pointer-events-none -translate-x-3 scale-90 opacity-0 sm:-translate-x-1/2 sm:translate-y-3";
-
+  const container = useRef<HTMLDivElement>(null),
+    panel = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<CSSProperties>({}),
+    [columns, setColumns] = useState(1);
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const update = () => {
+      if (!container.current) return;
+      const viewport = window.visualViewport ?? {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        offsetLeft: 0,
+        offsetTop: 0,
+      };
+      const nextColumns =
+        options.length * 48 + 12 > viewport.height - 24 && options.length > 3 ? 2 : 1;
+      setColumns(nextColumns);
+      const height =
+        nextColumns === columns
+          ? (panel.current?.offsetHeight ?? options.length * 48 + 12)
+          : Math.ceil(options.length / nextColumns) * 48 + 12;
+      setPosition(
+        fitStaticPanel(
+          container.current.getBoundingClientRect(),
+          304,
+          height,
+          viewport,
+          placement === "side" && viewport.width < 640 ? "side" : "above",
+        ),
+      );
+    };
+    const close = () => {
+      (onClose ?? onToggle)();
+    };
+    const outside = (event: PointerEvent) => {
+      if (
+        !container.current?.contains(event.target as Node) &&
+        !panel.current?.contains(event.target as Node)
+      )
+        close();
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        close();
+        container.current?.querySelector("button")?.focus();
+      }
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    if (panel.current) observer.observe(panel.current);
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    window.visualViewport?.addEventListener("resize", update);
+    window.visualViewport?.addEventListener("scroll", update);
+    document.addEventListener("pointerdown", outside, true);
+    document.addEventListener("keydown", escape);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+      window.visualViewport?.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("scroll", update);
+      document.removeEventListener("pointerdown", outside, true);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [isOpen, options.length, placement, columns, onClose, onToggle]);
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={container} className="relative">
       <FloatingButton
+        alwaysVisibleOnMobile={alwaysVisibleOnMobile || isOpen}
         ariaLabel={ariaLabel}
         icon={icon}
         disabled={disabled}
@@ -77,70 +121,57 @@ const FilterFloatingMenu = <TValue extends string>({
         onClick={onToggle}
         className={isOpen ? "ring-2 ring-primary/35" : ""}
       />
-
-      <div
-        aria-hidden={!isOpen}
-        inert={!isOpen}
-        className={`liquid-glass-panel ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} absolute overflow-y-auto overscroll-contain rounded-[22px] border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${menuPositionClassName} ${menuVisibilityClassName} ${getLiquidGlassClass(theme)} ${
-          theme === "light"
-            ? "border-white/70 bg-white/50 shadow-[0_18px_50px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]"
-            : "border-white/10 bg-black/70 shadow-[0_20px_55px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]"
-        }`}
-      >
-        <div role="menu" aria-label={ariaLabel} className="flex flex-col gap-1">
-          {options.map((option: TSelectOption<TValue>) => {
-            const isSelected: boolean = option.value === value;
-            const count: number | undefined = optionCounts?.[option.value];
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                role="menuitemradio"
-                aria-checked={isSelected}
-                onClick={(): void => onChange(option.value)}
-                className={`flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-medium transition-colors ${
-                  isSelected
-                    ? "bg-primary text-white"
-                    : theme === "light"
-                      ? "text-black hover:bg-black/5"
-                      : "text-white hover:bg-white/7"
-                }`}
-              >
-                {option.icon && (
-                  <span
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${
-                      isSelected
-                        ? "bg-white/15 text-white"
-                        : "bg-primary/10 text-primary"
-                    }`}
-                  >
-                    {option.icon}
-                  </span>
-                )}
-
-                <span className="min-w-0 flex-1 truncate">{option.label}</span>
-
-                {count !== undefined && (
-                  <span
-                    className={`flex min-w-8 shrink-0 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
-                      isSelected
-                        ? "bg-white/18 text-white"
-                        : "bg-primary/10 text-primary"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-
-                {isSelected && <CircleCheck size={17} strokeWidth={2.2} />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {createPortal(
+        <div
+          ref={panel}
+          style={position}
+          aria-hidden={!isOpen}
+          inert={!isOpen}
+          className={`liquid-glass-panel ${isOpen ? "liquid-glass-panel--open pointer-events-auto opacity-100" : "liquid-glass-panel--closed pointer-events-none opacity-0"} fixed z-9999 overflow-hidden rounded-[22px] border p-1.5 transition-[background-color,border-color,box-shadow,opacity,transform] duration-300 ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/70 bg-white/50 shadow-[0_18px_50px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]" : "border-white/10 bg-black/70 shadow-[0_20px_55px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]"}`}
+        >
+          <div
+            role="menu"
+            aria-label={ariaLabel}
+            className="grid gap-1"
+            style={{ gridTemplateColumns: `repeat(${columns},minmax(0,1fr))` }}
+          >
+            {options.map((option) => {
+              const selected = option.value === value,
+                count = optionCounts?.[option.value];
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={selected}
+                  title={option.label}
+                  onClick={() => onChange(option.value)}
+                  className={`flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-medium transition-colors ${selected ? "bg-primary text-white" : theme === "light" ? "text-black hover:bg-black/5" : "text-white hover:bg-white/7"}`}
+                >
+                  {option.icon && (
+                    <span
+                      className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${selected ? "bg-white/15 text-white" : "bg-primary/10 text-primary"}`}
+                    >
+                      {option.icon}
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                  {count !== undefined && (
+                    <span
+                      className={`flex min-w-8 shrink-0 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${selected ? "bg-white/18 text-white" : "bg-primary/10 text-primary"}`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                  {selected && <CircleCheck size={17} strokeWidth={2.2} className="shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 };
-
 export default FilterFloatingMenu;

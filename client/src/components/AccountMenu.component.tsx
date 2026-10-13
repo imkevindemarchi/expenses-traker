@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate } from "react-router";
 import {
   type CSSProperties,
   type FC,
@@ -9,11 +9,10 @@ import {
   useContext,
 } from "react";
 import { ChevronDown, LogOut, Settings, UserRound, Mail, Monitor, Moon, Sun } from "lucide-react";
-import {ThemeContext} from '../contexts/theme.context';
-import {tr} from '../i18n';
+import { ThemeContext } from "../contexts/theme.context";
+import { tr } from "../i18n";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-
 
 // assets
 import { getLiquidGlassClass } from "../assets/constants";
@@ -23,12 +22,14 @@ import { useTheme } from "../hooks";
 
 // utils
 
-
 type TMenuPlacement = "top" | "bottom";
 type TMenuAlignment = "left" | "right";
 
 interface IProps {
- username: string; surname?: string; email: string; onLogout: () => void;
+  username: string;
+  surname?: string;
+  email: string;
+  onLogout: () => void;
   className?: string;
   placement?: TMenuPlacement;
   alignment?: TMenuAlignment;
@@ -39,19 +40,27 @@ const MENU_MIN_WIDTH = 360;
 const VIEWPORT_PADDING = 12;
 
 const AccountMenu: FC<IProps> = ({
-  username, surname='', email, onLogout,
+  username,
+  surname = "",
+  email,
+  onLogout,
   className = "",
   placement = "bottom",
   alignment = "right",
 }) => {
-
-
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const {preference,setPreference}=useContext(ThemeContext);
-  const fullName=[username,surname].map(value=>value.trim()).filter(Boolean).join(' ');
-  const initials=[username,surname].filter(value=>value.trim()).map(value=>value.trim().charAt(0)).join('').toLocaleUpperCase();
+  const { preference, setPreference } = useContext(ThemeContext);
+  const fullName = [username, surname]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join(" ");
+  const initials = [username, surname]
+    .filter((value) => value.trim())
+    .map((value) => value.trim().charAt(0))
+    .join("")
+    .toLocaleUpperCase();
 
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -67,8 +76,6 @@ const AccountMenu: FC<IProps> = ({
     y: 0,
   });
 
-
-
   const isMenuOnTop: boolean = placement === "top";
   const isMenuAlignedLeft: boolean = alignment === "left";
 
@@ -81,10 +88,7 @@ const AccountMenu: FC<IProps> = ({
 
     const availableWidth: number = window.innerWidth - VIEWPORT_PADDING * 2;
 
-    const menuWidth: number = Math.min(
-      Math.max(triggerRect.width, MENU_MIN_WIDTH),
-      availableWidth,
-    );
+    const menuWidth: number = Math.min(Math.max(triggerRect.width, MENU_MIN_WIDTH), availableWidth);
 
     const menuHeight: number = menuRef.current?.scrollHeight ?? 120;
 
@@ -129,8 +133,6 @@ const AccountMenu: FC<IProps> = ({
 
     setIsOpen((previousValue: boolean): boolean => !previousValue);
   };
-
-
 
   const handleLogout = (): void => {
     setIsOpen(false);
@@ -201,20 +203,14 @@ const AccountMenu: FC<IProps> = ({
           onClick={handleToggleMenu}
           aria-haspopup="menu"
           aria-expanded={isOpen}
-          aria-label={
-            isOpen ? t("accountMenu.closeMenu") : t("accountMenu.openMenu")
-          }
+          aria-label={isOpen ? t("accountMenu.closeMenu") : t("accountMenu.openMenu")}
           className={`liquid-glass-interaction relative z-10 flex cursor-pointer items-center gap-3 rounded-full border px-3 py-2 text-left outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.9] ${
             isOpen
               ? "border-primary/40 ring-4 ring-primary/8"
               : theme === "light"
                 ? "border-black/7 hover:border-black/12"
                 : "border-white/8 hover:border-white/15"
-          } ${
-            theme === "light"
-              ? "text-black"
-              : "text-white"
-          }`}
+          } ${theme === "light" ? "text-black" : "text-white"}`}
         >
           <span
             className={`flex size-9 shrink-0 items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-6 group-hover:scale-110 ${
@@ -223,14 +219,20 @@ const AccountMenu: FC<IProps> = ({
                 : "bg-primary/10 text-primary"
             }`}
           >
-            {initials?<span className="text-xs font-semibold">{initials}</span>:<UserRound size={18} strokeWidth={1.7} />}
+            {initials ? (
+              <span className="text-xs font-semibold">{initials}</span>
+            ) : (
+              <UserRound size={18} strokeWidth={1.7} />
+            )}
           </span>
 
           <span className="min-w-0 flex-1 text-left transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.03]">
             <span className="block max-w-32 truncate text-sm font-semibold">
-              {fullName||email}
+              {fullName || email}
             </span>
-            {fullName&&<span className="block max-w-32 truncate text-[10px] opacity-60">{email}</span>}
+            {fullName && (
+              <span className="block max-w-32 truncate text-[10px] opacity-60">{email}</span>
+            )}
           </span>
 
           <ChevronDown
@@ -250,7 +252,7 @@ const AccountMenu: FC<IProps> = ({
       {createPortal(
         <div
           ref={menuRef}
-        data-glass-theme={theme}
+          data-glass-theme={theme}
           inert={!isOpen}
           role="menu"
           aria-label={t("accountMenu.menuLabel")}
@@ -269,22 +271,30 @@ const AccountMenu: FC<IProps> = ({
               : "pointer-events-none rounded-[22px] opacity-0"
           }`}
         >
-          <div className="account-menu-profile" role="presentation"><div className="account-menu-identity">{fullName&&<strong>{fullName}</strong>}<span className="account-menu-email"><Mail size={13}/><span title={email}>{email}</span></span></div></div>
+          <div className="account-menu-profile" role="presentation">
+            <div className="account-menu-identity">
+              {fullName && <strong>{fullName}</strong>}
+              <span className="account-menu-email">
+                <Mail size={13} />
+                <span title={email}>{email}</span>
+              </span>
+            </div>
+          </div>
           <div className="relative z-10 flex flex-col gap-1">
             <div
               role="group"
-              aria-label={tr('Tema')}
+              aria-label={tr("Tema")}
               className={`border-b px-3 pt-2 pb-3 ${theme === "light" ? "border-black/7 text-black" : "border-white/8 text-white"}`}
             >
-              <span className="mb-2 block text-xs font-semibold opacity-65">
-                {tr('Tema')}
-              </span>
+              <span className="mb-2 block text-xs font-semibold opacity-65">{tr("Tema")}</span>
               <div className="grid grid-cols-3 gap-1">
-                {([
-                  { value: "system", label: "Sistema", icon: Monitor },
-                  { value: "dark", label: "Scuro", icon: Moon },
-                  { value: "light", label: "Chiaro", icon: Sun },
-                ] as const).map(({ value, label, icon: Icon }) => (
+                {(
+                  [
+                    { value: "system", label: "Sistema", icon: Monitor },
+                    { value: "dark", label: "Scuro", icon: Moon },
+                    { value: "light", label: "Chiaro", icon: Sun },
+                  ] as const
+                ).map(({ value, label, icon: Icon }) => (
                   <button
                     key={value}
                     type="button"
@@ -305,8 +315,20 @@ const AccountMenu: FC<IProps> = ({
                 ))}
               </div>
             </div>
-            <button type="button" role="menuitem" onClick={() => {setIsOpen(false);navigate('/settings');}} className={`group flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left text-sm transition-all duration-300 ${theme === 'light' ? 'text-black hover:border-white/65 hover:bg-white/40' : 'text-white hover:border-white/8 hover:bg-white/6'}`}><span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Settings size={17} strokeWidth={1.7}/></span><span className="font-semibold">{t('accountMenu.settings')}</span></button>
-            
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setIsOpen(false);
+                navigate("/settings");
+              }}
+              className={`group flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left text-sm transition-all duration-300 ${theme === "light" ? "text-black hover:border-white/65 hover:bg-white/40" : "text-white hover:border-white/8 hover:bg-white/6"}`}
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Settings size={17} strokeWidth={1.7} />
+              </span>
+              <span className="font-semibold">{t("accountMenu.settings")}</span>
+            </button>
 
             <button
               type="button"

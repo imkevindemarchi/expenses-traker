@@ -41,13 +41,11 @@ const Header: FC<IProps> = ({
   const previousTitleRectRef = useRef<DOMRect | null>(null);
   const titleAnimationRef = useRef<Animation | null>(null);
 
-  const hasSearchInput: boolean =
-    searchValue !== undefined && onSearchChange !== undefined;
+  const hasSearchInput: boolean = searchValue !== undefined && onSearchChange !== undefined;
 
   const hasSearchValue: boolean = Boolean(searchValue);
 
-  const hasActionButton: boolean =
-    ariaLabel !== undefined && onClick !== undefined;
+  const hasActionButton: boolean = ariaLabel !== undefined && onClick !== undefined;
 
   const hasControls: boolean = hasSearchInput || hasActionButton;
 
@@ -73,14 +71,13 @@ const Header: FC<IProps> = ({
   };
 
   useEffect(() => {
-    const mobileMediaQuery: MediaQueryList =
-      window.matchMedia(MOBILE_MEDIA_QUERY);
+    const mobileMediaQuery: MediaQueryList = window.matchMedia(MOBILE_MEDIA_QUERY);
 
     let animationFrameId: number | null = null;
     const updateCompactState = (): void => {
       const shouldBeCompact: boolean =
-        mobileMediaQuery.matches && window.scrollY >
-          (compactRef.current ? SCROLL_RELEASE_THRESHOLD : SCROLL_THRESHOLD);
+        mobileMediaQuery.matches &&
+        window.scrollY > (compactRef.current ? SCROLL_RELEASE_THRESHOLD : SCROLL_THRESHOLD);
 
       if (compactRef.current === shouldBeCompact) return;
       previousTitleRectRef.current = titleRef.current?.getBoundingClientRect() ?? null;
@@ -115,15 +112,21 @@ const Header: FC<IProps> = ({
     const previousRect = previousTitleRectRef.current;
     previousTitleRectRef.current = null;
     titleAnimationRef.current?.cancel();
-    if (!button || !previousRect || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!button || !previousRect || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return;
 
     const nextRect = button.getBoundingClientRect();
     if (!nextRect.width || !nextRect.height) return;
     // Animate the visual difference after the layout changes, without animating layout itself.
-    titleAnimationRef.current = button.animate([
-      { transform: `translate3d(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px, 0) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})` },
-      { transform: "translate3d(0, 0, 0) scale(1)" },
-    ], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+    titleAnimationRef.current = button.animate(
+      [
+        {
+          transform: `translate3d(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px, 0) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})`,
+        },
+        { transform: "translate3d(0, 0, 0) scale(1)" },
+      ],
+      { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    );
     return () => titleAnimationRef.current?.cancel();
   }, [isCompact]);
 
@@ -145,16 +148,12 @@ const Header: FC<IProps> = ({
               aria-label={title}
               data-glass-theme={theme}
               className={`relative mx-auto w-fit max-w-full origin-top-left cursor-pointer overflow-hidden border px-5 text-center transition-[background-color,border-color,box-shadow] duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:cursor-default ${
-                isCompact
-                  ? "glass-surface rounded-full"
-                  : "rounded-none border-transparent"
+                isCompact ? "glass-surface rounded-full" : "rounded-none border-transparent"
               }`}
             >
               <span
                 className={`relative z-10 block truncate text-center font-semibold capitalize text-primary !transition-none ${
-                  isCompact
-                    ? "max-w-full py-2 text-sm"
-                    : "max-w-full py-3 text-2xl sm:text-3xl"
+                  isCompact ? "max-w-full py-2 text-sm" : "max-w-full py-3 text-2xl sm:text-3xl"
                 }`}
               >
                 {title}
@@ -180,15 +179,9 @@ const Header: FC<IProps> = ({
                       placeholder={placeholder}
                       value={searchValue}
                       icon={<Search size={18} strokeWidth={1.8} />}
-                      endIcon={
-                        hasSearchValue ? (
-                          <X size={17} strokeWidth={2} />
-                        ) : undefined
-                      }
+                      endIcon={hasSearchValue ? <X size={17} strokeWidth={2} /> : undefined}
                       onChange={handleSearchChange}
-                      onEndIconClick={
-                        hasSearchValue ? handleClearSearch : undefined
-                      }
+                      onEndIconClick={hasSearchValue ? handleClearSearch : undefined}
                       autoComplete="off"
                       autoFocus
                     />

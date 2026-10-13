@@ -59,16 +59,30 @@ const Modal: FC<IProps> = ({
     dialogRef.current?.focus({ preventScroll: true });
     const containFocus = (event: KeyboardEvent): void => {
       if (event.key !== "Tab" || !dialogRef.current) return;
-      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
-      )).filter(element => element.getClientRects().length > 0 && !element.closest('[inert]'));
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => element.getClientRects().length > 0 && !element.closest("[inert]"));
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (!first) { event.preventDefault(); dialogRef.current.focus(); return; }
-      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
-        event.preventDefault(); last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialogRef.current)) {
-        event.preventDefault(); first.focus();
+      if (!first) {
+        event.preventDefault();
+        dialogRef.current.focus();
+        return;
+      }
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === dialogRef.current)
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === last || document.activeElement === dialogRef.current)
+      ) {
+        event.preventDefault();
+        first.focus();
       }
     };
     dialogRef.current?.addEventListener("keydown", containFocus);
@@ -135,9 +149,7 @@ const Modal: FC<IProps> = ({
           onMouseDown={handleModalClick}
           className={`modal-surface relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
         >
-          <div
-            className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5"
-          >
+          <div className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5">
             <div className="flex items-start justify-between gap-4 sm:gap-5">
               <div className="min-w-0 flex-1">
                 <h2
@@ -177,9 +189,7 @@ const Modal: FC<IProps> = ({
           )}
 
           {footer && (
-            <div
-              className="modal-footer shrink-0 px-5 py-4 sm:px-7 sm:py-5"
-            >
+            <div className="modal-footer shrink-0 px-5 py-4 sm:px-7 sm:py-5">
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 {footer}
               </div>

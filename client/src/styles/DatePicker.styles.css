@@ -66,11 +66,7 @@
 
 .ak-calendar .react-calendar__navigation button:enabled:hover,
 .ak-calendar .react-calendar__navigation button:enabled:focus {
-  background: color-mix(
-    in srgb,
-    var(--calendar-primary) 12%,
-    transparent
-  ) !important;
+  background: color-mix(in srgb, var(--calendar-primary) 12%, transparent) !important;
   color: var(--calendar-primary);
 }
 
@@ -221,9 +217,9 @@
 /* weekends */
 
 .ak-calendar
-  .react-calendar__month-view__days__day--weekend:not(
-    .react-calendar__tile--active
-  ):not(.react-calendar__tile--now) {
+  .react-calendar__month-view__days__day--weekend:not(.react-calendar__tile--active):not(
+    .react-calendar__tile--now
+  ) {
   color: #ef4444;
 }
 
@@ -273,17 +269,16 @@
 
 .ak-calendar .react-calendar__year-view__months .react-calendar__tile::before,
 .ak-calendar .react-calendar__decade-view__years .react-calendar__tile::before,
-.ak-calendar
-  .react-calendar__century-view__decades
-  .react-calendar__tile::before {
+.ak-calendar .react-calendar__century-view__decades .react-calendar__tile::before {
   display: none;
 }
 
 .ak-calendar .react-calendar__year-view__months .react-calendar__tile--active,
 .ak-calendar .react-calendar__decade-view__years .react-calendar__tile--active,
-.ak-calendar
-  .react-calendar__century-view__decades
-  .react-calendar__tile--active {
+.ak-calendar .react-calendar__century-view__decades .react-calendar__tile--active {
   background: var(--calendar-primary) !important;
   color: #ffffff !important;
 }
+
+.date-picker-static .ak-calendar .react-calendar__tile { aspect-ratio: auto; min-height: var(--calendar-day-height, 44px); }
+.date-picker-static { overscroll-behavior: contain; touch-action: manipulation; }

@@ -1,5 +1,12 @@
 import useMobileFloatingVisibility from "../hooks/useMobileFloatingVisibility.hook";
-import { useImperativeHandle, useRef, type ButtonHTMLAttributes, type FC, type ReactNode, type Ref } from "react";
+import {
+  useImperativeHandle,
+  useRef,
+  type ButtonHTMLAttributes,
+  type FC,
+  type ReactNode,
+  type Ref,
+} from "react";
 
 import "../styles/FloatingMonthButton.styles.css";
 import { getLiquidGlassClass } from "../assets/constants";
@@ -7,10 +14,7 @@ import { getLiquidGlassClass } from "../assets/constants";
 // hooks
 import { useTheme } from "../hooks";
 
-interface IProps extends Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  "children"
-> {
+interface IProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
   alwaysVisibleOnMobile?: boolean;
   ariaLabel: string;
   icon: ReactNode;
@@ -31,7 +35,6 @@ const FloatingButton: FC<IProps> = ({
   const visible = useMobileFloatingVisibility(alwaysVisibleOnMobile);
   const buttonRef = useRef<HTMLButtonElement>(null);
   useImperativeHandle(ref, () => buttonRef.current!, []);
-
 
   return (
     <button

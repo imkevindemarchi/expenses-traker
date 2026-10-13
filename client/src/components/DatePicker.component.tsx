@@ -1,4 +1,5 @@
-import '../styles/DatePicker.styles.css';
+import { fitStaticPanel } from "../utils/fitStaticPanel";
+import "../styles/DatePicker.styles.css";
 import {
   type CSSProperties,
   type FC,
@@ -161,8 +162,7 @@ const DatePicker: FC<IProps> = ({
       return null;
     }
 
-    const parsedDate: Date =
-      dateValue instanceof Date ? dateValue : new Date(dateValue);
+    const parsedDate: Date = dateValue instanceof Date ? dateValue : new Date(dateValue);
 
     if (Number.isNaN(parsedDate.getTime())) {
       return null;
@@ -178,7 +178,11 @@ const DatePicker: FC<IProps> = ({
       return "";
     }
 
-    return new Intl.DateTimeFormat(i18n.resolvedLanguage === "it" ? "it-IT" : "en-US", {day:"2-digit",month:"2-digit",year:"numeric"}).format(parsedDate);
+    return new Intl.DateTimeFormat(i18n.resolvedLanguage === "it" ? "it-IT" : "en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(parsedDate);
   };
 
   const updateCalendarPosition = (): void => {
@@ -186,39 +190,19 @@ const DatePicker: FC<IProps> = ({
       return;
     }
 
-    const inputRect: DOMRect =
-      inputContainerRef.current.getBoundingClientRect();
-
-    const calendarHeight: number = calendarRef.current?.offsetHeight ?? 390;
-    const spacing: number = 8;
-    const horizontalSpacing: number = 16;
-    const availableBelow: number = window.innerHeight - inputRect.bottom;
-    const availableAbove: number = inputRect.top;
-
-    const shouldOpenAbove: boolean =
-      availableBelow < calendarHeight && availableAbove > availableBelow;
-
-    const availableWidth: number = window.innerWidth - horizontalSpacing * 2;
-
-    const calendarWidth: number = Math.min(350, availableWidth);
-
-    const maximumLeft: number =
-      window.innerWidth - calendarWidth - horizontalSpacing;
-
-    const left: number = Math.max(
-      horizontalSpacing,
-      Math.min(inputRect.left, maximumLeft),
-    );
-
-    const top: number = shouldOpenAbove
-      ? Math.max(spacing, inputRect.top - calendarHeight - spacing)
-      : inputRect.bottom + spacing;
-
+    const inputRect = inputContainerRef.current.getBoundingClientRect();
+    const viewport = window.visualViewport ?? {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      offsetTop: 0,
+      offsetLeft: 0,
+    };
+    const dayHeight = Math.max(18, Math.min(44, (viewport.height - 150) / 6));
+    const height = calendarRef.current?.offsetHeight ?? 6 * dayHeight + 126;
     setCalendarPosition({
-      top,
-      left,
-      width: calendarWidth,
-    });
+      ...fitStaticPanel(inputRect, 350, height, viewport),
+      "--calendar-day-height": dayHeight + "px",
+    } as TCalendarPosition & { "--calendar-day-height": string });
   };
 
   const handleOpenCalendar = (): void => {
@@ -274,10 +258,17 @@ const DatePicker: FC<IProps> = ({
     updateCalendarPosition();
 
     window.addEventListener("resize", updateCalendarPosition);
+    window.visualViewport?.addEventListener("resize", updateCalendarPosition);
+    window.visualViewport?.addEventListener("scroll", updateCalendarPosition);
+    const observer = new ResizeObserver(updateCalendarPosition);
+    if (calendarRef.current) observer.observe(calendarRef.current);
     window.addEventListener("scroll", updateCalendarPosition, true);
 
     return (): void => {
       window.removeEventListener("resize", updateCalendarPosition);
+      window.visualViewport?.removeEventListener("resize", updateCalendarPosition);
+      window.visualViewport?.removeEventListener("scroll", updateCalendarPosition);
+      observer.disconnect();
       window.removeEventListener("scroll", updateCalendarPosition, true);
     };
   }, [isOpen]);
@@ -290,11 +281,9 @@ const DatePicker: FC<IProps> = ({
         return;
       }
 
-      const clickedInput: boolean =
-        containerRef.current?.contains(target) ?? false;
+      const clickedInput: boolean = containerRef.current?.contains(target) ?? false;
 
-      const clickedCalendar: boolean =
-        calendarRef.current?.contains(target) ?? false;
+      const clickedCalendar: boolean = calendarRef.current?.contains(target) ?? false;
 
       if (!clickedInput && !clickedCalendar) {
         setIsOpen(false);
@@ -375,9 +364,7 @@ const DatePicker: FC<IProps> = ({
           aria-label={t("datePicker.toggleCalendar")}
           className={`relative z-10 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-300 focus:outline-none disabled:cursor-not-allowed ${colorClasses.endIconHover} ${isOpen ? colorClasses.endIconActive : theme === "light" ? "text-gray-500" : "text-gray-400"}`}
         >
-          <span
-            className={`flex transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-          >
+          <span className={`flex transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>
             {endIcon || <ChevronDown size={18} strokeWidth={2} />}
           </span>
         </button>
@@ -405,13 +392,16 @@ const DatePicker: FC<IProps> = ({
             ref={calendarRef}
             role="dialog"
             aria-label={label}
-            className={`liquid-glass-panel liquid-glass-panel--open origin-top fixed z-9999 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border p-3 ${getLiquidGlassClass(theme)} ${theme === "light" ? "text-black" : "text-white"}`}
+            className={`date-picker-static liquid-glass-panel liquid-glass-panel--open origin-top fixed z-9999 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border p-3 ${getLiquidGlassClass(theme)} ${theme === "light" ? "text-black" : "text-white"}`}
             style={
               {
                 top: calendarPosition.top,
                 left: calendarPosition.left,
                 width: calendarPosition.width,
                 "--calendar-primary": colorClasses.calendarColor,
+                "--calendar-day-height": (
+                  calendarPosition as CSSProperties & { "--calendar-day-height"?: string }
+                )["--calendar-day-height"],
               } as CSSProperties
             }
           >

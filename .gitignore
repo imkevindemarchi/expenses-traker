@@ -1,6 +1,16 @@
 node_modules/
 .env
+.env.*
+!.env.example
 dist/
-*.log
+build/
 coverage/
+*.log
+*.tsbuildinfo
+*.tar.gz
 mongodb-data/
+.openai/*.local.json
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

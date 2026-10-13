@@ -19,17 +19,8 @@ if (!hello.setName && hello.msg !== "isdbgrid")
   throw new Error(
     "MongoDB deve usare un replica set. Usa MongoDB Atlas oppure segui la guida locale nel README.",
   );
-await Promise.all([
-  Account.init(),
-  Category.init(),
-  Subcategory.init(),
-  Entry.init(),
-]);
-const server = app.listen(Number(process.env.PORT ?? 4000), () =>
-  console.log(
-    `Expenses Traker disponibile sulla porta ${process.env.PORT ?? 4000}`,
-  ),
-);
+await Promise.all([Account.init(), Category.init(), Subcategory.init(), Entry.init()]);
+const server = app.listen(4000, () => console.log(`Expenses Traker disponibile sulla porta 4000`));
 let stopping = false;
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
@@ -40,3 +31,9 @@ for (const signal of ["SIGINT", "SIGTERM"])
       process.exit(0);
     });
   });
+
+server.on("error", async (error) => {
+  console.error(error);
+  await mongoose.disconnect();
+  process.exit(1);
+});

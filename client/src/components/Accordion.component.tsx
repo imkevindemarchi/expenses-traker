@@ -36,18 +36,14 @@ const Accordion: FC<TAccordionProps> = ({
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-controls={contentId}
-        onClick={(): void =>
-          setIsOpen((currentValue: boolean) => !currentValue)
-        }
+        onClick={(): void => setIsOpen((currentValue: boolean) => !currentValue)}
         className={`group/accordion flex w-full cursor-pointer items-center gap-3 text-left transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ${headerClassName}`}
       >
         <span className="min-w-0 flex-1">{header}</span>
 
         <span
           className={`flex size-9 shrink-0 items-center justify-center rounded-xl border transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 group-hover/accordion:scale-105 ${
-            theme === "light"
-              ? "border-black/6 bg-white/70"
-              : "border-white/7 bg-black/15"
+            theme === "light" ? "border-black/6 bg-white/70" : "border-white/7 bg-black/15"
           } ${chevronClassName}`}
         >
           <ChevronDown

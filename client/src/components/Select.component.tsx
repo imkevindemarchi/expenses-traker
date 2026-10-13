@@ -1,5 +1,5 @@
-import { tr } from '../i18n';
-import { useTranslation } from 'react-i18next';
+import { tr } from "../i18n";
+import { useTranslation } from "react-i18next";
 import {
   type CSSProperties,
   type ReactElement,
@@ -104,8 +104,7 @@ const Select = <TValue extends string = string>({
       MENU_MAX_HEIGHT,
     );
 
-    const centeredLeft: number =
-      triggerRect.left + triggerRect.width / 2 - menuWidth / 2;
+    const centeredLeft: number = triggerRect.left + triggerRect.width / 2 - menuWidth / 2;
 
     const clampedLeft: number = Math.min(
       Math.max(centeredLeft, VIEWPORT_PADDING),
@@ -158,11 +157,7 @@ const Select = <TValue extends string = string>({
     const handleClickOutside = (event: PointerEvent): void => {
       const target: Node = event.target as Node;
 
-      if (
-        isOpen &&
-        !selectRef.current?.contains(target) &&
-        !menuRef.current?.contains(target)
-      ) {
+      if (isOpen && !selectRef.current?.contains(target) && !menuRef.current?.contains(target)) {
         setIsOpen(false);
       }
     };
@@ -236,11 +231,7 @@ const Select = <TValue extends string = string>({
                 : theme === "light"
                   ? "border-black/7 hover:border-black/12"
                   : "border-white/8 hover:border-white/15"
-            } ${
-              theme === "light"
-                ? "bg-black/[0.018] text-black"
-                : "bg-white/2.5 text-white"
-            }`}
+            } ${theme === "light" ? "bg-black/[0.018] text-black" : "bg-white/2.5 text-white"}`}
           >
             {(icon || selectedOption?.icon) && (
               <span
@@ -256,11 +247,7 @@ const Select = <TValue extends string = string>({
 
             <span
               className={`min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium ${
-                selectedOption
-                  ? ""
-                  : theme === "light"
-                    ? "text-gray-400"
-                    : "text-gray-500"
+                selectedOption ? "" : theme === "light" ? "text-gray-400" : "text-gray-500"
               }`}
             >
               {selectedOption?.label ?? translatedPlaceholder}
@@ -334,9 +321,7 @@ const Select = <TValue extends string = string>({
                   )}
 
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">
-                      {option.label}
-                    </span>
+                    <span className="block truncate text-sm font-semibold">{option.label}</span>
 
                     {option.description && (
                       <span

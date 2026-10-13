@@ -1,17 +1,10 @@
-import {
-  type ChangeEvent,
-  type FC,
-  type InputHTMLAttributes,
-  type ReactNode,
-} from "react";
+import { type ChangeEvent, type FC, type InputHTMLAttributes, type ReactNode } from "react";
 
 // hooks
 import { useTheme } from "../hooks";
 
-interface IProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "type" | "onChange" | "value"
-> {
+interface IProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "onChange" | "value"> {
   label: string;
   value: string;
   icon?: ReactNode;
@@ -48,9 +41,7 @@ const InputNumber: FC<IProps> = ({
       return;
     }
 
-    const normalizedValue: string = nextValue
-      .replace(/,/g, ".")
-      .replace(/[^0-9.]/g, "");
+    const normalizedValue: string = nextValue.replace(/,/g, ".").replace(/[^0-9.]/g, "");
 
     const [integerPart = "", ...decimalParts] = normalizedValue.split(".");
     const hasDecimalSeparator: boolean = normalizedValue.includes(".");
@@ -72,9 +63,7 @@ const InputNumber: FC<IProps> = ({
         {label}
       </label>
 
-      <div
-        className={`group relative flex items-center ${compact ? "gap-2" : "gap-3"}`}
-      >
+      <div className={`group relative flex items-center ${compact ? "gap-2" : "gap-3"}`}>
         {icon && (
           <div
             className={`flex shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-all duration-300 group-focus-within:bg-primary group-focus-within:text-white group-focus-within:shadow-md group-focus-within:shadow-primary/20 ${compact ? "size-8" : "size-10"}`}

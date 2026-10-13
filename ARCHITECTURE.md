@@ -5,7 +5,7 @@ expenses-traker/
   client/                   React + TypeScript + Vite + Tailwind
     src/components/         Componenti riutilizzati da Alice & Kevin
     src/App.tsx             Dashboard, movimenti e management
-    src/api.ts              HTTP, formattazione, export CSV
+    src/api/index.ts              HTTP, formattazione, export CSV
   server/                   Node.js + Express + Mongoose
     src/index.js            Configurazione, database, avvio
     src/app.js              API e serving della build
@@ -23,19 +23,19 @@ Le transazioni MongoDB proteggono la creazione degli account con categorie inizi
 
 ## Endpoint
 
-| Metodo | Percorso | Funzione |
-|---|---|---|
-| GET | /api/health | Stato connessione database |
-| POST | /api/auth/register | Crea account e categorie iniziali |
-| POST | /api/auth/login | Accedi |
-| GET | /api/auth/me | Account corrente |
-| POST | /api/auth/logout | Esci e invalida sessioni |
-| GET | /api/categories | Categorie e sottocategorie personali |
-| POST/PATCH/DELETE | /api/categories[/:id] | Gestione categorie |
-| POST/PATCH/DELETE | /api/subcategories[/:id] | Gestione sottocategorie |
-| GET | /api/entries?month=YYYY-MM&page=1&category=ID&kind=expense&q=testo | Lista filtrata, 30 record per pagina |
-| POST/PATCH/DELETE | /api/entries[/:id] | Gestione movimenti |
-| GET | /api/summary?month=YYYY-MM | Totali e grafici mensili |
+| Metodo            | Percorso                                                           | Funzione                             |
+| ----------------- | ------------------------------------------------------------------ | ------------------------------------ |
+| GET               | /api/health                                                        | Stato connessione database           |
+| POST              | /api/auth/register                                                 | Crea account e categorie iniziali    |
+| POST              | /api/auth/login                                                    | Accedi                               |
+| GET               | /api/auth/me                                                       | Account corrente                     |
+| POST              | /api/auth/logout                                                   | Esci e invalida sessioni             |
+| GET               | /api/categories                                                    | Categorie e sottocategorie personali |
+| POST/PATCH/DELETE | /api/categories[/:id]                                              | Gestione categorie                   |
+| POST/PATCH/DELETE | /api/subcategories[/:id]                                           | Gestione sottocategorie              |
+| GET               | /api/entries?month=YYYY-MM&page=1&category=ID&kind=expense&q=testo | Lista filtrata, 30 record per pagina |
+| POST/PATCH/DELETE | /api/entries[/:id]                                                 | Gestione movimenti                   |
+| GET               | /api/summary?month=YYYY-MM                                         | Totali e grafici mensili             |
 
 Esempio di movimento:
 

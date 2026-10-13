@@ -39,11 +39,7 @@ const BigButton: FC<IProps> = ({
       className={`whitespace-nowrap group flex cursor-pointer items-center justify-center gap-3 rounded-full border px-30 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:opacity-70 hover:shadow-lg hover:shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none ${fullWidth ? "w-full self-stretch" : "w-fit self-center"} ${variantClassName} ${className || ""}`}
       {...props}
     >
-      {icon && (
-        <span className="flex shrink-0 items-center justify-center">
-          {icon}
-        </span>
-      )}
+      {icon && <span className="flex shrink-0 items-center justify-center">{icon}</span>}
 
       <span>{children}</span>
 
