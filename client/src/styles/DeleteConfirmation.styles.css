@@ -1,0 +1,30 @@
+/* Shared confirmation treatment. Reuses the existing modal fade timing. */
+.modal-surface[data-modal-intent="danger"] .modal-header,
+.modal-surface[data-modal-intent="danger"] .modal-footer,
+.delete-confirmation-surface,
+.settings-delete-box.is-confirming,
+.routine-builder-danger.is-confirming,
+.editor-danger.is-confirming {
+ position:relative; isolation:isolate;
+ background:linear-gradient(135deg,rgb(239 68 68 / 9%),rgb(239 68 68 / 2%));
+ border-color:rgb(239 68 68 / 25%);
+}
+.modal-surface[data-modal-intent="danger"] .modal-header::after,
+.modal-surface[data-modal-intent="danger"] .modal-footer::after,
+.delete-confirmation-surface::before,
+.settings-delete-box.is-confirming::before,
+.routine-builder-danger.is-confirming::before,
+.editor-danger.is-confirming::before {
+ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; border-radius:inherit;
+ background:radial-gradient(ellipse at top left,rgb(239 68 68 / 14%),transparent 75%);
+ animation:modal-backdrop-enter 240ms cubic-bezier(.2,.65,.3,1) both;
+}
+.delete-confirmation-surface { border:1px solid rgb(239 68 68 / 25%); border-radius:16px; padding:16px; }
+.delete-confirmation-surface .actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+.modal-surface[data-modal-intent="danger"] .modal-header::before { background:linear-gradient(90deg,#ef4444,rgb(239 68 68 / 25%)); box-shadow:0 2px 12px rgb(239 68 68 / 20%); }
+@media(max-width:639px) { .delete-confirmation-surface .actions { flex-direction:column-reverse; } .delete-confirmation-surface .actions > button { width:100%; min-height:44px; } }
+@media(prefers-reduced-motion:reduce) { .delete-confirmation-surface::before,.settings-delete-box.is-confirming::before,.routine-builder-danger.is-confirming::before,.editor-danger.is-confirming::before,.modal-surface[data-modal-intent="danger"] .modal-header::after,.modal-surface[data-modal-intent="danger"] .modal-footer::after { animation:none; } }
+
+.pagination-surface { container-type:inline-size; width:100%; min-width:0; box-sizing:border-box; overflow:visible; }
+@container (max-width:600px) { .pagination-surface > .pagination-mobile-layout { display:flex; } .pagination-surface > .pagination-desktop-layout { display:none; } }
+@container (min-width:601px) { .pagination-surface > .pagination-mobile-layout { display:none; } .pagination-surface > .pagination-desktop-layout { display:flex; } }

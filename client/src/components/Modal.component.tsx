@@ -1,3 +1,4 @@
+import IconButton from "./IconButton.component";
 import {
   type FC,
   type MouseEvent,
@@ -13,6 +14,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import "../styles/Modal.styles.css";
+import "../styles/DeleteConfirmation.styles.css";
 
 import { getLiquidGlassClass } from "../assets/constants";
 
@@ -23,7 +25,7 @@ type TModalMaxWidth = "sm" | "md" | "lg" | "xl";
 
 interface IProps extends PropsWithChildren {
   isOpen: boolean;
-  appearance?: "default" | "choices";
+  appearance?: "default" | "choices" | "entry";
   title: string;
   description?: string;
   /** Optional actions. Omit for dialogs whose content triggers the action directly. */
@@ -31,6 +33,7 @@ interface IProps extends PropsWithChildren {
   isClosable?: boolean;
   closeOnBackdropClick?: boolean;
   maxWidth?: TModalMaxWidth;
+  intent?: "default" | "danger";
   onClose: () => void;
 }
 
@@ -51,6 +54,7 @@ const Modal: FC<IProps> = ({
   isClosable = true,
   closeOnBackdropClick = true,
   maxWidth = "md",
+  intent = "default",
   onClose,
 }) => {
   const { theme } = useTheme();
@@ -59,7 +63,7 @@ const Modal: FC<IProps> = ({
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useLayoutEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -153,21 +157,23 @@ const Modal: FC<IProps> = ({
     <div
       role="presentation"
       data-modal-theme={theme}
+      data-modal-appearance={appearance}
       onMouseDown={handleBackdropClick}
       className="modal-backdrop fixed inset-0 z-1000 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 sm:py-8"
     >
-      <div className="flex min-h-full items-center justify-center">
+      <div className="modal-placement flex min-h-full items-center justify-center">
         <div
           role="dialog"
           ref={dialogRef}
           tabIndex={-1}
           data-modal-theme={theme}
           data-modal-size={maxWidth}
+          data-modal-intent={intent}
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
           onMouseDown={handleModalClick}
-          className={`modal-surface ${appearance === "choices" ? "modal-choice-surface" : ""} ${getLiquidGlassClass(theme)} relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
+          className={`modal-surface ${appearance === "choices" ? "modal-choice-surface" : appearance === "entry" ? "modal-entry-surface" : ""} ${getLiquidGlassClass(theme)} relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
         >
           <div className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5">
             <div className="flex items-start justify-between gap-4 sm:gap-5">
@@ -189,16 +195,16 @@ const Modal: FC<IProps> = ({
                 )}
               </div>
 
-              {appearance !== "choices" && <button
+              {appearance !== "choices" && <IconButton
                 type="button"
                 onClick={onClose}
                 disabled={!isClosable}
                 aria-label={t("modal.close")}
                 title={t("modal.close")}
-                className="modal-close flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-[color,background-color,transform,box-shadow] duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
+
               >
                 <X size={18} strokeWidth={2} />
-              </button>}
+              </IconButton>}
             </div>
           </div>
 

@@ -1,5 +1,6 @@
-import Select from "../components/Select.component";
-import { CURRENCIES } from "../contexts/currency.context";
+import SectionNavigation from "../components/SectionNavigation.component";
+import CurrencyPicker from "../components/CurrencyPicker.component";
+import "../styles/DeleteConfirmation.styles.css";
 import { useMoney } from "../contexts/currency.context";
 import { useState, useId, type FormEvent } from "react";
 import { useNavigate } from "react-router";
@@ -29,10 +30,16 @@ import "../styles/Settings.styles.css";
 import Input from "../components/Input.component";
 import Button from "../components/Button.component";
 import FloatingButton from "../components/FloatingButton.component";
-function SettingsSection({header,children,ariaLabel,collapsible=false}:{header:ReactNode;children:ReactNode;ariaLabel:string;collapsible?:boolean;className?:string;contentClassName?:string}) {
- const [open,setOpen]=useState(!collapsible);
- const contentId=useId();
- return <section className="settings-section" aria-label={ariaLabel}><div className="settings-section-heading">{header}</div><div className="settings-section-body">{collapsible && <button type="button" className="settings-password-toggle" aria-expanded={open} aria-controls={contentId} onClick={()=>setOpen(value=>!value)}>{ariaLabel}<ChevronDown className={open ? "is-open" : ""} size={18} /></button>}<div id={contentId} hidden={!open} className={collapsible ? "settings-password-fields" : undefined}>{children}</div></div></section>;
+function SettingsSection({ id, header, children, ariaLabel, collapsible = false }: { id: string; header: ReactNode; children: ReactNode; ariaLabel: string; collapsible?: boolean }) {
+  const [open, setOpen] = useState(!collapsible);
+  const contentId = useId();
+  return <section id={id} tabIndex={-1} className="settings-section" aria-label={ariaLabel}>
+    {header}
+    <div className="settings-section-body">
+      {collapsible && <Button unstyled type="button" className="settings-password-toggle" aria-expanded={open} aria-controls={contentId} onClick={() => setOpen(value => !value)}>{ariaLabel}<ChevronDown className={open ? "is-open" : ""} size={18} /></Button>}
+      <div id={contentId} hidden={!open} className={collapsible ? "settings-password-fields" : undefined}>{children}</div>
+    </div>
+  </section>;
 }
 export default function SettingsPage({
   user,
@@ -153,12 +160,14 @@ export default function SettingsPage({
     }
   };
   return (
-    <>
+    <div className="subscription-settings-page">
       <div className="settings-layout">
-      <nav className="settings-navigation" aria-label={tr("Impostazioni")}>
-        <p className="settings-navigation-label">{tr("Impostazioni")}</p>
-        {["Profilo", "Valuta e budget mensile", "Password", "Gestione dati"].map((label,index)=><a key={label} href={`#expense-settings-${index}`}>{tr(label)}</a>)}
-      </nav>
+      <SectionNavigation label={tr("Impostazioni")} sections={[
+        { id: "expense-settings-0", title: tr("Profilo"), icon: <UserRound size={18} /> },
+        { id: "expense-settings-1", title: tr("Valuta e budget mensile"), icon: <Settings size={18} /> },
+        { id: "expense-settings-2", title: tr("Password"), icon: <LockKeyhole size={18} /> },
+        { id: "expense-settings-3", title: tr("Gestione dati"), icon: <Database size={18} /> },
+      ]} />
       <form
         id="account-settings-form"
         className="settings-sections settings-redesign"
@@ -166,15 +175,11 @@ export default function SettingsPage({
         noValidate
         aria-busy={busy}
       >
-        <div className="settings-identity"><span className="settings-avatar" aria-hidden="true">{user.name.slice(0,1).toUpperCase()}{user.surname?.slice(0,1).toUpperCase()}</span><div><strong>{[user.name,user.surname].filter(Boolean).join(" ")}</strong><p>{user.email}</p></div></div>
-        <div id="expense-settings-0" className="settings-panel">
-          <SettingsSection
-            className="settings-accordion"
-            contentClassName="settings-accordion-content"
+        <SettingsSection id="expense-settings-0"
             ariaLabel={tr("Profilo")}
             header={
-              <div className="settings-heading">
-                <span className="round-icon">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon">
                   <UserRound size={22} />
                 </span>
                 <div>
@@ -187,7 +192,7 @@ export default function SettingsPage({
             }
           >
             <div className="form-stack">
-              <div className="settings-profile-fields">
+              <div className="settings-profile-fields grid">
                 <Input
                   id="account-name"
                   label={tr("Nome")}
@@ -214,16 +219,12 @@ export default function SettingsPage({
                 />
               </div>
             </div>
-          </SettingsSection>
-        </div>
-        <div id="expense-settings-1" className="settings-panel">
-          <SettingsSection
-            className="settings-accordion"
-            contentClassName="settings-accordion-content"
+        </SettingsSection>
+        <SettingsSection id="expense-settings-1"
             ariaLabel={tr("Valuta e budget mensile")}
             header={
-              <div className="settings-heading">
-                <span className="round-icon">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon">
                   <Settings size={22} />
                 </span>
                 <div>
@@ -238,14 +239,7 @@ export default function SettingsPage({
             }
           >
             <div className="form-stack">
-              <Select
-                id="account-currency"
-                label={tr("Valuta dell’account")}
-                value={currency}
-                options={CURRENCIES.map((value) => ({ value, label: tr("currency." + value) }))}
-                onChange={setCurrency}
-                disabled={busy}
-              />
+              <CurrencyPicker value={currency} onChange={setCurrency} disabled={busy || deleteBusy || exportBusy} />
               <p className="muted">
                 {tr("Cambiare valuta non converte gli importi già registrati.")}
               </p>
@@ -276,17 +270,13 @@ export default function SettingsPage({
                 </p>
               )}
             </div>
-          </SettingsSection>
-        </div>
-        <div id="expense-settings-2" className="settings-panel">
-          <SettingsSection
-            className="settings-accordion"
-            contentClassName="settings-accordion-content"
+        </SettingsSection>
+        <SettingsSection id="expense-settings-2"
             ariaLabel={tr("Cambia password")}
             collapsible
             header={
-              <div className="settings-heading">
-                <span className="round-icon">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon">
                   <LockKeyhole size={22} />
                 </span>
                 <div>
@@ -319,7 +309,7 @@ export default function SettingsPage({
                 <Input
                   key={key}
                   id={`account-${key}`}
-                  aria-label={tr(label)}
+                  label={tr(label)}
                   placeholder={tr(label)}
                   type={showPasswords ? "text" : "password"}
                   autoComplete={autoComplete}
@@ -336,16 +326,12 @@ export default function SettingsPage({
                 />
               ))}
             </div>
-          </SettingsSection>
-        </div>
-        <div id="expense-settings-3" className="settings-panel">
-          <SettingsSection
-            className="settings-accordion"
-            contentClassName="settings-accordion-content"
+        </SettingsSection>
+        <SettingsSection id="expense-settings-3"
             ariaLabel={tr("I tuoi dati")}
             header={
-              <div className="settings-heading">
-                <span className="round-icon">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon">
                   <Database size={22} />
                 </span>
                 <div>
@@ -454,8 +440,7 @@ export default function SettingsPage({
                 </p>
               )}
             </div>
-          </SettingsSection>
-        </div>
+        </SettingsSection>
         {error && (
           <p className="form-error settings-panel" role="alert">
             {tr(error)}
@@ -463,8 +448,8 @@ export default function SettingsPage({
         )}
       </form>
       </div>
-      <div className="mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
-        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={24} />} onClick={()=>navigate("/")} disabled={busy || deleteBusy || exportBusy} />
+      <div className="settings-floating-actions mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
+        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={()=>navigate("/")} disabled={busy || deleteBusy || exportBusy} />
         <FloatingButton
           type="submit"
           form="account-settings-form"
@@ -473,6 +458,6 @@ export default function SettingsPage({
           disabled={busy || deleteBusy || exportBusy}
         />
       </div>
-    </>
+    </div>
   );
 }

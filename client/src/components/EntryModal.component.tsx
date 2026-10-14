@@ -1,18 +1,20 @@
 import { useTranslation } from "react-i18next";
 import DatePicker from "./DatePicker.component";
-import { useContext, useState, type FormEvent } from "react";
+import { useContext, useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
   Search,
   Check,
   ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { tr, locale } from "../i18n";
 import { CurrencyContext } from "../contexts/currency.context";
 import type { Category, Subcategory } from "../types";
 import Modal from "./Modal.component";
 import Stepper from "./Stepper.component";
+import "../styles/EntryModal.styles.css";
 import Button from "./Button.component";
 import Input from "./Input.component";
 import InputNumber from "./InputNumber.component";
@@ -49,6 +51,10 @@ export default function EntryModal({
   const [categorySearch, setCategorySearch] = useState("");
   const [subcategorySearch, setSubcategorySearch] = useState("");
   const [error, setError] = useState("");
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (!editing && step > 0 && step < 3) stepHeading.current?.focus({ preventScroll: true });
+  }, [editing, step]);
   const update = (patch: Partial<EntryForm>) => {
     setForm((value) => ({ ...value, ...patch }));
     setError("");
@@ -114,6 +120,7 @@ export default function EntryModal({
     return (
       <Modal
         isOpen
+        appearance="entry"
         title={tr("Modifica movimento")}
         maxWidth="md"
         isClosable={!busy}
@@ -124,6 +131,7 @@ export default function EntryModal({
               {tr("Annulla")}
             </Button>
             <Button
+              className="entry-save"
               type="submit"
               form="entry-edit"
               disabled={busy || !form.category || !form.subcategory || !categories.length}
@@ -139,7 +147,7 @@ export default function EntryModal({
           onSubmit={submit}
           noValidate
           aria-busy={busy}
-          className="entry-edit-form"
+          className={`entry-edit-form ${form.kind}`}
         >
           <fieldset disabled={busy} className="entry-edit-fields">
             <legend className="sr-only">{tr("Modifica movimento")}</legend>
@@ -260,58 +268,78 @@ export default function EntryModal({
   return (
     <Modal
       isOpen
-      appearance={step === 0 ? "choices" : "default"}
+      appearance="entry"
       title={tr("Nuovo movimento")}
+      description={step === 0 ? tr("Ogni movimento, al posto giusto.") : undefined}
       maxWidth="lg"
       isClosable={!busy}
       onClose={onClose}
-      footer={step === 0 ? undefined :
-        <>
-          <Button
-            variant="secondary"
-            disabled={busy}
-            onClick={() => (step ? move(step - 1) : onClose())}
-            icon={step ? <ChevronLeft size={17} /> : undefined}
-          >
-            {tr(step ? "Indietro" : "Annulla")}
-          </Button>
-          {step === 3 && <Button
-            type="submit"
-            form="entry-wizard"
-            disabled={
-              busy ||
-              !form.category ||
-              !form.subcategory ||
-              !categories.length
-            }
-            icon={<Check size={17} />}
-          >
-            {tr(busy ? "Salvataggio…" : "Salva movimento")}
-          </Button>}
-        </>
+      footer={
+        step === 0 ? undefined : (
+          <>
+            <Button
+              variant="secondary"
+              disabled={busy}
+              onClick={() => (step ? move(step - 1) : onClose())}
+              icon={step ? <ChevronLeft size={17} /> : undefined}
+            >
+              {tr(step ? "Indietro" : "Annulla")}
+            </Button>
+            {step === 3 && (
+              <Button
+                className={`entry-save ${form.kind}`}
+                type="submit"
+                form="entry-wizard"
+                disabled={busy || !form.category || !form.subcategory || !categories.length}
+                icon={<Check size={17} />}
+              >
+                {tr(
+                  busy ? "Salvataggio…" : form.kind === "income" ? "Salva entrata" : "Salva spesa",
+                )}
+              </Button>
+            )}
+          </>
+        )
       }
     >
       <form
         id="entry-wizard"
         onSubmit={submit}
         noValidate
-        className="entry-wizard"
+        className={`entry-wizard entry-flow ${chosenKind ? form.kind : "entry-neutral"}`}
         aria-busy={busy}
       >
-        {step > 0 && <Stepper
-          steps={["Tipo", "Categoria", "Sottocategoria", "Importo"].map((label) => ({
-            label: tr(label),
-          }))}
-          activeStep={step}
-          ariaLabel={tr("Passaggi del movimento")}
-        />}
-        <fieldset disabled={busy} className="entry-step">
+        {step > 0 && (
+          <>
+            <div className="entry-context">
+              <span className="entry-kind-badge">
+                {form.kind === "expense" ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
+                {tr(form.kind === "expense" ? "Spesa" : "Entrata")}
+              </span>
+              {step > 1 && <span className="entry-context-category">{selectedCategory?.name}</span>}
+            </div>
+            <Stepper
+              steps={["Tipo", "Categoria", "Sottocategoria", "Importo"].map((label) => ({
+                label: tr(label),
+              }))}
+              activeStep={step}
+              ariaLabel={tr("Passaggi del movimento")}
+              accent="var(--entry-accent)"
+              disabled={busy}
+              onStepClick={move}
+            />
+          </>
+        )}
+        <fieldset key={step} disabled={busy} className="entry-step entry-step-panel">
           <legend className="sr-only">
             {tr(["Tipo", "Categoria", "Sottocategoria", "Importo e data"][step])}
           </legend>
           {step === 0 && (
             <>
-              <h3 className="sr-only">{tr("Che movimento vuoi registrare?")}</h3>
+              <div className="entry-intro">
+                <h3>{tr("Che movimento vuoi registrare?")}</h3>
+                <p>{tr("Scegli il tipo e aggiungi i dettagli in pochi tocchi.")}</p>
+              </div>
               <div className="entry-create-kind" role="group" aria-label={tr("Tipo")}>
                 {(["expense", "income"] as const).map((kind) => (
                   <button
@@ -334,9 +362,19 @@ export default function EntryModal({
                         <ArrowDownLeft size={22} />
                       )}
                     </span>
-                    <span className="entry-kind-label">
-                      {tr(kind === "expense" ? "Spesa" : "Entrata")}
+                    <span className="entry-kind-copy">
+                      <span className="entry-kind-label">
+                        {tr(kind === "expense" ? "Spesa" : "Entrata")}
+                      </span>
+                      <span className="entry-kind-description">
+                        {tr(
+                          kind === "expense"
+                            ? "Acquisti, bollette e uscite"
+                            : "Stipendio, rimborsi e incassi",
+                        )}
+                      </span>
                     </span>
+                    <ChevronRight className="entry-kind-next" size={20} aria-hidden="true" />
                   </button>
                 ))}
               </div>
@@ -344,10 +382,12 @@ export default function EntryModal({
           )}
           {(step === 1 || step === 2) && (
             <>
-              <h3>{tr(step === 1 ? "Scegli la categoria" : "Scegli la sottocategoria")}</h3>
-              {step === 2 && <p className="muted">{selectedCategory?.name}</p>}
+              <h3 ref={stepHeading} tabIndex={-1}>
+                {tr(step === 1 ? "Scegli la categoria" : "Scegli la sottocategoria")}
+              </h3>
               <Input
                 id="entry-category-search"
+                aria-label={tr(step === 1 ? "Cerca categoria…" : "Cerca sottocategoria…")}
                 placeholder={tr(step === 1 ? "Cerca categoria…" : "Cerca sottocategoria…")}
                 icon={<Search size={18} />}
                 value={search}
@@ -407,6 +447,8 @@ export default function EntryModal({
                 <div>
                   <InputNumber
                     id="entry-amount"
+                    className="entry-amount-field"
+                    suffix={currency}
                     autoFocus
                     label={tr("Importo {{currency}}", { currency })}
                     value={form.amount}

@@ -1,0 +1,283 @@
+/* Transaction composer: shared dialog chrome, thumb-friendly choices. */
+.modal-entry-surface {
+  --entry-accent: var(--expense-color);
+}
+.modal-entry-surface:has(.entry-flow.income, .entry-edit-form.income) {
+  --entry-accent: var(--income-color);
+}
+.modal-entry-surface .entry-flow {
+  gap: 20px;
+}
+.modal-entry-surface .entry-edit-kind {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+}
+.modal-entry-surface .entry-edit-kind .entry-kind-option {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px;
+  flex-direction: row;
+  gap: 10px;
+  border: 1px solid var(--modal-line);
+  border-radius: 18px;
+  background: var(--kind-fill);
+}
+.modal-entry-surface .entry-edit-kind .entry-kind-option[aria-pressed="true"] {
+  border-color: var(--kind-color);
+}
+.modal-entry-surface .entry-edit-kind .entry-kind-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+}
+.modal-entry-surface .entry-edit-kind .entry-kind-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.modal-entry-surface .entry-edit-kind .entry-kind-label {
+  color: var(--kind-color);
+}
+.modal-entry-surface .entry-step h3 {
+  text-align: left;
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.entry-intro p {
+  margin-top: 8px;
+  color: var(--modal-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.modal-entry-surface .entry-create-kind {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 4px 0 8px;
+}
+.modal-entry-surface .entry-kind-option.expense {
+  --kind-color: var(--expense-color);
+  --kind-fill: color-mix(in srgb, var(--expense-color) 9%, var(--modal-canvas));
+}
+.modal-entry-surface .entry-kind-option.income {
+  --kind-color: var(--income-color);
+  --kind-fill: color-mix(in srgb, var(--income-color) 9%, var(--modal-canvas));
+}
+.modal-entry-surface .entry-create-kind .entry-kind-option {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 112px;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--kind-color) 22%, transparent);
+  border-radius: 24px;
+  background: linear-gradient(
+    125deg,
+    var(--kind-fill),
+    color-mix(in srgb, var(--kind-fill) 55%, var(--modal-canvas))
+  );
+  box-shadow:
+    0 4px 16px color-mix(in srgb, var(--kind-color) 6%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+  text-align: left;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.modal-entry-surface .entry-create-kind .entry-kind-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--kind-color) 12%, var(--kind-fill));
+  border: 1px solid color-mix(in srgb, var(--kind-color) 18%, transparent);
+  box-shadow: none;
+}
+.modal-entry-surface .entry-create-kind .entry-kind-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.entry-kind-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  flex: 1;
+}
+.modal-entry-surface .entry-create-kind .entry-kind-label {
+  font-size: 21px;
+  color: var(--kind-color);
+  font-weight: 700;
+}
+.entry-kind-description {
+  color: var(--modal-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.entry-kind-next {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+.modal-entry-surface .entry-create-kind .entry-kind-option[aria-pressed="true"] {
+  border-color: var(--kind-color);
+}
+.modal-entry-surface .entry-create-kind .entry-kind-icon::after {
+  display: none;
+}
+.modal-entry-surface .entry-create-kind .entry-kind-option:active {
+  transform: scale(0.98);
+}
+.entry-context {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.entry-kind-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--entry-accent);
+  background: color-mix(in srgb, var(--entry-accent) 10%, var(--modal-canvas));
+}
+.entry-context-category {
+  font-size: 13px;
+  color: var(--modal-muted);
+  overflow-wrap: anywhere;
+}
+.modal-entry-surface .entry-pills {
+  max-height: none;
+  gap: 10px;
+  padding: 4px;
+}
+.modal-entry-surface .entry-pill {
+  min-height: 48px;
+  font-size: 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--modal-ink) 3%, var(--modal-canvas));
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+.modal-entry-surface .entry-pill[aria-pressed="true"] {
+  color: var(--entry-accent);
+  border-color: var(--entry-accent);
+  background: color-mix(in srgb, var(--entry-accent) 9%, var(--modal-canvas));
+}
+.modal-entry-surface .entry-pill:active {
+  transform: scale(0.97);
+}
+.modal-entry-surface .entry-pill i {
+  width: 10px;
+  height: 10px;
+}
+.modal-entry-surface .entry-amount-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+.entry-amount-field {
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--entry-accent) 22%, var(--modal-line));
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--entry-accent) 5%, var(--modal-canvas));
+}
+.entry-amount-field input {
+  font-size: clamp(28px, 8vw, 42px);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  color: var(--entry-accent);
+  padding-block: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.entry-amount-field .input-number-suffix {
+  color: var(--entry-accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+.modal-entry-surface .entry-date-summary {
+  gap: 16px;
+}
+.modal-entry-surface .entry-date-summary .muted {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.modal-entry-surface .modal-actions .entry-save {
+  flex: 1;
+  background: var(--entry-accent);
+  color: #fff;
+  border-radius: 16px;
+  padding-inline: 16px;
+}
+.entry-step-panel {
+  animation: entry-step-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes entry-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (hover: hover) {
+  .modal-entry-surface .entry-create-kind .entry-kind-option:hover {
+    transform: translateY(-2px);
+    border-color: var(--kind-color);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--kind-color) 12%, transparent);
+  }
+  .modal-entry-surface .entry-pill:hover {
+    border-color: var(--entry-accent);
+    background: color-mix(in srgb, var(--entry-accent) 6%, var(--modal-canvas));
+  }
+}
+@media (min-width: 480px) {
+  .modal-entry-surface .entry-create-kind {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .modal-entry-surface .entry-create-kind .entry-kind-option {
+    min-height: 200px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .entry-kind-next {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+  }
+  .entry-kind-copy {
+    flex: initial;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-entry-surface .entry-kind-option:hover .entry-kind-icon,
+  .modal-entry-surface .entry-kind-option:active .entry-kind-icon {
+    transform: none;
+  }
+  .entry-step-panel {
+    animation: none;
+  }
+  .modal-entry-surface .entry-kind-option,
+  .modal-entry-surface .entry-kind-icon,
+  .modal-entry-surface .entry-pill {
+    transition: none;
+  }
+  .modal-entry-surface .entry-create-kind .entry-kind-option:hover,
+  .modal-entry-surface .entry-kind-option:active,
+  .modal-entry-surface .entry-pill:active {
+    transform: none;
+  }
+}

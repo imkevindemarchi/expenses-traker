@@ -71,10 +71,10 @@ export default function PeriodPicker({
       offsetLeft: 0,
       offsetTop: 0,
     };
-    setPosition({
-      ...fitStaticPanel(rect, 344, panel.current?.offsetHeight || 340, viewport, "below", 12, 8, "left"),
-      overflow: "hidden",
-    });
+    const height = panel.current?.offsetHeight || 340;
+    const next = fitStaticPanel(rect, 344, height, viewport, "below", 12, 8, "left");
+    const originX = Math.max(0, Math.min(next.width, rect.left + rect.width / 2 - next.left));
+    setPosition({ ...next, transformOrigin: `${originX}px ${next.top < rect.top ? height : 0}px`, overflow:"hidden" });
   }, []);
   const close = () => {
     setOpen(false);

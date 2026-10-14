@@ -1,6 +1,9 @@
-import { type FC, useMemo } from "react";
+import "../styles/DeleteConfirmation.styles.css";
+import { type FC, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+import { pageLimit, pageLimitOptions, paginationState } from "../utils/pagination.util";
 
 // assets
 import { getLiquidGlassClass } from "../assets/constants";
@@ -31,7 +34,7 @@ interface IProps {
 type TPaginationItem = number | "ellipsis-start" | "ellipsis-end";
 
 const Pagination: FC<IProps> = ({
-  pagination,
+  pagination: inputPagination,
   limitOptions = [10, 20, 50],
   justSelect = false,
   mobileJustSelect = false,
@@ -46,7 +49,13 @@ const Pagination: FC<IProps> = ({
   const { theme } = useTheme();
   const { t } = useTranslation();
 
-  const paginationItems: TPaginationItem[] = useMemo(() => {
+  const pagination = paginationState(inputPagination);
+  const safeLimitOptions = pageLimitOptions(limitOptions, pagination.limit);
+  useEffect(() => {
+    if (inputPagination.limit !== pagination.limit) onLimitChange(pagination.limit);
+    else if (inputPagination.page !== pagination.page) onPageChange(pagination.page);
+  }, [inputPagination.limit, inputPagination.page, pagination.limit, pagination.page, onLimitChange, onPageChange]);
+  const paginationItems: TPaginationItem[] = (() => {
     const totalPages: number = pagination.total_pages;
     const currentPage: number = pagination.page;
 
@@ -79,7 +88,7 @@ const Pagination: FC<IProps> = ({
       "ellipsis-end",
       totalPages,
     ];
-  }, [pagination.page, pagination.total_pages]);
+  })();
 
   const firstVisibleItem: number =
     pagination.total_items === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
@@ -106,7 +115,7 @@ const Pagination: FC<IProps> = ({
   };
 
   const handlePageClick = (page: number): void => {
-    if (page === pagination.page) {
+    if (!Number.isInteger(page) || page < 1 || page > pagination.total_pages || page === pagination.page) {
       return;
     }
 
@@ -118,7 +127,7 @@ const Pagination: FC<IProps> = ({
       return;
     }
 
-    onLimitChange(limit);
+    onLimitChange(pageLimit(limit));
   };
 
   const renderLimitSelect = (id: string) => (
@@ -126,7 +135,7 @@ const Pagination: FC<IProps> = ({
       id={id}
       name={id}
       value={pagination.limit.toString()}
-      options={limitOptions.map((option: number) => ({
+      options={safeLimitOptions.map((option: number) => ({
         value: option.toString(),
         label: option.toString(),
       }))}
@@ -155,9 +164,9 @@ const Pagination: FC<IProps> = ({
         className={`${mobileJustSelect ? "hidden sm:block" : "block"} ${flush ? "mt-0 pt-0" : "mt-0 pt-0 sm:mt-5 sm:pt-5"} ${className}`}
       >
         <div
-          className={`pagination-surface relative overflow-visible rounded-[26px] p-2 ${`${getLiquidGlassClass(theme)} border`}`}
+          className={`pagination-surface relative min-w-0 max-w-full overflow-visible rounded-[26px] p-2 ${`${getLiquidGlassClass(theme)} border`}`}
         >
-          <div className="flex w-full items-center justify-between gap-3 sm:hidden">
+          <div className="pagination-mobile-layout flex w-full min-w-0 items-center justify-between gap-3 sm:hidden">
             <button
               type="button"
               disabled={!pagination.has_previous_page}
@@ -183,7 +192,7 @@ const Pagination: FC<IProps> = ({
             </button>
           </div>
 
-          <div className="hidden w-full min-w-0 items-center justify-between gap-2 sm:flex">
+          <div className="pagination-desktop-layout hidden w-full min-w-0 items-center justify-between gap-2 sm:flex">
             <div
               className={`${compactDesktop ? "hidden xl:flex" : "hidden lg:flex"} min-w-0 items-center rounded-[18px] px-3 py-2.5`}
             >
@@ -200,7 +209,7 @@ const Pagination: FC<IProps> = ({
                 <p
                   className={`mt-0.5 text-sm font-semibold ${theme === "light" ? "text-black" : "text-white"}`}
                 >
-                  {pagination.page} / {pagination.total_pages}
+                  {pagination.page} / {Math.max(1, pagination.total_pages)}
                 </p>
               </div>
             </div>

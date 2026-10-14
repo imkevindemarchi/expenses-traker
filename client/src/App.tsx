@@ -1,3 +1,4 @@
+import IconButton from "./components/IconButton.component";
 import AuthShell from "./components/AuthShell.component";
 import Bootloader from "./components/Bootloader.component";
 import { OverviewSkeleton, CategoriesSkeleton } from "./components/LoadingSkeleton.component";
@@ -646,17 +647,7 @@ export default function App() {
                             {categories.map((category) => (
                               <Shadowbox key={category._id} className="category-card">
                                 <div className="category-header">
-                                  <span
-                                    className="category-orb"
-                                    style={{
-                                      background: category.color + "20",
-                                      color: category.color,
-                                    }}
-                                  >
-                                    <Shapes size={22} />
-                                  </span>
-                                  <h2>{category.name}</h2>
-                                  <button
+<IconButton
                                     className="quiet-icon"
                                     aria-label={tr("Modifica {{name}}", { name: category.name })}
                                     onClick={() =>
@@ -670,8 +661,8 @@ export default function App() {
                                     }
                                   >
                                     <Pencil size={16} />
-                                  </button>
-                                  <button
+                                  </IconButton>
+                                  <IconButton
                                     className="quiet-icon danger"
                                     aria-label={tr("Elimina {{name}}", { name: category.name })}
                                     onClick={() =>
@@ -680,10 +671,22 @@ export default function App() {
                                         label: category.name,
                                       })
                                     }
-                                  >
+                                   variant="danger">
                                     <Trash2 size={16} />
-                                  </button>
-                                </div>
+                                  </IconButton>
+
+
+                                  <span
+                                    className="category-orb"
+                                    style={{
+                                      background: category.color + "20",
+                                      color: category.color,
+                                    }}
+                                  >
+                                    <Shapes size={22} />
+                                  </span>
+                                  <h2>{category.name}</h2>
+                                  </div>
                                 <Accordion
                                   defaultOpen
                                   ariaLabel={tr("Sottocategorie di {{name}}", {
@@ -707,11 +710,7 @@ export default function App() {
                                     .filter((item) => item.category === category._id)
                                     .map((item) => (
                                       <div className="subcategory" key={item._id}>
-                                        <span>
-                                          <i style={{ background: category.color }} />
-                                          {item.name}
-                                        </span>
-                                        <button
+<IconButton
                                           className="quiet-icon"
                                           aria-label={tr("Modifica {{name}}", { name: item.name })}
                                           onClick={() =>
@@ -725,8 +724,8 @@ export default function App() {
                                           }
                                         >
                                           <Pencil size={15} />
-                                        </button>
-                                        <button
+                                        </IconButton>
+                                        <IconButton
                                           className="quiet-icon danger"
                                           aria-label={tr("Elimina {{name}}", { name: item.name })}
                                           onClick={() =>
@@ -735,10 +734,16 @@ export default function App() {
                                               label: item.name,
                                             })
                                           }
-                                        >
+                                         variant="danger">
                                           <Trash2 size={15} />
-                                        </button>
-                                      </div>
+                                        </IconButton>
+
+
+                                        <span>
+                                          <i style={{ background: category.color }} />
+                                          {item.name}
+                                        </span>
+                                        </div>
                                     ))}
                                   <Button
                                     variant="secondary"
@@ -821,7 +826,7 @@ export default function App() {
                 </footer>
               </main>
               {page !== "settings" && page !== "annual" && (
-                <div className="mobile-floating-actions floating-actions flex items-center gap-3">
+                <div className="mobile-floating-actions floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 max-[359px]:gap-2">
                   {page === "entries" && (
                     <>
                       <FilterFloatingMenu
@@ -991,8 +996,8 @@ export default function App() {
                   </form>
                 )}
               </Modal>
-              <Modal
-                isOpen={Boolean(deleteAction)}
+              <Modal intent="danger"
+        isOpen={Boolean(deleteAction)}
                 title={tr("Conferma eliminazione")}
                 description={tr("Vuoi eliminare “{{name}}”?", { name: deleteAction?.label ?? "" })}
                 maxWidth="sm"
@@ -1190,6 +1195,7 @@ function Empty({ text }: { text: string }) {
 function Skeleton() {
   return (
     <div role="status" aria-label={tr("Caricamento movimenti")} className="skeleton-list">
+        <div className="movement-skeleton-heading" aria-hidden="true">{[0,1,2,3].map(i=><span key={i} className="skeleton-block" />)}</div>
       {[1, 2, 3].map((value) => (
         <div key={value} className="movement-skeleton-row" aria-hidden="true"><div className="movement-skeleton-actions"><span className="skeleton-block" /><span className="skeleton-block" /></div><span className="skeleton-block movement-skeleton-icon" /><div><span className="skeleton-block skeleton-label" /><span className="skeleton-block skeleton-bar" /></div><span className="skeleton-block movement-skeleton-amount" /></div>
       ))}

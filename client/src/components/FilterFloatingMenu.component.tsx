@@ -71,7 +71,11 @@ const FilterFloatingMenu = <TValue extends string>({
           viewport,
           placement === "side" && viewport.width < 640 ? "side" : "above",
         );
-      setPosition(previous => previous.left === nextPosition.left && previous.top === nextPosition.top && previous.width === nextPosition.width ? previous : nextPosition);
+      const anchor = container.current.getBoundingClientRect();
+      const originX = Math.max(0, Math.min(nextPosition.width, anchor.left + anchor.width / 2 - nextPosition.left));
+      const originY = Math.max(0, Math.min(height, anchor.top + anchor.height / 2 - nextPosition.top));
+      const positioned = { ...nextPosition, transformOrigin: `${originX}px ${originY}px`, "--menu-close-offset": nextPosition.top < anchor.top ? "8px" : "-8px" } as CSSProperties;
+      setPosition(previous => previous.left === positioned.left && previous.top === positioned.top && previous.width === positioned.width && previous.transformOrigin === positioned.transformOrigin ? previous : positioned);
     };
     const close = () => {
       (onClose ?? onToggle)();
@@ -129,7 +133,7 @@ const FilterFloatingMenu = <TValue extends string>({
       {createPortal(
         <div
           ref={panel}
-          style={{ ...position, maxHeight: "calc(100dvh - 24px)", overflowY: "auto" }}
+          style={{ ...position, transform: isOpen ? "translateY(0) scale(1)" : "translateY(var(--menu-close-offset, 8px)) scale(0.96)", maxHeight: "calc(100dvh - 24px)", overflowY: "auto" }}
           aria-hidden={!isOpen}
           inert={!isOpen}
           className={`liquid-glass-panel ${isOpen ? "liquid-glass-panel--open pointer-events-auto opacity-100" : "liquid-glass-panel--closed pointer-events-none opacity-0"} fixed z-9999 overflow-hidden rounded-[22px] border p-1.5 transition-[background-color,border-color,box-shadow,opacity,transform] duration-300 ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/70 bg-white/50 shadow-[0_18px_50px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]" : "border-white/10 bg-black/70 shadow-[0_20px_55px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]"}`}

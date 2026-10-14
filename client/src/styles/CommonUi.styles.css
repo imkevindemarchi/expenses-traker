@@ -211,3 +211,19 @@ body {
 .ui-refresh .pagination-surface button { min-height: 44px; min-width: 44px; }
 .ui-refresh .input-number-suffix { color: var(--muted); font-size: 14px; padding-right: 8px; }
 .ui-refresh .page-section { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+
+/* Adapt to available space, including tablet panes beside a sidebar. */
+.pagination-surface { container-type:inline-size; contain-intrinsic-inline-size:600px; width:100%; min-width:0; box-sizing:border-box; overflow:visible; }
+@container (max-width:600px) {
+ .pagination-surface > .pagination-mobile-layout { display:flex; }
+ .pagination-surface > .pagination-desktop-layout { display:none; }
+}
+@container (min-width:601px) {
+ .pagination-surface > .pagination-mobile-layout { display:none; }
+ .pagination-surface > .pagination-desktop-layout { display:flex; }
+}
+@media(max-width:639px) {
+ .ui-refresh .pagination-surface { padding-block:16px; }
+ .pagination-mobile-layout { min-height:52px; }
+ .pagination-mobile-layout > button { flex:0 0 44px; width:44px; height:44px; }
+}

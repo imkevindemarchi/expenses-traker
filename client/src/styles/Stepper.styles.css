@@ -1,0 +1,69 @@
+/* Shared compact wizard progress: every step remains visible on a phone. */
+.compact-stepper {
+  --stepper-muted: #536171;
+  --stepper-line: rgb(24 32 40 / 12%);
+  width: 100%;
+}
+.compact-stepper[data-stepper-theme="dark"] {
+  --stepper-muted: #b8c4cf;
+  --stepper-line: rgb(255 255 255 / 14%);
+}
+.compact-stepper ol {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.compact-stepper li {
+  min-width: 0;
+}
+.compact-stepper-item {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--stepper-muted);
+  border: 0;
+  background: none;
+  padding: 0;
+}
+button.compact-stepper-item:not(:disabled) {
+  cursor: pointer;
+}
+.compact-stepper-item:focus-visible {
+  outline: 2px solid var(--stepper-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.compact-stepper-track {
+  width: 100%;
+  height: 4px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--stepper-line);
+}
+.compact-stepper .is-reached .compact-stepper-track {
+  background: var(--stepper-accent);
+}
+.compact-stepper-item[aria-current="step"] {
+  color: var(--stepper-accent);
+}
+.compact-stepper-label {
+  overflow-wrap: anywhere;
+}
+.compact-stepper-description {
+  font-size: 10px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 480px) {
+  .compact-stepper-item {
+    font-size: 12px;
+  }
+}

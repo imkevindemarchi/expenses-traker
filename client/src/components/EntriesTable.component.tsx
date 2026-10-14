@@ -1,3 +1,4 @@
+import IconButton from "./IconButton.component";
 import { useContext } from "react";
 import { CurrencyContext, useMoney } from "../contexts/currency.context";
 import { useTranslation } from "react-i18next";
@@ -36,13 +37,13 @@ export default function EntriesTable({
   return (
     <table className="entry-table">
       <caption className="sr-only">{tr("I tuoi movimenti")}</caption>
-      <thead className="sr-only">
+      <thead className="sr-only lg:not-sr-only">
         <tr>
           <th scope="col">{tr("Azioni")}</th>
 <th scope="col">{tr("Tipo")}</th>
           <th scope="col">{tr("Movimento")}</th>
           <th scope="col">{tr("Importo {{currency}}", { currency })}</th>
-          
+
         </tr>
       </thead>
       <tbody>
@@ -54,20 +55,20 @@ export default function EntriesTable({
           return (
             <tr key={entry._id} className="entry-row">
               <td className="entry-actions">
-                <button
+                <IconButton
                   className="quiet-icon"
                   onClick={() => onEdit(entry)}
                   aria-label={tr("Modifica {{name}}", { name: displayTitle })}
-                >
+                 size="compact">
                   <Pencil size={16} />
-                </button>
-                <button
+                </IconButton>
+                <IconButton
                   className="quiet-icon danger"
                   onClick={() => onDelete(entry)}
                   aria-label={tr("Elimina {{name}}", { name: displayTitle })}
-                >
+                 size="compact" variant="danger">
                   <Trash2 size={16} />
-                </button>
+                </IconButton>
               </td>
 <td>
                 <span
@@ -98,7 +99,7 @@ export default function EntriesTable({
                   {money(entry.amountCents)}
                 </strong>
               </td>
-              
+
             </tr>
           );
         })}

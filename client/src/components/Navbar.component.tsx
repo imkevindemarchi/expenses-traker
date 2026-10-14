@@ -14,6 +14,7 @@ const logoDarkImg = "/expenses-logo.png?v=2";
 import { getLiquidGlassClass } from "../assets/constants";
 import "../styles/LiquidGlass.styles.css";
 import "../styles/Navbar.styles.css";
+import "../styles/NavbarGlass.styles.css";
 
 // components
 import AccountMenu from "./AccountMenu.component";
@@ -114,7 +115,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
             onClick={handleCloseSidebar}
             data-nav-theme={theme}
             className={({ isActive }: { isActive: boolean }) =>
-              `nav-tab-card group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] opacity-100 ${isActive ? "border-primary/60 bg-primary text-white shadow-[0_18px_42px_rgba(189,150,82,0.28),inset_0_1px_0_rgba(255,255,255,0.28)]" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
+              `nav-tab-card group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] opacity-100 ${isActive ? "border-primary/60 bg-primary text-white" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
             }
           >
             {({ isActive }: { isActive: boolean }) => (

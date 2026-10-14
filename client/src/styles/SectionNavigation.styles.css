@@ -1,0 +1,77 @@
+.settings-navigation { display: none; min-width: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.settings-navigation { --ink:#242126; --muted:#706a72; --line:rgb(36 33 38 / 11%); --accent-ink:var(--color-primary); --soft:rgb(36 33 38 / 4%); }
+[data-theme="dark"] .settings-navigation { --ink:#f4f2f5; --muted:#aaa4af; --line:rgb(244 242 245 / 12%); --soft:rgb(244 242 245 / 4%); }
+@media (min-width: 1024px) {
+  .settings-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: sticky;
+    top: 140px;
+    padding: 12px 20px 20px 0;
+    border-right: 1px solid var(--line);
+  }
+  .settings-navigation-label {
+    padding: 0 14px 14px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .settings-navigation a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 50px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: none;
+  }
+  .settings-navigation a > svg {
+    flex-shrink: 0;
+  }
+  .settings-navigation a:hover {
+    color: var(--ink);
+    background: var(--soft);
+  }
+  .settings-navigation a[aria-current] {
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+  .settings-navigation a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+  .settings-navigation-dot {
+    width: 5px;
+    height: 5px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: currentColor;
+    margin-left: auto;
+    opacity: 0;
+  }
+  .settings-navigation a[aria-current] .settings-navigation-dot {
+    opacity: 1;
+  }
+  .settings-navigation .settings-navigation-danger {
+    margin-top: 18px;
+    color: #ef4444;
+  }
+  .settings-navigation .settings-navigation-danger[aria-current] {
+    color: #ef4444;
+    background: rgb(239 68 68 / 0.08);
+  }
+}
+.settings-navigation a, .settings-navigation a * { transition: none; }
+.settings-navigation a > span:not(.settings-navigation-dot) { min-width: 0; overflow-wrap: anywhere; }
+.settings-navigation-icon { display: flex; flex-shrink: 0; }
+.settings-navigation-icon > svg { width: 18px; height: 18px; }
+
+.settings-navigation a > svg { width:18px; height:18px; }

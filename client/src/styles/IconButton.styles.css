@@ -1,0 +1,20 @@
+/* Shared icon-only actions. Legacy contextual classes retain layout only. */
+button.icon-button.icon-button.icon-button.icon-button {
+  display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; min-width:0; min-height:0; flex:0 0 44px;
+  padding:0; border:0; border-radius:12px; background:transparent; box-shadow:none; color:var(--table-muted,var(--muted,var(--icon-muted,#706a72))); cursor:pointer;
+  transition:background-color 200ms,color 200ms,scale 200ms;
+}
+[data-theme="dark"] button.icon-button { --icon-muted:#aaa4af; }
+button.icon-button.icon-button.icon-button.icon-button[data-icon-size="compact"] { width:32px; height:32px; flex-basis:32px; border-radius:10px; }
+button.icon-button .icon-button-content { display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+button.icon-button.icon-button .icon-button-content > svg { width:18px; height:18px; stroke-width:2; }
+button.icon-button.icon-button[data-icon-size="compact"] .icon-button-content > svg { width:15px; height:15px; }
+button.icon-button.icon-button.icon-button.icon-button:hover:not(:disabled) { background:color-mix(in srgb,var(--color-primary) 8%,transparent); color:var(--color-primary); }
+button.icon-button.icon-button.icon-button.icon-button[data-icon-variant="danger"]:hover:not(:disabled) { background:rgb(239 68 68 / 8%); color:var(--color-danger,#ef4444); }
+button.icon-button.icon-button.icon-button.icon-button[data-icon-variant="success"] { color:var(--color-success,#22c55e); }
+button.icon-button.icon-button.icon-button.icon-button:active:not(:disabled) { scale:.94; }
+button.icon-button.icon-button.icon-button.icon-button:focus-visible { outline:2px solid var(--color-primary); outline-offset:2px; }
+button.icon-button.icon-button.icon-button.icon-button:disabled { cursor:not-allowed; opacity:.4; }
+.icon-button-rotate:hover:not(:disabled) .icon-button-content { transform:rotate(90deg); }
+.icon-button-content { transition:transform 200ms; }
+@media(prefers-reduced-motion:reduce) { button.icon-button, .icon-button-content { transition:none; } }

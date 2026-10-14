@@ -262,9 +262,7 @@
 .settings-layout {
   min-width: 0;
 }
-.settings-navigation {
-  display: none;
-}
+
 .settings-section,
 #settings-delete {
   scroll-margin-top: 160px;
@@ -288,72 +286,6 @@
     max-width: 1120px;
     margin-inline: auto;
   }
-  .settings-navigation {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    position: sticky;
-    top: 140px;
-    padding: 12px 20px 20px 0;
-    border-right: 1px solid var(--line);
-  }
-  .settings-navigation-label {
-    padding: 0 14px 14px;
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-  }
-  .settings-navigation a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 50px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: none;
-  }
-  .settings-navigation a > svg {
-    flex-shrink: 0;
-  }
-  .settings-navigation a:hover {
-    color: var(--ink);
-    background: var(--soft);
-  }
-  .settings-navigation a[aria-current] {
-    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-    color: var(--accent-ink);
-    font-weight: 600;
-  }
-  .settings-navigation a:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 3px;
-  }
-  .settings-navigation-dot {
-    width: 5px;
-    height: 5px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: currentColor;
-    margin-left: auto;
-    opacity: 0;
-  }
-  .settings-navigation a[aria-current] .settings-navigation-dot {
-    opacity: 1;
-  }
-  .settings-navigation .settings-navigation-danger {
-    margin-top: 18px;
-    color: #ef4444;
-  }
-  .settings-navigation .settings-navigation-danger[aria-current] {
-    color: #ef4444;
-    background: rgb(239 68 68 / 0.08);
-  }
   .settings-layout .settings-redesign {
     max-width: none;
   }
@@ -370,10 +302,24 @@
   }
 }
 
-.settings-redesign .settings-heading { display:flex; align-items:flex-start; gap:12px; }
-.settings-redesign .settings-heading .round-icon { background:transparent; width:24px; height:24px; border:0; box-shadow:none; }
-.settings-redesign .settings-panel { padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
-.settings-panel { scroll-margin-top:150px; }
-
 .settings-navigation a, .settings-navigation a * { transition: none; }
 .settings-navigation a > span:not(.settings-navigation-dot) { min-width: 0; overflow-wrap: anywhere; }
+
+.subscription-settings-page { --ink:#242126; --muted:#706a72; --line:rgb(36 33 38 / 11%); --accent-ink:var(--color-primary); --soft:rgb(36 33 38 / 4%); --canvas:var(--color-canvas-light); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; max-width:1120px; margin-inline:auto; }
+[data-theme="dark"] .subscription-settings-page { --ink:#f4f2f5; --muted:#aaa4af; --line:rgb(244 242 245 / 12%); --soft:rgb(244 242 245 / 4%); --canvas:var(--color-canvas-dark); }
+.subscription-settings-page .settings-redesign { color:var(--ink); }
+.subscription-settings-page .settings-currency-notice { padding-block:18px; font-size:14px; color:var(--muted); }
+.subscription-settings-page > div:first-child { margin-bottom:24px; }
+.subscription-settings-page .sk-settings { padding-bottom:110px; }
+.subscription-settings-page [data-skeleton-layout="editor-settings"] { min-width:0; width:100%; }
+
+.subscription-settings-page .muted { color:var(--muted); }
+.subscription-settings-page .form-stack { display:grid; gap:22px; }
+
+/* Match AliceAndKevin while using this app’s canvas tokens. */
+.subscription-settings-page { --canvas: #faf9f9; }
+[data-theme="dark"] .subscription-settings-page { --canvas: #151416; }
+.subscription-settings-page .settings-redesign { gap: 0; }
+.subscription-settings-page .settings-section-heading h2 { letter-spacing: normal; }
+.subscription-settings-page .settings-section-heading p { margin-top: 6px; }
+.subscription-settings-page .settings-section-icon { background: transparent; border: 0; width: auto; height: auto; }
