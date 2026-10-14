@@ -54,10 +54,23 @@
 @media (max-width: 639px) {
   .ui-refresh .charts-grid .breakdown { flex-direction: column; align-items: stretch; }
   .ui-refresh .donut { align-self: center; }
-  .ui-refresh .entry-table .entry-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: start; gap: 10px; }
-  .ui-refresh .entry-table .entry-actions { grid-column: 2 / -1; justify-content: flex-end; width: auto; margin-left: 0; }
+  .ui-refresh .entry-table .entry-row { display: grid; grid-template-columns: 44px 36px minmax(0, 1fr); align-items: start; gap: 10px; }
+  .ui-refresh .entry-table .entry-actions { grid-column: 1; grid-row:1 / span 2; flex-direction:column; justify-content:flex-start; width:44px; margin:0; }
+  .ui-refresh .entry-table .entry-row > td:nth-child(2) { grid-column:2; grid-row:1; }
+  .ui-refresh .entry-table .entry-description { grid-column:3; grid-row:1; }
+  .ui-refresh .entry-table .entry-amount { grid-column:3; grid-row:2; }
   .ui-refresh .entry-table .entry-icon { width: 36px; height: 36px; }
   .ui-refresh .filters { grid-template-columns: minmax(0, 1fr); }
   .ui-refresh .filters > div:first-child { grid-column: auto; }
+}
+.ui-refresh .skeleton-list > .movement-skeleton-row { display:grid; grid-template-columns:96px 40px minmax(0,1fr) 96px; }
+.ui-refresh .movement-skeleton-row > .movement-skeleton-actions { display:flex; flex:initial; gap:8px; }
+.movement-skeleton-actions > span { width:44px; height:44px; border-radius:12px; }
+@media(max-width:639px) {
+ .ui-refresh .skeleton-list > .movement-skeleton-row { grid-template-columns:44px 36px minmax(0,1fr); }
+ .movement-skeleton-actions { grid-column:1; grid-row:1 / span 2; flex-direction:column; }
+ .movement-skeleton-icon { grid-column:2; grid-row:1; }
+ .movement-skeleton-row > div:not(.movement-skeleton-actions) { grid-column:3; grid-row:1; }
+ .movement-skeleton-amount { grid-column:3; grid-row:2; }
 }
 .app-main.ui-refresh { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }

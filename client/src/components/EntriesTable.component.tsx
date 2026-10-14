@@ -38,10 +38,11 @@ export default function EntriesTable({
       <caption className="sr-only">{tr("I tuoi movimenti")}</caption>
       <thead className="sr-only">
         <tr>
-          <th scope="col">{tr("Tipo")}</th>
+          <th scope="col">{tr("Azioni")}</th>
+<th scope="col">{tr("Tipo")}</th>
           <th scope="col">{tr("Movimento")}</th>
           <th scope="col">{tr("Importo {{currency}}", { currency })}</th>
-          <th scope="col">{tr("Azioni")}</th>
+          
         </tr>
       </thead>
       <tbody>
@@ -52,7 +53,23 @@ export default function EntriesTable({
             tr("Categoria");
           return (
             <tr key={entry._id} className="entry-row">
-              <td>
+              <td className="entry-actions">
+                <button
+                  className="quiet-icon"
+                  onClick={() => onEdit(entry)}
+                  aria-label={tr("Modifica {{name}}", { name: displayTitle })}
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  className="quiet-icon danger"
+                  onClick={() => onDelete(entry)}
+                  aria-label={tr("Elimina {{name}}", { name: displayTitle })}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </td>
+<td>
                 <span
                   className="entry-icon"
                   style={{
@@ -81,22 +98,7 @@ export default function EntriesTable({
                   {money(entry.amountCents)}
                 </strong>
               </td>
-              <td className="entry-actions">
-                <button
-                  className="quiet-icon"
-                  onClick={() => onEdit(entry)}
-                  aria-label={tr("Modifica {{name}}", { name: displayTitle })}
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  className="quiet-icon danger"
-                  onClick={() => onDelete(entry)}
-                  aria-label={tr("Elimina {{name}}", { name: displayTitle })}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </td>
+              
             </tr>
           );
         })}

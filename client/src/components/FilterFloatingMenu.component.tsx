@@ -48,6 +48,7 @@ const FilterFloatingMenu = <TValue extends string>({
     [columns, setColumns] = useState(1);
   useLayoutEffect(() => {
     if (!isOpen) return;
+    let frame = 0;
     const update = () => {
       if (!container.current) return;
       const viewport = window.visualViewport ?? {
@@ -63,15 +64,14 @@ const FilterFloatingMenu = <TValue extends string>({
         nextColumns === columns
           ? (panel.current?.offsetHeight ?? options.length * 48 + 12)
           : Math.ceil(options.length / nextColumns) * 48 + 12;
-      setPosition(
-        fitStaticPanel(
+      const nextPosition = fitStaticPanel(
           container.current.getBoundingClientRect(),
           304,
           Math.min(height, viewport.height - 24),
           viewport,
           placement === "side" && viewport.width < 640 ? "side" : "above",
-        ),
-      );
+        );
+      setPosition(previous => previous.left === nextPosition.left && previous.top === nextPosition.top && previous.width === nextPosition.width ? previous : nextPosition);
     };
     const close = () => {
       (onClose ?? onToggle)();
@@ -90,21 +90,26 @@ const FilterFloatingMenu = <TValue extends string>({
         container.current?.querySelector("button")?.focus();
       }
     };
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => { frame = 0; update(); });
+    };
     update();
-    const observer = new ResizeObserver(update);
+    const observer = new ResizeObserver(scheduleUpdate);
     if (panel.current) observer.observe(panel.current);
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
-    window.visualViewport?.addEventListener("resize", update);
-    window.visualViewport?.addEventListener("scroll", update);
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("scroll", scheduleUpdate, true);
+    window.visualViewport?.addEventListener("resize", scheduleUpdate);
+    window.visualViewport?.addEventListener("scroll", scheduleUpdate);
     document.addEventListener("pointerdown", outside, true);
     document.addEventListener("keydown", escape);
     return () => {
+      cancelAnimationFrame(frame);
       observer.disconnect();
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
-      window.visualViewport?.removeEventListener("resize", update);
-      window.visualViewport?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("scroll", scheduleUpdate, true);
+      window.visualViewport?.removeEventListener("resize", scheduleUpdate);
+      window.visualViewport?.removeEventListener("scroll", scheduleUpdate);
       document.removeEventListener("pointerdown", outside, true);
       document.removeEventListener("keydown", escape);
     };

@@ -37,7 +37,7 @@
   }
 }
 .month-picker-panel.liquid-glass-panel--open {
-  animation: liquid-glass-pop-open 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: liquid-glass-pop-open 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
   transform-origin: top center;
 }
 

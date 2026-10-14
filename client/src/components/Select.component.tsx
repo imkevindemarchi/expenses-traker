@@ -6,6 +6,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -124,15 +125,21 @@ const Select = <TValue extends string = string>({
 
     setIsMenuAbove(shouldOpenAbove);
 
-    setMenuOrigin({
+    setMenuOrigin(previous => {
+      const next = {
       x: Math.min(Math.max(triggerCenterX - clampedLeft, 0), menuWidth),
       y: shouldOpenAbove ? menuHeight : 0,
+      };
+      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
     });
 
-    setMenuStyle({
+    setMenuStyle(previous => {
+      const next = {
       left: clampedLeft,
       top: clampedTop,
       width: menuWidth,
+      };
+      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
     });
   }, [openUpwardOnMobile]);
 
@@ -177,19 +184,25 @@ const Select = <TValue extends string = string>({
     };
   }, [isOpen]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen) {
       return;
     }
 
+    let frame = 0;
+    const schedulePosition = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => { frame = 0; updateMenuPosition(); });
+    };
     updateMenuPosition();
 
-    window.addEventListener("resize", updateMenuPosition);
-    window.addEventListener("scroll", updateMenuPosition, true);
+    window.addEventListener("resize", schedulePosition);
+    window.addEventListener("scroll", schedulePosition, true);
 
     return (): void => {
-      window.removeEventListener("resize", updateMenuPosition);
-      window.removeEventListener("scroll", updateMenuPosition, true);
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedulePosition);
+      window.removeEventListener("scroll", schedulePosition, true);
     };
   }, [isOpen, updateMenuPosition]);
 

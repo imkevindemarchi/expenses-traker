@@ -20,7 +20,7 @@ if (!hello.setName && hello.msg !== "isdbgrid")
     "MongoDB deve usare un replica set. Usa MongoDB Atlas oppure segui la guida locale nel README.",
   );
 await Promise.all([Account.init(), Category.init(), Subcategory.init(), Entry.init()]);
-const server = app.listen(4000, () => console.log(`Expenses Traker disponibile sulla porta 4000`));
+const server = app.listen(4001, () => console.log(`Expenses Traker disponibile sulla porta 4001`));
 let stopping = false;
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {

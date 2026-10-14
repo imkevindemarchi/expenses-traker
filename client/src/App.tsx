@@ -1191,7 +1191,7 @@ function Skeleton() {
   return (
     <div role="status" aria-label={tr("Caricamento movimenti")} className="skeleton-list">
       {[1, 2, 3].map((value) => (
-        <div key={value} className="movement-skeleton-row" aria-hidden="true"><span className="skeleton-block movement-skeleton-icon" /><div><span className="skeleton-block skeleton-label" /><span className="skeleton-block skeleton-bar" /></div><span className="skeleton-block movement-skeleton-amount" /></div>
+        <div key={value} className="movement-skeleton-row" aria-hidden="true"><div className="movement-skeleton-actions"><span className="skeleton-block" /><span className="skeleton-block" /></div><span className="skeleton-block movement-skeleton-icon" /><div><span className="skeleton-block skeleton-label" /><span className="skeleton-block skeleton-bar" /></div><span className="skeleton-block movement-skeleton-amount" /></div>
       ))}
     </div>
   );

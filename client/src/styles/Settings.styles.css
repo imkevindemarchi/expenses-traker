@@ -314,11 +314,9 @@
     border-radius: 14px;
     color: var(--muted);
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
-    transition:
-      color 0.18s,
-      background-color 0.18s;
+    transition: none;
   }
   .settings-navigation a > svg {
     flex-shrink: 0;
@@ -330,7 +328,7 @@
   .settings-navigation a[aria-current] {
     background: color-mix(in srgb, var(--color-primary) 10%, transparent);
     color: var(--accent-ink);
-    font-weight: 700;
+    font-weight: 600;
   }
   .settings-navigation a:focus-visible {
     outline: 2px solid var(--color-primary);
@@ -376,3 +374,6 @@
 .settings-redesign .settings-heading .round-icon { background:transparent; width:24px; height:24px; border:0; box-shadow:none; }
 .settings-redesign .settings-panel { padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
 .settings-panel { scroll-margin-top:150px; }
+
+.settings-navigation a, .settings-navigation a * { transition: none; }
+.settings-navigation a > span:not(.settings-navigation-dot) { min-width: 0; overflow-wrap: anywhere; }

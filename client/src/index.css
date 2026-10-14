@@ -297,21 +297,8 @@ input:-webkit-autofill:active {
 
 /* Independent scale preserves each panel's positioning and transform origin. */
 @keyframes liquid-glass-pop-open {
-  0% {
-    opacity: 0;
-    scale: 0.2 0.14;
-  }
-  55% {
-    opacity: 1;
-    scale: 1.018 0.985;
-  }
-  78% {
-    scale: 0.996 1.006;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
-  }
+  from { opacity:0; scale:.97; }
+  to { opacity:1; scale:1; }
 }
 
 .liquid-glass-panel {
@@ -323,7 +310,7 @@ input:-webkit-autofill:active {
 }
 
 .liquid-glass-panel--open {
-  animation: liquid-glass-pop-open 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: liquid-glass-pop-open 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .liquid-glass-panel--closed {
@@ -352,15 +339,8 @@ input:-webkit-autofill:active {
 }
 
 @keyframes liquid-glass-inline-open {
-  0% {
-    scale: 0.97 0.94;
-  }
-  65% {
-    scale: 1.005 1.008;
-  }
-  100% {
-    scale: 1;
-  }
+  from { opacity:0; scale:.97; }
+  to { opacity:1; scale:1; }
 }
 
 .liquid-glass-inline {
@@ -371,7 +351,7 @@ input:-webkit-autofill:active {
 }
 
 .liquid-glass-inline--open {
-  animation: liquid-glass-inline-open 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: liquid-glass-inline-open 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1042,8 +1022,8 @@ input:-webkit-autofill:active {
 }
 
 .operation-loader { position:fixed; inset:0; z-index:2147483647; display:grid; place-items:center; padding:24px; cursor:wait; background:rgb(0 0 0 / 12%); }
-.operation-loader-card { display:flex; align-items:center; gap:16px; padding:24px 30px; border-radius:28px; border:1px solid rgb(255 255 255 / 35%); background:rgb(255 255 255 / 75%); color:#242126; backdrop-filter:blur(24px); box-shadow:0 20px 60px rgb(0 0 0 / 15%); }
-[data-theme="dark"] .operation-loader-card { background:rgb(30 28 34 / 80%); color:#fff; }
+.operation-loader-card.glass-surface { display:flex; align-items:center; gap:16px; padding:24px 30px; border-radius:28px; border:1px solid var(--glass-rim); color:#242126; box-shadow:var(--glass-shadow); }
+[data-theme="dark"] .operation-loader-card { color:#fff; }
 .operation-loader-card svg { width:28px; height:28px; color:var(--color-primary); animation:operation-spin 1s linear infinite; }
 @keyframes operation-spin { to { transform:rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { .operation-loader-card svg { animation:none; } }
@@ -1055,3 +1035,11 @@ input:-webkit-autofill:active {
 .movement-skeleton-row > div { flex:1; min-width:0; display:grid; gap:12px; }
 .movement-skeleton-icon { width:44px; height:44px; border-radius:14px; flex-shrink:0; }
 .movement-skeleton-amount { width:72px; height:20px; flex-shrink:0; }
+
+/* Compact menus move on the compositor without a spring or delayed shine. */
+.liquid-glass-panel { transition-property:opacity,scale,transform; transition-duration:160ms; transition-timing-function:cubic-bezier(.2,.8,.2,1); }
+.liquid-glass-panel--open::after { animation:none; }
+
+@media(prefers-reduced-motion:reduce) { .liquid-glass-panel { animation:none; transition:none; } }
+
+.liquid-glass-inline--open::after { animation:none; }
