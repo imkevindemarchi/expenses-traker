@@ -282,3 +282,27 @@
 
 .date-picker-static .ak-calendar .react-calendar__tile { aspect-ratio: auto; min-height: var(--calendar-day-height, 44px); }
 .date-picker-static { overscroll-behavior: contain; touch-action: manipulation; }
+
+/* The menu supplies the shared blur; only month/year cells add glass wrappers. */
+.date-picker-static .ak-calendar .react-calendar__tile { isolation: isolate; }
+.date-picker-static .ak-calendar .react-calendar__tile:not(.react-calendar__month-view__days__day):not(.react-calendar__tile--active):not(.react-calendar__tile--now)::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid var(--glass-rim);
+  border-radius: 12px;
+  background: var(--glass-fill);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+.date-picker-static .ak-calendar .react-calendar__tile--hasActive::after {
+  border-color: var(--calendar-primary);
+}
+.date-picker-static .ak-calendar .react-calendar__navigation { gap: 6px; }
+.date-picker-static .ak-calendar .react-calendar__navigation button {
+  border: 1px solid var(--glass-rim) !important;
+  background: var(--glass-fill) !important;
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  border-radius: 12px;
+}

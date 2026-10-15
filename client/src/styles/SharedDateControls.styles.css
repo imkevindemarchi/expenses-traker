@@ -15,9 +15,9 @@
 .month-picker .month-step:hover { background: var(--soft); }
 .month-picker-panel.liquid-glass-panel,
 .date-picker-static.liquid-glass-panel {
-  border: 0;
-  background: var(--canvas);
-  box-shadow: 0 12px 40px rgb(0 0 0 / 12%);
+  border: 1px solid var(--glass-rim);
+  background: var(--glass-fill);
+  box-shadow: var(--glass-shadow);
 }
 .month-picker-panel .month-tile { border: 0; background: transparent; box-shadow: none; }
 .month-picker-panel .month-tile:hover { background: var(--soft); }
@@ -38,3 +38,19 @@
 .ui-refresh .month-picker { border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 2px; }
 .ui-refresh .month-picker .month-step { width: 44px; height: 44px; }
 .ui-refresh .month-picker .month-picker-icon { border: 0; background: transparent; box-shadow: none; }
+
+/* Match the calendar's inner glass wrappers without additional blur layers. */
+.month-picker-panel .month-grid .month-tile:not(.is-selected),
+.month-picker-panel .month-year-bar,
+.month-picker-panel .month-year-bar .month-step,
+.month-picker-panel .month-current {
+  border: 1px solid var(--glass-rim);
+  border-radius: 12px;
+  background: var(--glass-fill);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+.month-picker-panel .month-grid .month-tile.is-current:not(.is-selected) { border-color: var(--color-primary); }
+.month-picker-panel .month-grid .month-tile:not(.is-selected):hover,
+.month-picker-panel .month-current:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--glass-fill));
+}

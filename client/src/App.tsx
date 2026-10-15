@@ -177,7 +177,8 @@ export default function App() {
   }, [theme]);
   useEffect(() => {
     let active = true;
-    api<{ user: User }>("/auth/me")
+    const controller = new AbortController();
+    api<{ user: User }>("/auth/me", { signal: controller.signal })
       .then((data) => {
         if (active) setUser(data.user);
       })
@@ -202,6 +203,7 @@ export default function App() {
     window.addEventListener("session-expired", expired);
     return () => {
       active = false;
+      controller.abort();
       window.removeEventListener("session-expired", expired);
     };
   }, []);
@@ -235,7 +237,7 @@ export default function App() {
     const controller = new AbortController();
     setLoading(true);
     const timer = window.setTimeout(() => {
-      const query = new URLSearchParams({ month, page: String(listPage), limit: String(pageLimit) });
+      const query = new URLSearchParams({ month, page: String(page === "dashboard" ? 1 : listPage), limit: String(page === "dashboard" ? 5 : pageLimit) });
       if (page === "entries") {
         if (filterCategory) query.set("category", filterCategory);
         if (filterKind) query.set("kind", filterKind);
@@ -244,7 +246,7 @@ export default function App() {
       api<{ entries: Entry[]; total: number; totalPages: number }>(`/entries?${query}`, { signal: controller.signal })
         .then(list => {
           if (!active) return;
-          if (listPage > Math.max(1, list.totalPages)) { setListPage(Math.max(1, list.totalPages)); return; }
+          if (page === "entries" && listPage > Math.max(1, list.totalPages)) { setListPage(Math.max(1, list.totalPages)); return; }
           setEntries(list.entries); setTotalEntries(list.total); setTotalPages(list.totalPages);
         })
         .catch(error => { if (active) setNotice({ error:true, message:errorText(error) }); })
@@ -274,6 +276,15 @@ export default function App() {
   }, [user?.id, needsMonthlyData, month, summaryCategory, summaryKind, summarySearch, refresh]);
   const categoryById = useMemo(() => new Map(categories.map((item) => [item._id, item])), [categories]);
   const subcategoryById = useMemo(() => new Map(subcategories.map((item) => [item._id, item])), [subcategories]);
+  const subcategoriesByCategory = useMemo(() => {
+    const groups = new Map<string, Subcategory[]>();
+    for (const item of subcategories) {
+      const group = groups.get(item.category);
+      if (group) group.push(item);
+      else groups.set(item.category, [item]);
+    }
+    return groups;
+  }, [subcategories]);
   const mutate = async (endpoint: string, method: string, body?: unknown) => {
     setBusy(true);
     setNotice(null);
@@ -709,18 +720,14 @@ export default function App() {
                                       {tr("Sottocategorie")}{" "}
                                       <span className="count">
                                         {
-                                          subcategories.filter(
-                                            (item) => item.category === category._id,
-                                          ).length
+                                          (subcategoriesByCategory.get(category._id)?.length ?? 0)
                                         }
                                       </span>
                                     </span>
                                   }
                                   contentClassName="subcategory-list"
                                 >
-                                  {subcategories
-                                    .filter((item) => item.category === category._id)
-                                    .map((item) => (
+                                  {(subcategoriesByCategory.get(category._id) ?? []).map((item) => (
                                       <div className="subcategory" key={item._id}>
                                         <IconButton
                                           className="quiet-icon"
@@ -920,6 +927,7 @@ export default function App() {
               )}
               <Modal
                 isOpen={Boolean(manageEdit)}
+                accentColor={manageEdit?.mode === "category" ? manageEdit.color : categoryById.get(manageEdit?.category ?? "")?.color}
                 title={tr(
                   manageEdit?.mode === "category"
                     ? manageEdit.id
@@ -1099,7 +1107,6 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
       const result = await api<{ user: User }>(register ? "/auth/register" : "/auth/login", {
         method: "POST",
         body: form,
-        globalLoader: false,
       });
       onLogin(result.user);
     } catch (error) {

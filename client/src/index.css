@@ -1024,13 +1024,6 @@ input:-webkit-autofill:active {
  .pagination-surface > div { min-width: 0; gap: 0.25rem; }
 }
 
-.operation-loader { position:fixed; inset:0; z-index:2147483647; display:grid; place-items:center; padding:24px; cursor:wait; background:rgb(0 0 0 / 12%); }
-.operation-loader-card.glass-surface { display:flex; align-items:center; gap:16px; padding:24px 30px; border-radius:28px; border:1px solid var(--glass-rim); color:#242126; box-shadow:var(--glass-shadow); }
-[data-theme="dark"] .operation-loader-card { color:#fff; }
-.operation-loader-card svg { width:28px; height:28px; color:var(--color-primary); animation:operation-spin 1s linear infinite; }
-@keyframes operation-spin { to { transform:rotate(360deg); } }
-@media(prefers-reduced-motion:reduce) { .operation-loader-card svg { animation:none; } }
-
 .ui-refresh .category-card { border-left:3px solid color-mix(in srgb,var(--category-color,var(--color-primary)) 55%,transparent); border-radius:20px; padding:22px; background:color-mix(in srgb,var(--category-color,var(--color-primary)) 4%,transparent); margin-block:12px; }
 .ui-refresh .category-card:nth-child(even) { background:color-mix(in srgb,var(--category-color,var(--color-primary)) 9%,transparent); }
 

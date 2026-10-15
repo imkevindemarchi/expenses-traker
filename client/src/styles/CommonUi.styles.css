@@ -130,9 +130,9 @@ body {
 .month-picker .month-step:hover { background: var(--soft); }
 .month-picker-panel.liquid-glass-panel,
 .date-picker-static.liquid-glass-panel {
-  border: 0;
-  background: var(--canvas);
-  box-shadow: 0 12px 40px rgb(0 0 0 / 12%);
+  border: 1px solid var(--glass-rim);
+  background: var(--glass-fill);
+  box-shadow: var(--glass-shadow);
 }
 .month-picker-panel .month-tile { border: 0; background: transparent; box-shadow: none; }
 .month-picker-panel .month-tile:hover { background: var(--soft); }

@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { amountCents, dateKey, monthRange, owned, credentials } from "../src/validation.js";
+import { amountCents, dateKey, monthRange, owned, credentials, transactionPageLimit } from "../src/validation.js";
 import { auth } from "../src/auth.js";
+
+test("il riepilogo accetta 5 movimenti e la paginazione mantiene i limiti previsti", () => {
+  assert.equal(transactionPageLimit("5"), 5);
+  assert.equal(transactionPageLimit(undefined), 20);
+  for (const limit of [10, 20, 50]) assert.equal(transactionPageLimit(String(limit)), limit);
+  for (const limit of ["0", "-5", "5.5", "100", "NaN", ""]) {
+    assert.throws(() => transactionPageLimit(limit), /Numero di righe non valido/);
+  }
+});
 test("importi in centesimi, virgola italiana e nessun errore di floating point", () => {
   assert.equal(amountCents("12,34"), 1234);
   assert.equal(amountCents("0.10"), 10);

@@ -22,16 +22,13 @@ export function OverviewSkeleton({ budget = false, annual = false }: { budget?: 
       )}
       <div className="charts-grid">
         <Glass className="panel">
-          <div className="skeleton-stack">
-            <SkeletonBlock className="skeleton-label" />
-            <ChartSkeleton kind={annual ? "bars" : "line"} />
-          </div>
+          <div className="section-heading"><Placeholder className="sk-section-title" />{!annual && <Placeholder className="sk-label" />}</div>
+          {annual ? <div className="h-64 w-full sm:h-72 lg:h-80"><ChartSkeleton kind="bars" fill /></div> : <div className="trend"><ChartSkeleton trend /><Placeholder className="sk-trend-note" /></div>}
         </Glass>
         <Glass className="panel">
-          <div className="skeleton-stack">
-            <SkeletonBlock className="skeleton-label" />
-            <ChartSkeleton kind="donut" />
-          </div>
+          {!annual && <Placeholder className="sk-label sk-breakdown-eyebrow" />}
+          <Placeholder className="sk-section-title" />
+          <div className="breakdown"><Placeholder className="donut sk-overview-donut" /><div className="category-legend">{[0,1,2].map(index => <div key={index}><Placeholder className="sk-text" /><Placeholder className="sk-value" /></div>)}</div></div>
         </Glass>
       </div>
       {annual && <Glass className="panel"><Placeholder className="sk-section-title"/><EntriesSkeleton /></Glass>}

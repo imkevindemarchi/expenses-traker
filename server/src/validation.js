@@ -72,7 +72,7 @@ export const monthlyBudgetCents = (value) => {
 
 export const transactionPageLimit = (value) => {
   const limit = Number(value ?? 20);
-  if (![10, 20, 50].includes(limit)) fail("Numero di righe non valido.");
+  if (![5, 10, 20, 50].includes(limit)) fail("Numero di righe non valido.");
   return limit;
 };
 

@@ -11,6 +11,7 @@ import Glass from "../components/Glass.component";
 import YearPicker from "../components/YearPicker.component";
 import EntriesTable from "../components/EntriesTable.component";
 import SpendingBreakdown from "../components/SpendingBreakdown.component";
+import { dateFormatter } from "../utils/formatters.util";
 import { annualMonths } from "../utils/annual";
 import Histogram from "../components/Histogram.component";
 export default function AnnualPage({
@@ -134,7 +135,7 @@ function AnnualTrend({ summary, year }: { summary: AnnualSummary; year: string }
     <Histogram
       label={tr("Andamento mensile di entrate e spese")}
       labels={months.map((month) => {
-        const label = new Intl.DateTimeFormat(locale(), { month: "short" }).format(
+        const label = dateFormatter(locale(), { month: "short" }).format(
           new Date(month.month + "-01T12:00:00Z"),
         );
         return label.charAt(0).toLocaleUpperCase(locale()) + label.slice(1);

@@ -1,0 +1,19 @@
+/* Same option surfaces and states as the page period filters. */
+.ui-select-menu [role="option"] {
+  border-color: var(--glass-rim);
+  background: var(--glass-fill);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+.ui-select-menu [role="option"]:not([aria-selected="true"]):hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--glass-rim));
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--glass-fill));
+}
+.ui-select-menu [role="option"][aria-selected="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+.ui-select-menu [role="option"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

@@ -59,3 +59,12 @@
 [data-skeleton-layout="overview"] .dashboard-calendar .sk-section-title { margin:0; height:26px; }
 [data-skeleton-layout="overview"] .budget-heading .sk-section-title { margin-top:12px; }
 .sk-budget-track { width:100%; height:10px; margin-block:18px; border-radius:100px; }
+
+/* Chart placeholders reserve the loaded SVG/canvas dimensions at every breakpoint. */
+.sk-chart--fill { height:100%; margin-top:0; }
+.sk-chart--trend { height:auto; aspect-ratio:580 / 190; margin-top:0; }
+.sk-trend-note { width:70%; height:15px; margin-top:12px; }
+.sk-breakdown-eyebrow { height:15px; margin-bottom:4px; }
+.sk-overview-donut { mask:radial-gradient(circle,transparent 52%,#000 53%); }
+[data-skeleton-layout="overview"] .category-legend .sk-text { height:16px; width:55%; }
+[data-skeleton-layout="overview"] .category-legend .sk-value { height:16px; width:55px; }

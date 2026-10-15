@@ -1,3 +1,4 @@
+import "../styles/Select.styles.css";
 
 import { useTranslation } from "react-i18next";
 import {
@@ -161,6 +162,7 @@ const Select = <TValue extends string = string>({
   };
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleClickOutside = (event: PointerEvent): void => {
       const target: Node = event.target as Node;
 
@@ -221,6 +223,7 @@ const Select = <TValue extends string = string>({
         )}
 
         <div
+          data-glass-theme={theme}
           className={`group relative isolate w-full overflow-hidden rounded-2xl ${getLiquidGlassClass(theme)}`}
         >
           {/* <span className="pointer-events-none absolute inset-px rounded-2xl bg-linear-to-b from-white/30 via-white/5 to-transparent opacity-70 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:inset-0 group-hover:opacity-100" />
@@ -244,7 +247,7 @@ const Select = <TValue extends string = string>({
                 : theme === "light"
                   ? "border-black/7 hover:border-black/12"
                   : "border-white/8 hover:border-white/15"
-            } ${theme === "light" ? "bg-black/[0.018] text-black" : "bg-white/2.5 text-white"}`}
+            } ${theme === "light" ? "bg-transparent text-black" : "bg-transparent text-white"}`}
           >
             {(icon || selectedOption?.icon) && (
               <span
@@ -284,6 +287,7 @@ const Select = <TValue extends string = string>({
       {createPortal(
         <div
           ref={menuRef}
+          data-glass-theme={theme}
           inert={!isOpen}
           aria-hidden={!isOpen}
           style={{
@@ -293,7 +297,7 @@ const Select = <TValue extends string = string>({
               : `translateY(${isMenuAbove ? "8px" : "-8px"}) scale(0.96)`,
             transformOrigin: `${menuOrigin.x}px ${menuOrigin.y}px`,
           }}
-          className={`liquid-glass-panel glass-surface--clear ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} fixed z-9999 isolate overflow-hidden border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[transform,opacity] ${getLiquidGlassClass(theme)} ${
+          className={`ui-select-menu liquid-glass-panel glass-surface--clear ${isOpen ? "liquid-glass-panel--open" : "liquid-glass-panel--closed"} fixed z-9999 isolate overflow-hidden border p-1.5 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[transform,opacity] ${getLiquidGlassClass(theme)} ${
             isOpen
               ? "pointer-events-auto rounded-[22px] opacity-100"
               : "pointer-events-none rounded-[22px] opacity-0"
@@ -317,7 +321,7 @@ const Select = <TValue extends string = string>({
                   onClick={(): void => handleOptionClick(option.value)}
                   className={`flex w-full cursor-pointer items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-[background-color,border-color,color,box-shadow] duration-300 ${
                     isSelected
-                      ? `${getLiquidGlassClass(theme)} text-primary`
+                      ? "text-white"
                       : theme === "light"
                         ? "border-transparent text-black hover:border-white/65 hover:bg-white/40"
                         : "border-transparent text-white hover:border-white/8 hover:bg-white/6"
@@ -327,7 +331,7 @@ const Select = <TValue extends string = string>({
                     <span
                       className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${
                         isSelected
-                          ? "bg-primary text-white shadow-[0_6px_18px_rgba(0,0,0,0.14)]"
+                          ? "bg-white/20 text-white"
                           : "bg-primary/10 text-primary"
                       }`}
                     >
@@ -342,7 +346,7 @@ const Select = <TValue extends string = string>({
                       <span
                         className={`mt-0.5 block truncate text-xs ${
                           isSelected
-                            ? "text-primary/70"
+                            ? "text-white/80"
                             : theme === "light"
                               ? "text-darkgray"
                               : "text-gray"
@@ -356,7 +360,7 @@ const Select = <TValue extends string = string>({
                   <span
                     className={`flex size-6 shrink-0 items-center justify-center rounded-full transition-[opacity,transform] duration-300 ${
                       isSelected
-                        ? `${getLiquidGlassClass(theme)} scale-100 border text-primary opacity-100`
+                        ? "scale-100 border border-white/30 bg-white/20 text-white opacity-100"
                         : "scale-75 opacity-0"
                     }`}
                   >

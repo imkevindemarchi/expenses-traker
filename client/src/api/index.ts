@@ -1,4 +1,3 @@
-import { startGlobalLoading, stopGlobalLoading } from "../stores/loader.store";
 import { locale } from "../i18n";
 import { numberFormatter, dateFormatter } from "../utils/formatters.util";
 export class ApiError extends Error {
@@ -10,11 +9,8 @@ export class ApiError extends Error {
 }
 export async function api<T>(
   path: string,
-  options?: { method?: string; body?: unknown; globalLoader?: boolean; signal?: AbortSignal },
+  options?: { method?: string; body?: unknown; signal?: AbortSignal },
 ): Promise<T> {
-  const showLoading = options?.globalLoader ?? ((options?.method && options.method !== "GET" && !(options.method === "PATCH" && path.startsWith("/workouts/"))) || path === "/backup");
-  if (showLoading) startGlobalLoading();
-  try {
   const response = await fetch(`/api${path}`, {
     method: options?.method ?? "GET",
     credentials: "same-origin",
@@ -37,12 +33,11 @@ export async function api<T>(
     throw new ApiError(data.message ?? "Richiesta non riuscita.", response.status);
   }
   return data as T;
-  } finally { if (showLoading) stopGlobalLoading(); }
 }
 export const money = (cents: number, currency = "EUR") =>
   numberFormatter(locale(), { style: "currency", currency }).format(cents / 100);
 export const today = () => {
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  const parts = dateFormatter("en-CA", {
     timeZone: "Europe/Rome",
     year: "numeric",
     month: "2-digit",

@@ -16,4 +16,5 @@
 .sk-settings-fields { display:grid; gap:22px; }
 .sk-settings-fields .sk-field { margin-top:0; }
 .sk-settings-fields .sk-field-line { width:100%; height:53px; }
+.sk-entry-card .entry-card-main > .sk-text { width:100%; height:20px; }
 @media(min-width:640px) { .sk-settings-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }

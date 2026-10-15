@@ -2,6 +2,7 @@ import useModalViewport from "../hooks/useModalViewport.hook";
 import IconButton from "./IconButton.component";
 import {
   type FC,
+  type CSSProperties,
   type MouseEvent,
   type PropsWithChildren,
   type ReactNode,
@@ -35,6 +36,7 @@ interface IProps extends PropsWithChildren {
   closeOnBackdropClick?: boolean;
   maxWidth?: TModalMaxWidth;
   intent?: "default" | "danger";
+  accentColor?: string;
   onClose: () => void;
 }
 
@@ -56,6 +58,7 @@ const Modal: FC<IProps> = ({
   closeOnBackdropClick = true,
   maxWidth = "md",
   intent = "default",
+  accentColor,
   onClose,
 }) => {
   const { theme } = useTheme();
@@ -173,6 +176,7 @@ const Modal: FC<IProps> = ({
           data-modal-theme={theme}
           data-modal-size={maxWidth}
           data-modal-intent={intent}
+          style={accentColor ? { "--color-primary": accentColor, "--accent-ink": accentColor } as CSSProperties : undefined}
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
@@ -184,6 +188,7 @@ const Modal: FC<IProps> = ({
               <div className="min-w-0 flex-1">
                 <h2
                   id={titleId}
+                  style={accentColor ? { color: accentColor } : undefined}
                   className="modal-title wrap-break-word text-xl leading-7 font-semibold tracking-tight sm:text-2xl sm:leading-8"
                 >
                   {title}
