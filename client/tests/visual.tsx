@@ -77,8 +77,27 @@ let entries = [
 ];
 window.fetch = async (request, init) => {
   const url = new URL(String(request), location.origin);
+  const selectedEntries = entries.filter((entry) => {
+    const matches = ["category", "subcategory", "kind"] as const;
+    const query = url.searchParams.get("q")?.trim().toLocaleLowerCase();
+    return (
+      matches.every(
+        (key) => !url.searchParams.get(key) || entry[key] === url.searchParams.get(key),
+      ) &&
+      (!url.searchParams.get("month") || entry.date.startsWith(url.searchParams.get("month")!)) &&
+      (!query ||
+        [
+          categories.find((item) => item._id === entry.category)?.name,
+          subcategories.find((item) => item._id === entry.subcategory)?.name,
+        ].some((name) => name?.toLocaleLowerCase().includes(query)))
+    );
+  });
   let data: unknown = {};
   if (url.pathname.endsWith("/auth/me")) data = { user: demoUser };
+  else if (url.pathname.endsWith("/backup/import")) {
+    const body = JSON.parse(String(init?.body));
+    data = { categories: body.categories.length, subcategories: body.subcategories.length, entries: body.entries.length };
+  }
   else if (url.pathname.endsWith("/account/settings")) {
     const body = JSON.parse(String(init?.body));
     demoUser = {
@@ -122,22 +141,32 @@ window.fetch = async (request, init) => {
         .filter((item) => item.total),
       entries: selected.slice(0, 5),
     };
-  } else if (url.pathname.endsWith("/summary"))
+  } else if (url.pathname.endsWith("/summary")) {
+    const income = selectedEntries
+      .filter((entry) => entry.kind === "income")
+      .reduce((sum, entry) => sum + entry.amountCents, 0);
+    const expense = selectedEntries
+      .filter((entry) => entry.kind === "expense")
+      .reduce((sum, entry) => sum + entry.amountCents, 0);
     data = {
-      income: 240000,
-      expense: 19545,
-      balance: 220455,
-      count: 4,
-      byCategory: [
-        { _id: categories[2]._id, total: 15745 },
-        { _id: categories[1]._id, total: 3800 },
-      ],
-      daily: entries.map((entry) => ({
+      income,
+      expense,
+      balance: income - expense,
+      count: selectedEntries.length,
+      byCategory: categories
+        .map((category) => ({
+          _id: category._id,
+          total: selectedEntries
+            .filter((entry) => entry.kind === "expense" && entry.category === category._id)
+            .reduce((sum, entry) => sum + entry.amountCents, 0),
+        }))
+        .filter((item) => item.total),
+      daily: selectedEntries.map((entry) => ({
         _id: { date: entry.date, kind: entry.kind },
         total: entry.amountCents,
       })),
     };
-  else if (url.pathname.endsWith("/entries") && init?.method === "POST") {
+  } else if (url.pathname.endsWith("/entries") && init?.method === "POST") {
     const body = JSON.parse(String(init.body));
     entries = [
       {
@@ -149,14 +178,14 @@ window.fetch = async (request, init) => {
     ];
   } else if (url.pathname.endsWith("/entries"))
     data = {
-      entries: [...entries].sort((a, b) => b.date.localeCompare(a.date)),
-      total: entries.length,
-      totalPages: 1,
+      entries: [...selectedEntries].sort((a, b) => b.date.localeCompare(a.date)),
+      total: selectedEntries.length,
+      totalPages: selectedEntries.length ? 1 : 0,
     };
   return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
 };
 createRoot(document.getElementById("root")!).render(
-  <MemoryRouter>
+  <MemoryRouter initialEntries={[new URLSearchParams(location.search).get("route") || "/"]}>
     <App />
   </MemoryRouter>,
 );

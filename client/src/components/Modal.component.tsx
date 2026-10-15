@@ -74,7 +74,8 @@ const Modal: FC<IProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     const previousFocus = document.activeElement as HTMLElement | null;
-    dialogRef.current?.focus({ preventScroll: true });
+    if (!dialogRef.current?.contains(document.activeElement))
+      dialogRef.current?.focus({ preventScroll: true });
     const containFocus = (event: KeyboardEvent): void => {
       if (event.key !== "Tab" || !dialogRef.current) return;
       const focusable = Array.from(
@@ -181,7 +182,7 @@ const Modal: FC<IProps> = ({
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
           onMouseDown={handleModalClick}
-          className={`modal-surface ${appearance === "choices" ? "modal-choice-surface" : appearance === "entry" ? "modal-entry-surface" : ""} ${getLiquidGlassClass(theme)} relative flex max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top))-max(1.5rem,env(safe-area-inset-bottom)))] w-full min-w-0 flex-col overflow-hidden sm:max-h-[calc(100dvh-4rem)] ${MAX_WIDTH_CLASSES[maxWidth]}`}
+          className={`modal-surface ${appearance === "choices" ? "modal-choice-surface" : appearance === "entry" ? "modal-entry-surface" : ""} ${getLiquidGlassClass(theme)} relative flex w-full min-w-0 flex-col overflow-hidden ${MAX_WIDTH_CLASSES[maxWidth]}`}
         >
           <div className="modal-header shrink-0 px-5 pt-5 pb-4 sm:px-7 sm:pt-6 sm:pb-5">
             <div className="flex items-start justify-between gap-4 sm:gap-5">

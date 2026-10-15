@@ -59,3 +59,5 @@
 .period-picker-compact .month-year-bar { margin: 8px 0; }
 .period-picker-compact .month-picker-panel-heading { margin-bottom: 8px; }
 .period-picker-compact .month-current { margin-top: 8px; padding: 8px; }
+
+.month-tile:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }

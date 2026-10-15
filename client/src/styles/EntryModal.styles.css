@@ -151,10 +151,17 @@
   background: color-mix(in srgb, var(--entry-accent) 10%, var(--modal-canvas));
 }
 .entry-context-category {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
   font-size: 13px;
   color: var(--modal-muted);
   overflow-wrap: anywhere;
 }
+.entry-context-category > span { min-width: 0; }
+.entry-context-separator { opacity: 0.6; }
 .modal-entry-surface .entry-pills {
   max-height: none;
   gap: 10px;

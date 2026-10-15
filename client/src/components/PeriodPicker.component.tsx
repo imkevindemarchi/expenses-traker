@@ -1,3 +1,4 @@
+import { isSelectablePeriod } from "../utils/date-limits";
 import { fitStaticPanel } from "../utils/fitStaticPanel";
 import {
   useCallback,
@@ -46,7 +47,7 @@ export default function PeriodPicker({
   );
   const annual = mode === "year";
   const currentYear = Number(today().slice(0, 4));
-  const maxYear = annual ? currentYear : 2100;
+  const maxYear = currentYear;
   const selectedMonth = Number(value.slice(5, 7)) - 1;
   const current = today().slice(0, annual ? 4 : 7);
 
@@ -81,6 +82,7 @@ export default function PeriodPicker({
     trigger.current?.focus();
   };
   const select = (month: string) => {
+    if (!isSelectablePeriod(month, current)) return;
     onChange(month);
     close();
   };
@@ -93,7 +95,7 @@ export default function PeriodPicker({
     }
     const next = new Date(Number(value.slice(0, 4)), selectedMonth + direction, 1);
     const nextYear = next.getFullYear();
-    if (nextYear < 2000 || nextYear > 2100) return;
+    if (nextYear < 2000 || !isSelectablePeriod(`${nextYear}-${String(next.getMonth() + 1).padStart(2, "0")}`, current)) return;
     onChange(`${nextYear}-${String(next.getMonth() + 1).padStart(2, "0")}`);
     setOpen(false);
   };
@@ -147,7 +149,7 @@ export default function PeriodPicker({
       event.preventDefault();
       panel.current
         ?.querySelector<HTMLButtonElement>(
-          `[data-month="${(index + offset + options.length) % options.length}"]`,
+          `[data-month="${(index + offset + options.length) % options.length}"]:not(:disabled)`,
         )
         ?.focus();
     }
@@ -198,7 +200,7 @@ export default function PeriodPicker({
           className="month-step"
           aria-label={tr(annual ? tr("Anno successivo") : tr("Mese successivo"))}
           title={tr(annual ? tr("Anno successivo") : tr("Mese successivo"))}
-          disabled={value === (annual ? String(maxYear) : "2100-12")}
+          disabled={value >= current}
           onClick={() => shift(1)}
         >
           <ChevronRight size={18} strokeWidth={1.8} />
@@ -263,6 +265,7 @@ export default function PeriodPicker({
                     type="button"
                     role="option"
                     aria-selected={active}
+                    disabled={!isSelectablePeriod(monthValue, current)}
                     onKeyDown={(event) => key(event, index)}
                     onClick={() => select(monthValue)}
                     className={`month-tile ${active ? "is-selected" : ""} ${current === monthValue ? "is-current" : ""}`}

@@ -1,4 +1,5 @@
 {
+  "modalChoice": { "back": "Back", "clear": "Clear selection" },
   "loader": {
     "loading": "Loading..."
   },

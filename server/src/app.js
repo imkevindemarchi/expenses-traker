@@ -2,6 +2,7 @@ import { changePassword } from "./password.js";
 import { deleteAccount } from "./delete-account.js";
 import { profileInput } from "./profile.js";
 import { saveAccountSettings } from "./account-settings.js";
+import { importBackup } from "./backup.js";
 import express from "express";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
     return next(new ApiError(403, "Origine della richiesta non autorizzata."));
   next();
 });
+app.use("/api/backup/import", express.json({ limit: "10mb" }));
 app.use(express.json({ limit: "32kb" }));
 app.use((req, res, next) => {
   if (
@@ -140,6 +142,10 @@ app.post(
 );
 app.use("/api", auth);
 const userId = (req) => req.account._id;
+app.post(
+  "/api/backup/import",
+  asyncRoute(async (req, res) => res.json(await importBackup(userId(req), req.body))),
+);
 app.get(
   "/api/backup",
   asyncRoute(async (req, res) => {
@@ -407,6 +413,8 @@ export const periodFilter = async (req) => {
   const filter = { ...owned(userId(req)), date: { $gte: range.from, $lte: range.to } };
   if (req.query.category)
     filter.category = new mongoose.Types.ObjectId(objectId(req.query.category));
+  if (req.query.subcategory)
+    filter.subcategory = new mongoose.Types.ObjectId(objectId(req.query.subcategory));
   if (req.query.kind) {
     if (!["income", "expense"].includes(req.query.kind)) fail("Filtro non valido.");
     filter.kind = req.query.kind;

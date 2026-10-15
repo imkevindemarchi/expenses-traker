@@ -2,7 +2,7 @@ import SectionNavigation from "../components/SectionNavigation.component";
 import CurrencyPicker from "../components/CurrencyPicker.component";
 import "../styles/DeleteConfirmation.styles.css";
 import { useMoney } from "../contexts/currency.context";
-import { useState, useId, type FormEvent } from "react";
+import { useState, useId, useRef, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -17,6 +17,7 @@ import {
   UserRound,
   Database,
   Download,
+  Upload,
   ChevronLeft,
   ChevronDown,
 } from "lucide-react";
@@ -46,11 +47,13 @@ export default function SettingsPage({
   onSaved,
   onNotice,
   onDeleted,
+  onImported,
 }: {
   user: User;
   onSaved: (user: User) => void;
   onNotice: (error: boolean, message: string) => void;
   onDeleted: () => void;
+  onImported: () => void;
 }) {
   const money = useMoney();
   const navigate = useNavigate();
@@ -73,8 +76,31 @@ export default function SettingsPage({
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [exportBusy, setExportBusy] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
+  const importInput = useRef<HTMLInputElement>(null);
+  const dataBusy = exportBusy || importBusy;
+  const importData = async (file: File) => {
+    if (busy || deleteBusy || dataBusy) return;
+    setImportBusy(true);
+    try {
+      if (file.size > 10 * 1024 * 1024) throw new Error(tr("Il backup non può superare 10 MB."));
+      let data: unknown;
+      try {
+        data = JSON.parse((await file.text()).replace(/^\uFEFF/, ""));
+      } catch {
+        throw new Error(tr("Seleziona un backup JSON valido di ExpensesTraker."));
+      }
+      const result = await api<{ entries: number }>("/backup/import", { method: "POST", body: data });
+      onImported();
+      onNotice(false, tr("Importazione completata: {{count}} movimenti aggiunti.", { count: result.entries }));
+    } catch (cause) {
+      onNotice(true, cause instanceof Error ? cause.message : "Si è verificato un errore.");
+    } finally {
+      setImportBusy(false);
+    }
+  };
   const exportData = async () => {
-    if (busy || deleteBusy || exportBusy) return;
+    if (busy || deleteBusy || dataBusy) return;
     setExportBusy(true);
     try {
       const data = await api<unknown>("/backup");
@@ -93,7 +119,7 @@ export default function SettingsPage({
     }
   };
   const removeAccount = async () => {
-    if (!deleteConfirm || deleteBusy || busy || exportBusy) return;
+    if (!deleteConfirm || deleteBusy || busy || dataBusy) return;
     setDeleteBusy(true);
     setDeleteError("");
     try {
@@ -107,7 +133,7 @@ export default function SettingsPage({
   };
   const save = async (event: FormEvent) => {
     event.preventDefault();
-    if (busy || deleteBusy || exportBusy) return;
+    if (busy || deleteBusy || dataBusy) return;
     setError("");
     if (
       amount !== "" &&
@@ -200,7 +226,7 @@ export default function SettingsPage({
                   placeholder={tr("Nome")}
                   autoComplete="given-name"
                   maxLength={60}
-                  disabled={busy || deleteBusy || exportBusy}
+                  disabled={busy || deleteBusy || dataBusy}
                   value={profile.name}
                   onChange={(event) =>
                     setProfile((value) => ({ ...value, name: event.target.value }))
@@ -212,7 +238,7 @@ export default function SettingsPage({
                   placeholder={tr("Cognome")}
                   autoComplete="family-name"
                   maxLength={60}
-                  disabled={busy || deleteBusy || exportBusy}
+                  disabled={busy || deleteBusy || dataBusy}
                   value={profile.surname}
                   onChange={(event) =>
                     setProfile((value) => ({ ...value, surname: event.target.value }))
@@ -240,7 +266,7 @@ export default function SettingsPage({
             }
           >
             <div className="form-stack">
-              <CurrencyPicker value={currency} onChange={setCurrency} disabled={busy || deleteBusy || exportBusy} />
+              <CurrencyPicker value={currency} onChange={setCurrency} disabled={busy || deleteBusy || dataBusy} />
               <p className="muted">
                 {tr("Cambiare valuta non converte gli importi già registrati.")}
               </p>
@@ -314,7 +340,7 @@ export default function SettingsPage({
                   placeholder={tr(label)}
                   type={showPasswords ? "text" : "password"}
                   autoComplete={autoComplete}
-                  disabled={busy || deleteBusy || exportBusy}
+                  disabled={busy || deleteBusy || dataBusy}
                   value={passwords[key]}
                   icon={<LockKeyhole size={17} />}
                   endIcon={showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -361,15 +387,35 @@ export default function SettingsPage({
               <div className="settings-data-actions">
                 <Button
                   variant="secondary"
-                  disabled={busy || deleteBusy || exportBusy}
+                  disabled={busy || deleteBusy || dataBusy}
                   icon={<Download size={17} />}
                   onClick={() => void exportData()}
                 >
                   {tr(exportBusy ? "Esportazione…" : "Esporta backup")}
                 </Button>
+                <Button
+                  variant="secondary"
+                  disabled={busy || deleteBusy || dataBusy}
+                  icon={<Upload size={17} />}
+                  onClick={() => importInput.current?.click()}
+                >
+                  {tr(importBusy ? "Importazione…" : "Importa backup JSON")}
+                </Button>
+                <input
+                  ref={importInput}
+                  type="file"
+                  hidden
+                  accept="application/json,.json"
+                  disabled={busy || deleteBusy || dataBusy}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = "";
+                    if (file) void importData(file);
+                  }}
+                />
               </div>
               <p className="muted settings-data-note">
-                {tr("Scarica una copia dei tuoi dati prima di eliminare l’account.")}
+                {tr("L’importazione aggiunge categorie, sottocategorie e movimenti al tuo account. Importare più volte lo stesso backup può duplicare i movimenti.")}
               </p>
             </div>
             <div className={`settings-delete-box ${deleteConfirm ? "is-confirming" : ""}`}>
@@ -412,7 +458,7 @@ export default function SettingsPage({
                     </Button>
                     <Button
                       variant="danger"
-                      disabled={deleteBusy || busy || exportBusy}
+                      disabled={deleteBusy || busy || dataBusy}
                       icon={<Trash2 size={16} />}
                       onClick={() => {
                         void removeAccount();
@@ -424,7 +470,7 @@ export default function SettingsPage({
                 ) : (
                   <Button
                     variant="danger"
-                    disabled={busy || deleteBusy || exportBusy}
+                    disabled={busy || deleteBusy || dataBusy}
                     icon={<Trash2 size={16} />}
                     onClick={() => {
                       setDeleteError("");
@@ -450,13 +496,13 @@ export default function SettingsPage({
       </form>
       </div>
       <div className="settings-floating-actions mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
-        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={() => location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)} disabled={busy || deleteBusy || exportBusy} />
+        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={() => location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)} disabled={busy || deleteBusy || dataBusy} />
         <FloatingButton
           type="submit"
           form="account-settings-form"
           ariaLabel={tr(busy ? "Salvataggio…" : "Salva impostazioni")}
           icon={<Save size={27} />}
-          disabled={busy || deleteBusy || exportBusy}
+          disabled={busy || deleteBusy || dataBusy}
         />
       </div>
     </div>

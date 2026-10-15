@@ -1,3 +1,4 @@
+import { maximumCalendarDate, isSelectableDate } from "../utils/date-limits";
 import { fitStaticPanel } from "../utils/fitStaticPanel";
 import { tr } from "../utils/ui-text";
 import "../styles/DatePicker.styles.css";
@@ -107,6 +108,8 @@ interface IProps {
   name?: string;
   minDate?: Date;
   maxDate?: Date;
+  /** Only scheduled events and expiration dates may opt into future dates. */
+  allowFuture?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
   color?: TDatePickerColor;
@@ -131,6 +134,7 @@ const DatePicker: FC<IProps> = ({
   name,
   minDate,
   maxDate,
+  allowFuture = false,
   disabled = false,
   autoFocus = false,
   color = "primary",
@@ -153,6 +157,8 @@ const DatePicker: FC<IProps> = ({
     left: 0,
     width: 350,
   });
+
+  const effectiveMaxDate = maximumCalendarDate(maxDate, allowFuture);
 
   const inputId: string = id || name || label;
 
@@ -227,6 +233,7 @@ const DatePicker: FC<IProps> = ({
       return;
     }
 
+    if (disabled || (calendarValue && !isSelectableDate(calendarValue, minDate, maximumCalendarDate(maxDate, allowFuture)))) return;
     onChange(calendarValue);
     setIsOpen(false);
   };
@@ -411,7 +418,7 @@ const DatePicker: FC<IProps> = ({
               value={normalizedValue}
               locale={i18n.language}
               minDate={minDate}
-              maxDate={maxDate}
+              maxDate={effectiveMaxDate}
               defaultActiveStartDate={normalizedValue || new Date()}
               onChange={handleCalendarChange}
               prev2Label={null}

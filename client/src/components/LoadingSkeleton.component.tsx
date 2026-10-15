@@ -37,5 +37,13 @@ export function OverviewSkeleton({ budget = false, annual = false }: { budget?: 
 }
 export function CategoriesSkeleton() {
  useTranslation();
- return <div role="status" aria-busy="true" aria-label={tr("Caricamento categorie")} className="category-grid">{[0,1,2].map(index => <section className="category-card sk-category-card" key={index}><div className="category-header"><Placeholder className="sk-category-action" /><Placeholder className="sk-category-action" /><Placeholder className="category-orb" /><Placeholder className="sk-text" /></div><div className="sk-category-subheading"><Placeholder className="sk-label" /><Placeholder className="sk-pill" /></div><div className="subcategory-list">{[0,1,2].map(child => <div className="subcategory" key={child}><Placeholder className="sk-text" /><div className="entry-card-actions"><Placeholder className="sk-entry-action" /><Placeholder className="sk-entry-action" /></div></div>)}</div><Placeholder className="sk-entry-page-size" /></section>)}</div>;
+ return <div role="status" aria-busy="true" data-skeleton-layout="categories" aria-label={tr("Caricamento categorie")} className="category-grid">{[0,1,2].map(index => <section className="category-card sk-category-card" key={index}>
+   <div className="category-header"><Placeholder className="category-orb" /><Placeholder className="sk-text" /><div className="category-actions"><Placeholder className="sk-category-action" /><Placeholder className="sk-category-action" /></div></div>
+   <div className="sk-category-subheading"><Placeholder className="sk-label" /><Placeholder className="sk-category-chevron" /></div>
+   <Placeholder className="category-add-subcategory sk-category-add" />
+ </section>)}</div>;
+}
+
+export function AnnualPageSkeleton() {
+  return <><div className="annual-filter" aria-hidden="true"><div className="month-picker"><Placeholder className="month-step" /><div className="month-picker-trigger"><Placeholder className="month-picker-icon" /><div className="month-picker-value"><Placeholder className="sk-year-value" /><Placeholder className="sk-year-caption" /></div></div><Placeholder className="month-step" /></div></div><OverviewSkeleton annual /></>;
 }

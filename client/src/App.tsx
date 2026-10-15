@@ -2,12 +2,12 @@ import IconButton from "./components/IconButton.component";
 import AuthShell from "./components/AuthShell.component";
 import Bootloader from "./components/Bootloader.component";
 import EntriesSkeleton, { PaginationSkeleton, SettingsPageSkeleton } from "./components/EntriesSkeleton.component";
-import { OverviewSkeleton, CategoriesSkeleton } from "./components/LoadingSkeleton.component";
+import { OverviewSkeleton, CategoriesSkeleton, AnnualPageSkeleton } from "./components/LoadingSkeleton.component";
 import EntryModal from "./components/EntryModal.component";
 import { CurrencyContext, useMoney } from "./contexts/currency.context";
 import FilteredBalance from "./components/FilteredBalance.component";
 import Autocomplete from "./components/Autocomplete.component";
-import FilterFloatingMenu from "./components/FilterFloatingMenu.component";
+import EntryFiltersModal from "./components/EntryFiltersModal.component";
 const AnnualPage = lazy(() => import("./pages/Annual.page"));
 import SpendingBreakdown from "./components/SpendingBreakdown.component";
 import Pagination from "./components/Pagination.component";
@@ -133,16 +133,18 @@ export default function App() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [summary, setSummary] = useState<Summary>(emptySummary);
   const [filterCategory, setFilterCategory] = useState("");
+  const [filterSubcategory, setFilterSubcategory] = useState("");
   const [filterKind, setFilterKind] = useState("");
-  const [kindMenuOpen, setKindMenuOpen] = useState(false);
+  const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const filtersChanged = Boolean(
-    search || filterCategory || filterKind || month !== today().slice(0, 7),
+    search || filterCategory || filterSubcategory || filterKind || month !== today().slice(0, 7),
   );
   const resetEntryFilters = () => {
-    setKindMenuOpen(false);
+    setFiltersModalOpen(false);
     setSearch("");
     setFilterCategory("");
+    setFilterSubcategory("");
     setFilterKind("");
     setMonth(today().slice(0, 7));
     setListPage(1);
@@ -240,6 +242,7 @@ export default function App() {
       const query = new URLSearchParams({ month, page: String(page === "dashboard" ? 1 : listPage), limit: String(page === "dashboard" ? 5 : pageLimit) });
       if (page === "entries") {
         if (filterCategory) query.set("category", filterCategory);
+        if (filterSubcategory) query.set("subcategory", filterSubcategory);
         if (filterKind) query.set("kind", filterKind);
         if (search.trim()) query.set("q", search.trim());
       }
@@ -253,8 +256,9 @@ export default function App() {
         .finally(() => { if (active) setLoading(false); });
     }, search && page === "entries" ? 250 : 0);
     return () => { active = false; controller.abort(); window.clearTimeout(timer); };
-  }, [user?.id, needsMonthlyData, month, listPage, pageLimit, filterCategory, filterKind, search, refresh, page]);
+  }, [user?.id, needsMonthlyData, month, listPage, pageLimit, filterCategory, filterSubcategory, filterKind, search, refresh, page]);
   const summaryCategory = page === "entries" ? filterCategory : "";
+  const summarySubcategory = page === "entries" ? filterSubcategory : "";
   const summaryKind = page === "entries" ? filterKind : "";
   const summarySearch = page === "entries" ? search.trim() : "";
   useEffect(() => {
@@ -265,6 +269,7 @@ export default function App() {
     const timer = window.setTimeout(() => {
       const query = new URLSearchParams({ month });
       if (summaryCategory) query.set("category", summaryCategory);
+      if (summarySubcategory) query.set("subcategory", summarySubcategory);
       if (summaryKind) query.set("kind", summaryKind);
       if (summarySearch) query.set("q", summarySearch);
       api<Summary>(`/summary?${query}`, { signal:controller.signal })
@@ -273,7 +278,7 @@ export default function App() {
         .finally(() => { if (active) setSummaryLoading(false); });
     }, summarySearch ? 250 : 0);
     return () => { active = false; controller.abort(); window.clearTimeout(timer); };
-  }, [user?.id, needsMonthlyData, month, summaryCategory, summaryKind, summarySearch, refresh]);
+  }, [user?.id, needsMonthlyData, month, summaryCategory, summarySubcategory, summaryKind, summarySearch, refresh]);
   const categoryById = useMemo(() => new Map(categories.map((item) => [item._id, item])), [categories]);
   const subcategoryById = useMemo(() => new Map(subcategories.map((item) => [item._id, item])), [subcategories]);
   const subcategoriesByCategory = useMemo(() => {
@@ -332,18 +337,20 @@ export default function App() {
   useEffect(() => {
     setSearch("");
     setFilterCategory("");
+    setFilterSubcategory("");
     setFilterKind("");
     setListPage(1);
     setEntryEdit(null);
     setManageEdit(null);
     setDeleteAction(null);
-    setKindMenuOpen(false);
+    setFiltersModalOpen(false);
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [location.pathname]);
   const changePage = (next: Page) => {
     navigate(ROUTE_PATHS[next]);
     setSearch("");
     setFilterCategory("");
+    setFilterSubcategory("");
     setFilterKind("");
     setListPage(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -444,7 +451,7 @@ export default function App() {
                     </div>
                   )}
                 </div>
-                <Suspense fallback={page === "settings" ? <SettingsPageSkeleton /> : <OverviewSkeleton annual />}><Routes>
+                <Suspense fallback={page === "settings" ? <SettingsPageSkeleton /> : <AnnualPageSkeleton />}><Routes>
                   <Route
                     path={ROUTE_PATHS.dashboard}
                     element={
@@ -567,7 +574,7 @@ export default function App() {
                               </p>
                             </div>
                           </div>
-                          <div className="filters">
+                          <div className="entries-search">
                             <Input
                               id="search"
                               placeholder={tr("Cerca un movimento…")}
@@ -577,26 +584,21 @@ export default function App() {
                                 setListPage(1);
                               }}
                             />
-                            <Autocomplete
-                              id="filter-category"
-                              isLoading={categoriesLoading}
-                              placeholder={tr("Tutte le categorie")}
-                              value={categoryById.get(filterCategory) ?? null}
-                              options={categories}
-                              getOptionKey={(item) => item._id}
-                              getOptionLabel={(item) => item.name}
-                              getOptionIcon={(item) => (
-                                <span
-                                  className="category-filter-dot"
-                                  style={{ background: item.color }}
-                                />
-                              )}
-                              onChange={(item) => {
-                                setFilterCategory(item?._id ?? "");
-                                setListPage(1);
-                              }}
-                            />
                           </div>
+                          {(filterCategory || filterSubcategory || filterKind) && (
+                            <div className="entry-active-filters" aria-label={tr("Filtri attivi")}>
+                              {[
+                                { value: filterKind, label: filterKind === "income" ? tr("Entrate") : tr("Spese"), clear: () => setFilterKind("") },
+                                { value: filterCategory, label: categoryById.get(filterCategory)?.name, clear: () => setFilterCategory("") },
+                                { value: filterSubcategory, label: subcategoryById.get(filterSubcategory)?.name, clear: () => setFilterSubcategory("") },
+                              ].filter((item) => item.value).map((item, index) => (
+                                <button key={index} type="button" aria-label={tr("Rimuovi filtro: {{name}}", { name: item.label })}
+                                  onClick={() => { item.clear(); setListPage(1); }}>
+                                  <span>{item.label}</span><X size={14} aria-hidden="true" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
                           <FilteredBalance summary={summary} kind={filterKind} loading={summaryLoading} />
                           {loading ? (
                             <EntriesSkeleton />
@@ -670,6 +672,17 @@ export default function App() {
                                 style={{ "--category-color": category.color } as CSSProperties}
                               >
                                 <div className="category-header">
+                                  <span
+                                    className="category-orb"
+                                    style={{
+                                      background: category.color + "20",
+                                      color: category.color,
+                                    }}
+                                  >
+                                    <Shapes size={22} />
+                                  </span>
+                                  <h2>{category.name}</h2>
+                                  <div className="category-actions">
                                   <IconButton
                                     className="quiet-icon"
                                     aria-label={tr("Modifica {{name}}", { name: category.name })}
@@ -698,20 +711,9 @@ export default function App() {
                                   >
                                     <Trash2 size={16} />
                                   </IconButton>
-
-                                  <span
-                                    className="category-orb"
-                                    style={{
-                                      background: category.color + "20",
-                                      color: category.color,
-                                    }}
-                                  >
-                                    <Shapes size={22} />
-                                  </span>
-                                  <h2>{category.name}</h2>
+                                  </div>
                                 </div>
                                 <Accordion
-                                  defaultOpen
                                   ariaLabel={tr("Sottocategorie di {{name}}", {
                                     name: category.name,
                                   })}
@@ -764,9 +766,11 @@ export default function App() {
                                         </span>
                                       </div>
                                     ))}
+                                </Accordion>
                                   <Button
                                     variant="secondary"
-                                    className="w-full mt-3"
+                                    className="category-add-subcategory"
+                                    icon={<span className="category-add-icon"><Plus size={17} /></span>}
                                     onClick={() =>
                                       setManageEdit({
                                         mode: "subcategory",
@@ -776,9 +780,8 @@ export default function App() {
                                       })
                                     }
                                   >
-                                    <Plus size={16} /> {tr("Sottocategoria")}
+                                    {tr("Nuova sottocategoria")}
                                   </Button>
-                                </Accordion>
                               </Shadowbox>
                             ))}
                           </div>
@@ -826,6 +829,10 @@ export default function App() {
                           setNotice({ error: false, message: "Account eliminato." });
                         }}
                         user={user}
+                        onImported={() => {
+                          setCategoryRevision((value) => value + 1);
+                          setRefresh((value) => value + 1);
+                        }}
                         onSaved={setUser}
                         onNotice={(error, message) => setNotice({ error, message })}
                       />
@@ -848,31 +855,14 @@ export default function App() {
                 <div className="mobile-floating-actions floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 max-[359px]:gap-2">
                   {page === "entries" && (
                     <>
-                      <FilterFloatingMenu
-                        ariaLabel={tr("Tipo di movimento")}
+                      <FloatingButton
+                        ariaLabel={tr("Filtra movimenti")}
+                        title={tr("Filtra movimenti")}
                         icon={<ListFilter size={27} />}
-                        value={filterKind}
-                        options={[
-                          { value: "", label: tr("Tutti"), icon: <Wallet size={18} /> },
-                          {
-                            value: "income",
-                            label: tr("Entrate"),
-                            icon: <ArrowDownLeft size={18} className="income-text" />,
-                          },
-                          {
-                            value: "expense",
-                            label: tr("Spese"),
-                            icon: <ArrowUpRight size={18} className="expense-text" />,
-                          },
-                        ]}
-                        isOpen={kindMenuOpen}
-                        onClose={() => setKindMenuOpen(false)}
-                        onToggle={() => setKindMenuOpen((value) => !value)}
-                        onChange={(value) => {
-                          setFilterKind(value);
-                          setListPage(1);
-                          setKindMenuOpen(false);
-                        }}
+                        className={filtersChanged ? "entry-filters-active" : ""}
+                        aria-haspopup="dialog"
+                        aria-expanded={filtersModalOpen}
+                        onClick={() => setFiltersModalOpen(true)}
                       />
                       {filtersChanged && (
                         <FloatingButton
@@ -902,6 +892,22 @@ export default function App() {
                     }
                   />
                 </div>
+              )}
+              {filtersModalOpen && page === "entries" && (
+                <EntryFiltersModal
+                  initial={{ category: filterCategory, subcategory: filterSubcategory, kind: filterKind }}
+                  categories={categories}
+                  subcategories={subcategories}
+                  loading={categoriesLoading}
+                  onClose={() => setFiltersModalOpen(false)}
+                  onApply={(filters) => {
+                    setFilterCategory(filters.category);
+                    setFilterSubcategory(filters.subcategory);
+                    setFilterKind(filters.kind);
+                    setListPage(1);
+                    setFiltersModalOpen(false);
+                  }}
+                />
               )}
               {entryEdit && (
                 <EntryModal
@@ -982,7 +988,7 @@ export default function App() {
                           }
                         />
                       </label>
-                    ) : (
+                    ) : manageEdit.id ? (
                       <>
                         <Autocomplete
                           id="manage-parent"
@@ -1012,7 +1018,7 @@ export default function App() {
                           )}
                         </p>
                       </>
-                    )}
+                    ) : null}
                   </form>
                 )}
               </Modal>

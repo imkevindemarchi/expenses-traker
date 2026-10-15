@@ -1,0 +1,83 @@
+/* Share the transaction editor's controls; only the three-way layout differs. */
+.entry-filters {
+  display: grid;
+  gap: 20px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.entry-filter-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.modal-entry-surface .entry-filters .entry-filter-kinds {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+.modal-entry-surface .entry-filters .entry-kind-option {
+  gap: 4px;
+  padding-inline: 5px;
+}
+.modal-entry-surface .entry-filters .entry-kind-label {
+  font-size: 12px;
+}
+.modal-entry-surface .entry-filters .entry-kind-option.all {
+  --kind-color: var(--modal-muted);
+  --kind-fill: color-mix(in srgb, var(--modal-ink) 5%, var(--modal-canvas));
+}
+.modal-entry-surface:has(.entry-filters.all) {
+  --entry-accent: var(--color-primary);
+}
+.entry-filter-disclosures {
+  display: grid;
+  gap: 12px;
+}
+.entry-filters .entry-pill {
+  max-width: 100%;
+  text-align: left;
+}
+.entry-filters .entry-pill > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.entry-filters .entry-pill small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--modal-muted);
+}
+.entries-search {
+  margin-bottom: 16px;
+}
+.entry-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.entry-active-filters button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  max-width: 100%;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.entry-active-filters button span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.entry-active-filters button svg {
+  flex-shrink: 0;
+}
+.floating-month-button.entry-filters-active {
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+}

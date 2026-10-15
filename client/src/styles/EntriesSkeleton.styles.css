@@ -18,3 +18,31 @@
 .sk-settings-fields .sk-field-line { width:100%; height:53px; }
 .sk-entry-card .entry-card-main > .sk-text { width:100%; height:20px; }
 @media(min-width:640px) { .sk-settings-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+/* Use the same section, field and backup geometry as the settings form. */
+[data-skeleton-layout="expense-settings"] .sk-field { margin-top:0; }
+[data-skeleton-layout="expense-settings"] .sk-field > .sk-label { height:21px; margin-bottom:8px; }
+[data-skeleton-layout="expense-settings"] .sk-field-line { height:53px; }
+[data-skeleton-layout="expense-settings"] .settings-section-heading .sk-section-title { height:24px; margin:0; }
+[data-skeleton-layout="expense-settings"] .settings-section-heading .sk-caption { width:100%; height:22px; }
+[data-skeleton-layout="expense-settings"] .settings-navigation-label { box-sizing:content-box; }
+.sk-settings-note { width:100%; height:22px; }
+.sk-settings-note--long { height:44px; }
+.sk-settings-toggle { width:100%; height:48px; }
+.sk-settings-button { width:180px; height:44px; border-radius:12px; }
+[data-skeleton-layout="expense-settings"] .settings-delete-actions .sk-settings-button { width:160px; }
+
+[data-skeleton-layout="expense-settings"] .settings-section-icon { width:22px; height:24px; }
+[data-skeleton-layout="expense-settings"] .settings-delete-icon { width:20px; height:22px; }
+
+[data-skeleton-layout="categories"] .sk-category-action { width:26px; height:30px; }
+[data-skeleton-layout="categories"] .sk-category-subheading { padding:0; min-height:36px; }
+.sk-category-chevron { width:36px; height:36px; border-radius:12px; }
+.sk-category-add { height:46px; }
+
+[data-skeleton-layout="expense-settings"] .ui-placeholder.settings-section-icon,
+[data-skeleton-layout="expense-settings"] .ui-placeholder.settings-delete-icon { background:rgb(36 33 38 / 8%); }
+[data-theme="dark"] [data-skeleton-layout="expense-settings"] .ui-placeholder.settings-section-icon,
+[data-theme="dark"] [data-skeleton-layout="expense-settings"] .ui-placeholder.settings-delete-icon { background:rgb(244 242 245 / 9%); }
+[data-skeleton-layout="expense-settings"] .settings-data-actions > .ui-placeholder { width:100%; min-height:48px; }
+[data-skeleton-layout="expense-settings"] .ui-placeholder.settings-password-toggle { width:100%; }

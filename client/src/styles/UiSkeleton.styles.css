@@ -68,3 +68,7 @@
 .sk-overview-donut { mask:radial-gradient(circle,transparent 52%,#000 53%); }
 [data-skeleton-layout="overview"] .category-legend .sk-text { height:16px; width:55%; }
 [data-skeleton-layout="overview"] .category-legend .sk-value { height:16px; width:55px; }
+
+.sk-year-value { width:46px; height:20px; }
+.sk-year-caption { width:52px; height:12px; margin-top:2px; }
+.annual-filter .ui-placeholder.month-picker-icon { width:30px; height:30px; }

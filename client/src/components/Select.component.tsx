@@ -1,3 +1,4 @@
+import ModalChoiceField from "./ModalChoiceField.component";
 import "../styles/Select.styles.css";
 
 import { useTranslation } from "react-i18next";
@@ -59,6 +60,8 @@ const Select = <TValue extends string = string>({
   const translatedPlaceholder = placeholder ?? t("autocomplete.placeholder");
 
   const selectRef = useRef<HTMLDivElement>(null);
+  const [insideModal, setInsideModal] = useState(false);
+  useLayoutEffect(() => { setInsideModal(Boolean(selectRef.current?.closest('[role="dialog"]'))); }, []);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -208,6 +211,13 @@ const Select = <TValue extends string = string>({
     };
   }, [isOpen, updateMenuPosition]);
 
+  if (insideModal) return <ModalChoiceField
+    id={id} label={label} placeholder={translatedPlaceholder} value={selectedOption ?? null}
+    options={options} icon={icon} disabled={disabled} clearable={false}
+    getOptionKey={(item) => item.value} getOptionLabel={(item) => item.label}
+    getOptionDescription={(item) => item.description} getOptionIcon={(item) => item.icon}
+    onChange={(item) => { if (item) onChange(item.value); }}
+  />;
   return (
     <>
       <div ref={selectRef} className="w-full">
