@@ -49,3 +49,13 @@
 @media(min-width:1440px) { .sk-home-cards { grid-template-columns:repeat(4,minmax(0,1fr)); } }
 @media(max-width:399px) { .sk-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .sk-metrics > :last-child:nth-child(3) { grid-column:1/-1; } .sk-detail-heading { gap:12px; } .sk-avatar { width:72px; height:72px; } }
 @media(prefers-reduced-motion:reduce) { .ui-placeholder,.sk-chart-line,.skeleton-block,[class*="animate-pulse"] { animation:none!important; } }
+
+[data-skeleton-layout="overview"] .sk-overview-balance { width:160px; height:46px; margin:12px 0; }
+[data-skeleton-layout="overview"] .balance-card > .sk-pill { margin-top:12px; }
+[data-skeleton-layout="overview"] .sk-overview-description { width:85%; height:22px; }
+[data-skeleton-layout="overview"] .sk-overview-amount { width:140px; height:38px; margin:12px 0; }
+.sk-overview-goal { margin-top:16px; }
+.sk-calendar-weekday { width:12px; height:16px; margin:auto; }
+[data-skeleton-layout="overview"] .dashboard-calendar .sk-section-title { margin:0; height:26px; }
+[data-skeleton-layout="overview"] .budget-heading .sk-section-title { margin-top:12px; }
+.sk-budget-track { width:100%; height:10px; margin-block:18px; border-radius:100px; }

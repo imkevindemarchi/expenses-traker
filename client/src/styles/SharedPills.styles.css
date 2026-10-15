@@ -1,0 +1,23 @@
+/* Common capsule geometry, preserving app, category and semantic colors. */
+.ui-pill.ui-pill.ui-pill {
+  display:inline-flex; align-items:center; justify-content:flex-start; gap:7px;
+  max-width:100%; min-height:30px; height:auto;
+  padding:4px 10px; border:1px solid color-mix(in srgb,currentColor 20%,transparent);
+  border-radius:100px; font-size:12px; line-height:18px; font-weight:600;
+  background-image:linear-gradient(135deg,rgb(255 255 255 / 8%),transparent 70%);
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / 12%); vertical-align:middle;
+}
+.ui-pill.ui-pill.ui-pill > svg {
+  flex-shrink:0; width:24px; height:24px; padding:4px; border-radius:50%;
+  background:color-mix(in srgb,currentColor 12%,transparent);
+}
+.ui-pill.ui-pill.ui-pill > span:has(> svg):not(:has(button)) {
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  width:24px; height:24px; border-radius:50%;
+  background:color-mix(in srgb,currentColor 12%,transparent);
+}
+.ui-pill.ui-pill.ui-pill > span:has(> svg) > svg { width:15px; height:15px; }
+.ui-pill.ui-pill.ui-pill:not(:has(svg,i))::before { content:""; width:6px; height:6px; flex-shrink:0; border-radius:50%; background:currentColor; }
+button.ui-pill.ui-pill.ui-pill { min-height:40px; }
+.ui-pill.ui-pill.ui-pill > button > svg { background:transparent; }
+.ui-pill.ui-pill.ui-pill.workout-status-pill { padding-left:4px; }

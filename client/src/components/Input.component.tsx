@@ -31,11 +31,11 @@ const Input: FC<IProps> = ({
   const inputId: string = id || name || label || "";
 
   return (
-    <div className={`w-full ${className || ""}`}>
+    <div className={`ui-field w-full ${className || ""}`}>
       {label && (
         <label
           htmlFor={inputId}
-          className={`mb-2 block text-base font-semibold sm:text-sm ${theme === "light" ? "text-black" : "text-white"}`}
+          className={`ui-field-label mb-2 block text-base font-semibold sm:text-sm ${theme === "light" ? "text-black" : "text-white"}`}
         >
           {label}
         </label>
@@ -53,7 +53,7 @@ const Input: FC<IProps> = ({
           name={name}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${inputId}-error` : undefined}
-          className={`w-full bg-transparent py-5 text-base outline-none sm:text-sm ${theme === "light" ? "text-black placeholder:text-gray-400" : "text-white placeholder:text-gray-500"}`}
+          className={`ui-field-control w-full bg-transparent py-5 text-base outline-none sm:text-sm ${theme === "light" ? "text-black placeholder:text-gray-400" : "text-white placeholder:text-gray-500"}`}
           {...props}
         />
 

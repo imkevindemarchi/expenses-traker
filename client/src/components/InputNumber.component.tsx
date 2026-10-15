@@ -60,10 +60,10 @@ const InputNumber: FC<IProps> = ({
   };
 
   return (
-    <div className={`w-full ${className || ""}`}>
+    <div className={`ui-field w-full ${className || ""}`}>
       <label
         htmlFor={inputId}
-        className={hideLabel ? "sr-only" : `${compact ? "mb-1 block text-xs font-semibold" : "mb-2 block text-base font-semibold sm:text-sm"} ${theme === "light" ? "text-black" : "text-white"}`}
+        className={hideLabel ? "sr-only" : `ui-field-label ${compact ? "mb-1 block text-xs font-semibold" : "mb-2 block text-base font-semibold sm:text-sm"} ${theme === "light" ? "text-black" : "text-white"}`}
       >
         {label}
       </label>
@@ -87,7 +87,7 @@ const InputNumber: FC<IProps> = ({
           min={min}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${inputId}-error` : undefined}
-          className={`w-full bg-transparent outline-none ${compact ? "py-2.5 text-center text-base font-semibold sm:text-sm" : "py-5 text-base sm:text-sm"} ${theme === "light" ? "text-black placeholder:text-gray-400" : "text-white placeholder:text-gray-500"}`}
+          className={`ui-field-control w-full bg-transparent outline-none ${compact ? "py-2.5 text-center text-base font-semibold sm:text-sm" : "py-5 text-base sm:text-sm"} ${theme === "light" ? "text-black placeholder:text-gray-400" : "text-white placeholder:text-gray-500"}`}
           onChange={handleChange}
           {...props}
         />

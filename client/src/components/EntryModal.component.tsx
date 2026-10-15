@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import DatePicker from "./DatePicker.component";
-import { useContext, useEffect, useRef, useState, type FormEvent } from "react";
+import { useContext, useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -8,6 +8,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Shapes,
+  Layers3,
 } from "lucide-react";
 import { tr, locale } from "../i18n";
 import { CurrencyContext } from "../contexts/currency.context";
@@ -51,7 +53,10 @@ export default function EntryModal({
   const [categorySearch, setCategorySearch] = useState("");
   const [subcategorySearch, setSubcategorySearch] = useState("");
   const [error, setError] = useState("");
+  const [editSection, setEditSection] = useState<"category" | "subcategory" | null>(null);
   const stepHeading = useRef<HTMLHeadingElement>(null);
+  const categoryToggle = useRef<HTMLButtonElement>(null);
+  const subcategoryToggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!editing && step > 0 && step < 3) stepHeading.current?.focus({ preventScroll: true });
   }, [editing, step]);
@@ -94,6 +99,10 @@ export default function EntryModal({
       )
     ) {
       if (!editing) move(1);
+      else
+        setEditSection(
+          categories.some((item) => item._id === form.category) ? "subcategory" : "category",
+        );
       setError("Seleziona una categoria valida.");
       return;
     }
@@ -121,8 +130,8 @@ export default function EntryModal({
       <Modal
         isOpen
         appearance="entry"
-        title={tr("Modifica movimento")}
-        maxWidth="md"
+        title={tr(form.kind === "expense" ? "Modifica spesa" : "Modifica entrata")}
+        maxWidth="lg"
         isClosable={!busy}
         onClose={onClose}
         footer={
@@ -137,7 +146,7 @@ export default function EntryModal({
               disabled={busy || !form.category || !form.subcategory || !categories.length}
               icon={<Check size={17} />}
             >
-              {tr(busy ? "Salvataggio…" : "Salva movimento")}
+              {tr(busy ? "Salvataggio…" : "Salva modifiche")}
             </Button>
           </>
         }
@@ -171,68 +180,11 @@ export default function EntryModal({
                 </button>
               ))}
             </div>
-            <div className="entry-edit-choices">
-              <Input
-                id="entry-edit-category-search"
-                label={tr("Categoria")}
-                placeholder={tr("Cerca categoria…")}
-                icon={<Search size={16} />}
-                value={categorySearch}
-                onChange={(event) => setCategorySearch(event.target.value)}
-              />
-              <div className="entry-pills" role="group" aria-label={tr("Categoria")}>
-                {editCategories.map((item) => (
-                  <button
-                    type="button"
-                    key={item._id}
-                    className="entry-pill"
-                    aria-pressed={form.category === item._id}
-                    onClick={() => {
-                      update({
-                        category: item._id,
-                        subcategory: item._id === form.category ? form.subcategory : "",
-                      });
-                      if (item._id !== form.category) setSubcategorySearch("");
-                    }}
-                  >
-                    <i style={{ background: item.color }} />
-                    {item.name}
-                    {form.category === item._id && <Check size={14} />}
-                  </button>
-                ))}
-              </div>
-              {!editCategories.length && <p className="muted">{tr("Nessun risultato.")}</p>}
-            </div>
-            <div className="entry-edit-choices">
-              <Input
-                id="entry-edit-subcategory-search"
-                label={tr("Sottocategoria")}
-                placeholder={tr("Cerca sottocategoria…")}
-                icon={<Search size={16} />}
-                disabled={!form.category}
-                value={subcategorySearch}
-                onChange={(event) => setSubcategorySearch(event.target.value)}
-              />
-              <div className="entry-pills" role="group" aria-label={tr("Sottocategoria")}>
-                {editSubcategories.map((item) => (
-                  <button
-                    type="button"
-                    key={item._id}
-                    className="entry-pill"
-                    aria-pressed={form.subcategory === item._id}
-                    onClick={() => update({ subcategory: item._id })}
-                  >
-                    <i style={{ background: selectedCategory?.color }} />
-                    {item.name}
-                    {form.subcategory === item._id && <Check size={14} />}
-                  </button>
-                ))}
-              </div>
-              {!editSubcategories.length && <p className="muted">{tr("Nessun risultato.")}</p>}
-            </div>
             <div className="entry-edit-details">
               <InputNumber
                 id="entry-edit-amount"
+                className="entry-amount-field"
+                suffix={currency}
                 label={tr("Importo {{currency}}", { currency })}
                 value={form.amount}
                 allowDecimal
@@ -244,6 +196,7 @@ export default function EntryModal({
               />
               <DatePicker
                 id="entry-edit-date"
+                className="entry-edit-date-field"
                 label={tr("Data")}
                 value={form.date ? new Date(form.date + "T12:00:00") : null}
                 disabled={busy}
@@ -255,6 +208,133 @@ export default function EntryModal({
                   })
                 }
               />
+            </div>
+            <div
+              className="entry-edit-classification"
+              style={
+                {
+                  "--category-color": selectedCategory?.color ?? "var(--entry-accent)",
+                } as CSSProperties
+              }
+            >
+              <div className="entry-edit-choices">
+                <button
+                  ref={categoryToggle}
+                  type="button"
+                  className="entry-edit-choice-toggle"
+                  aria-expanded={editSection === "category"}
+                  aria-controls="entry-edit-category-options"
+                  onClick={() =>
+                    setEditSection((current) => (current === "category" ? null : "category"))
+                  }
+                >
+                  <Shapes size={19} aria-hidden="true" />
+                  <span>
+                    <small>{tr("Categoria")}</small>
+                    <strong>{selectedCategory?.name ?? tr("Scegli una categoria")}</strong>
+                  </span>
+                  <ChevronRight size={18} aria-hidden="true" />
+                </button>
+                {editSection === "category" && (
+                  <div id="entry-edit-category-options" className="entry-edit-choice-options">
+                    <Input
+                      id="entry-edit-category-search"
+                      label={tr("Categoria")}
+                      placeholder={tr("Cerca categoria…")}
+                      icon={<Search size={16} />}
+                      value={categorySearch}
+                      onChange={(event) => setCategorySearch(event.target.value)}
+                    />
+                    <div className="entry-pills" role="group" aria-label={tr("Categoria")}>
+                      {editCategories.map((item) => (
+                        <button
+                          type="button"
+                          key={item._id}
+                          className="ui-pill entry-pill"
+                          aria-pressed={form.category === item._id}
+                          onClick={() => {
+                            update({
+                              category: item._id,
+                              subcategory: item._id === form.category ? form.subcategory : "",
+                            });
+                            if (item._id !== form.category) setSubcategorySearch("");
+                            setCategorySearch("");
+                            setEditSection(item._id === form.category ? null : "subcategory");
+                            (item._id === form.category
+                              ? categoryToggle
+                              : subcategoryToggle
+                            ).current?.focus({ preventScroll: true });
+                          }}
+                        >
+                          <i style={{ background: item.color }} />
+                          {item.name}
+                          {form.category === item._id && <Check size={14} />}
+                        </button>
+                      ))}
+                    </div>
+                    {!editCategories.length && <p className="muted">{tr("Nessun risultato.")}</p>}
+                  </div>
+                )}
+              </div>
+              <div className="entry-edit-choices">
+                <button
+                  ref={subcategoryToggle}
+                  type="button"
+                  className="entry-edit-choice-toggle"
+                  aria-expanded={editSection === "subcategory"}
+                  aria-controls="entry-edit-subcategory-options"
+                  disabled={!form.category}
+                  onClick={() =>
+                    setEditSection((current) => (current === "subcategory" ? null : "subcategory"))
+                  }
+                >
+                  <Layers3 size={19} aria-hidden="true" />
+                  <span>
+                    <small>{tr("Sottocategoria")}</small>
+                    <strong>
+                      {subcategories.find((item) => item._id === form.subcategory)?.name ??
+                        tr("Scegli una sottocategoria")}
+                    </strong>
+                  </span>
+                  <ChevronRight size={18} aria-hidden="true" />
+                </button>
+                {editSection === "subcategory" && (
+                  <div id="entry-edit-subcategory-options" className="entry-edit-choice-options">
+                    <Input
+                      id="entry-edit-subcategory-search"
+                      label={tr("Sottocategoria")}
+                      placeholder={tr("Cerca sottocategoria…")}
+                      icon={<Search size={16} />}
+                      disabled={!form.category}
+                      value={subcategorySearch}
+                      onChange={(event) => setSubcategorySearch(event.target.value)}
+                    />
+                    <div className="entry-pills" role="group" aria-label={tr("Sottocategoria")}>
+                      {editSubcategories.map((item) => (
+                        <button
+                          type="button"
+                          key={item._id}
+                          className="ui-pill entry-pill"
+                          aria-pressed={form.subcategory === item._id}
+                          onClick={() => {
+                            update({ subcategory: item._id });
+                            setEditSection(null);
+                            setSubcategorySearch("");
+                            subcategoryToggle.current?.focus({ preventScroll: true });
+                          }}
+                        >
+                          <i style={{ background: selectedCategory?.color }} />
+                          {item.name}
+                          {form.subcategory === item._id && <Check size={14} />}
+                        </button>
+                      ))}
+                    </div>
+                    {!editSubcategories.length && (
+                      <p className="muted">{tr("Nessun risultato.")}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </fieldset>
           {error && (
@@ -312,7 +392,7 @@ export default function EntryModal({
         {step > 0 && (
           <>
             <div className="entry-context">
-              <span className="entry-kind-badge">
+              <span className="ui-pill entry-kind-badge">
                 {form.kind === "expense" ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
                 {tr(form.kind === "expense" ? "Spesa" : "Entrata")}
               </span>
@@ -404,7 +484,7 @@ export default function EntryModal({
                     <button
                       type="button"
                       key={item._id}
-                      className="entry-pill"
+                      className="ui-pill entry-pill"
                       aria-pressed={selected}
                       onClick={() => {
                         update(

@@ -1,6 +1,6 @@
 /* One open authentication layout, shared verbatim across all three apps. */
-.auth-shell { --auth-canvas:#faf9f9; --auth-ink:#242126; --auth-muted:#706a72; --auth-line:rgb(36 33 38 / 11%); position:relative; display:grid; place-items:center; min-height:100dvh; width:100%; padding:112px 24px 48px; color:var(--auth-ink); background:var(--auth-canvas); }
-[data-theme="dark"] .auth-shell { --auth-canvas:#151416; --auth-ink:#f4f2f5; --auth-muted:#aaa4af; --auth-line:rgb(244 242 245 / 12%); }
+.auth-shell { --auth-canvas:var(--canvas); --auth-ink:#242126; --auth-muted:#706a72; --auth-line:rgb(36 33 38 / 11%); position:relative; display:grid; place-items:center; min-height:100dvh; width:100%; padding:112px 24px 48px; color:var(--auth-ink); background:var(--auth-canvas); }
+[data-theme="dark"] .auth-shell { --auth-canvas:var(--canvas); --auth-ink:#f4f2f5; --auth-muted:#aaa4af; --auth-line:rgb(244 242 245 / 12%); }
 .auth-shell-language { position:absolute; top:max(24px,env(safe-area-inset-top)); right:max(24px,env(safe-area-inset-right)); z-index:40; }
 .auth-shell-content { width:100%; max-width:440px; min-width:0; }
 .auth-shell-brand { display:flex; align-items:center; gap:14px; margin-bottom:40px; font-size:20px; font-weight:650; letter-spacing:-.025em; }

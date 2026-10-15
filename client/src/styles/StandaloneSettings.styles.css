@@ -1,0 +1,14 @@
+/* Standalone settings use the detail page chrome and retain safe-area gutters. */
+.app-main.ui-refresh.standalone-settings-page,
+.app-page-container.standalone-settings-page {
+  padding-top:calc(24px + env(safe-area-inset-top,0px));
+  padding-left:max(20px,env(safe-area-inset-left));
+  padding-right:max(20px,env(safe-area-inset-right));
+  padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));
+}
+.standalone-settings-page > .app-footer { display:none; }
+.standalone-settings-page > .subscription-settings-page { padding-top:0; }
+@media(min-width:768px) {
+  .app-main.ui-refresh.standalone-settings-page,
+  .app-page-container.standalone-settings-page { padding-inline:36px; }
+}

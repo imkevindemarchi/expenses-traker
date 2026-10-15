@@ -1,0 +1,39 @@
+/* One shared type scale and reading rhythm for all three applications. */
+:root {
+  --ui-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --ui-font-body:16px;
+  --ui-font-label:14px;
+  --ui-font-caption:12px;
+  --ui-font-section:19px;
+  --ui-font-card-title:16px;
+  --ui-space-section:24px;
+  --ui-space-card:16px;
+  --ui-text-muted:#625b65;
+}
+[data-theme="dark"] { --ui-text-muted:#b8b2bc; }
+html, body, #root { font-family:var(--ui-font-family); font-size:var(--ui-font-body); line-height:1.5; -webkit-text-size-adjust:100%; }
+:where(button,input,textarea,select) { font-family:inherit; }
+.ui-field .ui-field-label { font-size:var(--ui-font-label); line-height:20px; font-weight:600; }
+:where(.ui-field) .ui-field-control { font-size:var(--ui-font-body); line-height:24px; min-width:0; }
+.date-picker-field label { font-size:var(--ui-font-label); line-height:20px; font-weight:600; }
+.date-picker-field .date-picker-control input { font-size:var(--ui-font-body); line-height:24px; min-width:0; }
+button[data-ui-button] { font-size:var(--ui-font-label); line-height:20px; }
+.ui-page-heading .ui-page-title { font-size:24px; line-height:1.25; font-weight:650; letter-spacing:-.025em; }
+.ui-page-heading[data-ui-compact="true"] .ui-page-title { font-size:14px; line-height:20px; letter-spacing:0; }
+.ui-page-heading:not([data-ui-compact="true"]) .ui-page-title { white-space:normal; overflow-wrap:anywhere; }
+.section-heading .section-heading-title { font-size:var(--ui-font-section); line-height:1.35; font-weight:650; }
+.section-heading .section-heading-description { font-size:var(--ui-font-label); line-height:1.6; color:var(--ui-text-muted); }
+.muted, .text-gray, .ui-refresh .muted { color:var(--ui-text-muted); }
+:where(.entry-cards,.history-workout-cards,.user-list-cards,.ppv-list-cards) { gap:var(--ui-space-card); }
+.ui-refresh .entry-card h3, .ui-refresh .history-workout-card h3,
+.user-list-card .user-list-card-link, .ppv-list-card .ppv-list-card-title { font-size:var(--ui-font-card-title); line-height:24px; font-weight:600; }
+.entry-card-category, .entry-card-date,
+.history-card-metrics span, .history-card-context > span:first-child,
+.analytics-detail-row:not(.analytics-detail-row--sale) :is(.analytics-detail-username,.analytics-detail-context,.analytics-detail-date),
+.user-list-card .user-list-card-expiration-label,
+.user-list-card .user-list-card-metric-label { font-size:var(--ui-font-caption); line-height:18px; }
+.entry-card, .history-workout-card { border-radius:24px; }
+.settings-section-heading p, .settings-redesign .settings-data-note { font-size:var(--ui-font-label); line-height:1.65; }
+@media(min-width:640px) { .ui-page-heading:not([data-ui-compact="true"]) .ui-page-title { font-size:30px; } }
+
+.ui-user-card [class~="text-[11px]"], .ui-user-card [class~="text-[10px]"] { font-size:var(--ui-font-caption); line-height:18px; }

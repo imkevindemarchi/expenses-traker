@@ -1,0 +1,181 @@
+/* Compact movement cards share category tones with Management. */
+.entry-cards {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.entry-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--entry-card-category) 16%, var(--line));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--entry-card-category) 4%, var(--canvas));
+}
+.entry-card-main {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.entry-card-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  color: var(--entry-card-tone);
+  background: color-mix(in srgb, var(--entry-card-tone) 10%, transparent);
+}
+.ui-refresh .entry-card h3 {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+.entry-card-amount {
+  color: var(--entry-card-tone);
+  font-size: 20px;
+  line-height: 26px;
+  letter-spacing: -0.035em;
+  font-weight: 650;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.entry-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--entry-card-category) 12%, var(--line));
+}
+.entry-card-meta {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.entry-card-category {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+}
+.entry-card-category i {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--entry-card-category);
+}
+.entry-card-date {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+.entry-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.entry-card-actions .quiet-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+}
+@media (max-width: 1023px) {
+  .ui-refresh .entry-table--desktop {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .entry-cards {
+    display: none;
+  }
+}
+@media (max-width: 379px) {
+  .entry-card {
+    padding: 14px;
+  }
+  .entry-card-main {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 4px 10px;
+  }
+  .entry-card-icon {
+    grid-row: 1;
+  }
+  .entry-card-amount {
+    font-size: 20px;
+  }
+}
+/* Loading cards keep the same spacing and control positions as loaded movements. */
+@media (max-width: 1023px) {
+  .ui-refresh .skeleton-list {
+    gap: 12px;
+  }
+  .ui-refresh .skeleton-list > .movement-skeleton-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 134px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--soft);
+  }
+  .ui-refresh .movement-skeleton-row > .movement-skeleton-icon {
+    grid-column: 1;
+    grid-row: 1;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+  .ui-refresh .movement-skeleton-row > div:not(.movement-skeleton-actions) {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .ui-refresh .movement-skeleton-row > .movement-skeleton-amount {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    justify-self: end;
+    width: 76px;
+    height: 26px;
+  }
+  .ui-refresh .movement-skeleton-row > .movement-skeleton-actions {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    flex-direction: row;
+  }
+  .ui-refresh .movement-skeleton-actions > span {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+}
+
+.entry-card-actions {
+  align-self: start;
+}
+.entries-pagination {
+  margin-top: 24px;
+  padding-bottom: 4px;
+}
+.entries-pagination .pagination-surface.glass-surface {
+  border: 1px solid var(--glass-rim);
+  border-radius: 26px;
+  padding: 8px;
+  background: var(--glass-fill);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+}

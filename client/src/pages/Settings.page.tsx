@@ -3,7 +3,7 @@ import CurrencyPicker from "../components/CurrencyPicker.component";
 import "../styles/DeleteConfirmation.styles.css";
 import { useMoney } from "../contexts/currency.context";
 import { useState, useId, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Settings,
@@ -54,6 +54,7 @@ export default function SettingsPage({
 }) {
   const money = useMoney();
   const navigate = useNavigate();
+  const location = useLocation();
   useTranslation();
   const [amount, setAmount] = useState(
     user.monthlyBudgetCents == null ? "" : (user.monthlyBudgetCents / 100).toFixed(2),
@@ -165,7 +166,7 @@ export default function SettingsPage({
       <SectionNavigation label={tr("Impostazioni")} sections={[
         { id: "expense-settings-0", title: tr("Profilo"), icon: <UserRound size={18} /> },
         { id: "expense-settings-1", title: tr("Valuta e budget mensile"), icon: <Settings size={18} /> },
-        { id: "expense-settings-2", title: tr("Password"), icon: <LockKeyhole size={18} /> },
+        { id: "expense-settings-2", title: tr("Sicurezza"), icon: <LockKeyhole size={18} /> },
         { id: "expense-settings-3", title: tr("Gestione dati"), icon: <Database size={18} /> },
       ]} />
       <form
@@ -280,7 +281,7 @@ export default function SettingsPage({
                   <LockKeyhole size={22} />
                 </span>
                 <div>
-                  <h2>{tr("Cambia password")}</h2>
+                  <h2>{tr("Sicurezza")}</h2>
                   <p className="muted">
                     {tr(
                       "Usa almeno 10 caratteri. Dopo il cambio, le altre sessioni dovranno accedere di nuovo.",
@@ -337,7 +338,7 @@ export default function SettingsPage({
                 <div>
                   <h2>{tr("I tuoi dati")}</h2>
                   <p className="muted">
-                    {tr("Gestisci una copia dei tuoi dati e il tuo account.")}
+                    {tr("Gestisci i dati dell’applicativo.")}
                   </p>
                 </div>
               </div>
@@ -449,7 +450,7 @@ export default function SettingsPage({
       </form>
       </div>
       <div className="settings-floating-actions mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
-        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={()=>navigate("/")} disabled={busy || deleteBusy || exportBusy} />
+        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={() => location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)} disabled={busy || deleteBusy || exportBusy} />
         <FloatingButton
           type="submit"
           form="account-settings-form"

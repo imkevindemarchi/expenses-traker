@@ -1,4 +1,12 @@
 {
+  "Gestisci i dati dell’applicativo.": "Manage application data.",
+  "Esporta e importa i dati dell’applicativo.": "Export and import application data.",
+  "Sicurezza": "Security",
+  "Modifica spesa": "Edit expense",
+  "Modifica entrata": "Edit income",
+  "Salva modifiche": "Save changes",
+  "Scegli una categoria": "Choose a category",
+  "Scegli una sottocategoria": "Choose a subcategory",
   "Anno corrente": "Current year",
   "Torna all’anno corrente": "Back to the current year",
   "La tua panoramica, un anno alla volta.": "Your overview, one year at a time.",

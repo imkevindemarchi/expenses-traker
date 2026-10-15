@@ -60,6 +60,7 @@ const Button: FC<IProps> = ({
   return (
     <button
       {...props}
+      data-ui-button
       type={type}
       disabled={disabled}
       className={`${

@@ -147,12 +147,13 @@ const Header: FC<IProps> = ({
               onClick={handleTitleClick}
               aria-label={title}
               data-glass-theme={theme}
-              className={`relative mx-auto w-fit max-w-full origin-top-left cursor-pointer overflow-hidden border px-5 text-center transition-[background-color,border-color,box-shadow] duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:cursor-default ${
+              data-ui-compact={isCompact}
+              className={`ui-page-heading relative mx-auto w-fit max-w-full origin-top-left cursor-pointer overflow-hidden border px-5 text-center transition-[background-color,border-color,box-shadow] duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:cursor-default ${
                 isCompact ? "glass-surface rounded-full" : "rounded-none border-transparent"
               }`}
             >
               <span
-                className={`relative z-10 block truncate text-center font-semibold capitalize text-primary !transition-none ${
+                className={`ui-page-title relative z-10 block truncate text-center font-semibold capitalize text-primary !transition-none ${
                   isCompact ? "max-w-full py-2 text-sm" : "max-w-full py-3 text-2xl sm:text-3xl"
                 }`}
               >

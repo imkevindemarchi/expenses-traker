@@ -1,5 +1,6 @@
 import { startGlobalLoading, stopGlobalLoading } from "../stores/loader.store";
 import { locale } from "../i18n";
+import { numberFormatter, dateFormatter } from "../utils/formatters.util";
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -9,17 +10,19 @@ export class ApiError extends Error {
 }
 export async function api<T>(
   path: string,
-  options?: { method?: string; body?: unknown },
+  options?: { method?: string; body?: unknown; globalLoader?: boolean; signal?: AbortSignal },
 ): Promise<T> {
-  const showLoading = (options?.method && options.method !== "GET" && !(options.method === "PATCH" && path.startsWith("/workouts/"))) || path === "/backup";
+  const showLoading = options?.globalLoader ?? ((options?.method && options.method !== "GET" && !(options.method === "PATCH" && path.startsWith("/workouts/"))) || path === "/backup");
   if (showLoading) startGlobalLoading();
   try {
   const response = await fetch(`/api${path}`, {
     method: options?.method ?? "GET",
     credentials: "same-origin",
+    signal: options?.signal,
     headers: options?.body ? { "Content-Type": "application/json" } : undefined,
     body: options?.body ? JSON.stringify(options.body) : undefined,
-  }).catch(() => {
+  }).catch((error) => {
+    if (options?.signal?.aborted) throw error;
     throw new ApiError(
       "Il server non è raggiungibile. Verifica la connessione e che il back-end sia avviato.",
       0,
@@ -37,7 +40,7 @@ export async function api<T>(
   } finally { if (showLoading) stopGlobalLoading(); }
 }
 export const money = (cents: number, currency = "EUR") =>
-  new Intl.NumberFormat(locale(), { style: "currency", currency }).format(cents / 100);
+  numberFormatter(locale(), { style: "currency", currency }).format(cents / 100);
 export const today = () => {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Rome",
@@ -50,7 +53,7 @@ export const today = () => {
     .join("-");
 };
 export const displayDate = (date: string) =>
-  new Intl.DateTimeFormat(locale(), { day: "2-digit", month: "short" }).format(
+  dateFormatter(locale(), { day: "2-digit", month: "short" }).format(
     new Date(`${date}T12:00:00Z`),
   );
 export const csvCell = (value: string) =>

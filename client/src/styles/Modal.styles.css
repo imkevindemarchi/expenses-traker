@@ -405,3 +405,54 @@
   width: 32px;
   height: 32px;
 }
+
+/* Mobile action layout and keyboard-aware visible viewport. */
+@media (max-width:639px) {
+  .modal-backdrop {
+    --modal-safe-bottom:env(safe-area-inset-bottom,0px);
+    top:var(--modal-viewport-top,0px);
+    bottom:auto;
+    height:var(--modal-viewport-height,100dvh);
+  }
+  .modal-backdrop[data-modal-keyboard="true"] { --modal-safe-bottom:0px; }
+  .modal-backdrop .modal-placement { height:100%; min-height:0; }
+  .modal-surface.glass-surface:not(.modal-choice-surface) { max-height:100%; }
+  .modal-choice-surface.glass-surface { max-height:100%; }
+  .modal-surface:has(> .modal-footer) .modal-content { padding-bottom:20px; }
+  .modal-footer {
+    max-height:calc(var(--modal-viewport-height,100dvh) * 0.6);
+    padding-top:12px;
+    padding-bottom:max(16px,var(--modal-safe-bottom));
+    background:var(--modal-canvas);
+  }
+  .modal-actions { gap:10px; align-items:stretch; }
+  .modal-actions > button, .modal-entry-surface .modal-actions > .entry-save {
+    flex:1 1 calc(50% - 5px);
+    margin:0;
+    padding-inline:14px;
+    min-height:50px;
+    border-radius:16px;
+    text-wrap:pretty;
+  }
+  .modal-actions > button:only-child { flex-basis:100%; }
+  .modal-actions > div > button { min-height:50px; white-space:normal; overflow-wrap:anywhere; }
+}
+@media (max-width:379px) {
+  .modal-actions > button, .modal-entry-surface .modal-actions > .entry-save { flex-basis:100%; }
+}
+
+/* Every text-button group in modal footers uses the same mobile layout. */
+@media(max-width:639px) {
+  .modal-surface .modal-footer div:has(> button[data-ui-button]) { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; align-items:stretch; width:100%; min-width:0; }
+  .modal-surface .modal-footer div:has(> button[data-ui-button]:only-child),
+  .modal-surface .modal-footer div:has(> button[data-ui-button]:nth-of-type(n+3)) { grid-template-columns:minmax(0,1fr); }
+  .modal-surface .modal-footer div:has(> button[data-ui-button]) > :not(button) { grid-column:1 / -1; }
+  .modal-surface .modal-footer button[data-ui-button] { width:100%; min-width:0; max-width:100%; min-height:50px; height:auto; margin:0; padding:12px 14px; border-radius:16px; font-size:14px; line-height:20px; white-space:normal; overflow-wrap:anywhere; text-wrap:pretty; }
+  .modal-surface .modal-footer button[data-ui-button] > span { min-width:0; white-space:normal; overflow-wrap:anywhere; }
+  .modal-surface .modal-footer button[data-ui-button] > svg { flex-shrink:0; }
+  .modal-surface .modal-footer .workout-finish-actions { grid-template-columns:minmax(0,1fr); }
+  .modal-surface .modal-footer .workout-finish-actions > button:first-child { order:2; }
+}
+@media(max-width:379px) {
+  .modal-surface .modal-footer div:has(> button[data-ui-button]) { grid-template-columns:minmax(0,1fr); }
+}

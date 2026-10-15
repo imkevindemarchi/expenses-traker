@@ -1,3 +1,4 @@
+import useModalViewport from "../hooks/useModalViewport.hook";
 import IconButton from "./IconButton.component";
 import {
   type FC,
@@ -62,6 +63,8 @@ const Modal: FC<IProps> = ({
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  useModalViewport(isOpen, backdropRef);
   const onCloseRef = useRef(onClose);
   useLayoutEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
@@ -155,6 +158,7 @@ const Modal: FC<IProps> = ({
 
   return createPortal(
     <div
+      ref={backdropRef}
       role="presentation"
       data-modal-theme={theme}
       data-modal-appearance={appearance}

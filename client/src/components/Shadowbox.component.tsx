@@ -1,4 +1,4 @@
-import { type FC, type ReactNode } from "react";
+import { type CSSProperties, type FC, type ReactNode } from "react";
 
 // hooks
 import { useTheme } from "../hooks";
@@ -6,15 +6,17 @@ import { useTheme } from "../hooks";
 interface IProps {
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
   "data-muscle"?: string;
 }
 
-const Shadowbox: FC<IProps> = ({ children, className, "data-muscle": muscle }) => {
+const Shadowbox: FC<IProps> = ({ children, className, style, "data-muscle": muscle }) => {
   const { theme } = useTheme();
 
   return (
     <div
       data-muscle={muscle}
+      style={style}
       className={`page-section bg-[var(--canvas)] rounded-3xl border p-0 sm:p-5 shadow-[0_20px_45px_var(--tw-shadow-color)] transition-all duration-300 ${className || ""} ${theme === "light" ? "border-lightgray shadow-lightshadow" : "border-darkgray shadow-darkshadow"}`}
     >
       {children}

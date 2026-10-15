@@ -1031,8 +1031,8 @@ input:-webkit-autofill:active {
 @keyframes operation-spin { to { transform:rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { .operation-loader-card svg { animation:none; } }
 
-.ui-refresh .category-card { border-left:3px solid color-mix(in srgb,var(--color-primary) 55%,transparent); border-radius:20px; padding:22px; background:color-mix(in srgb,var(--color-primary) 4%,transparent); margin-block:12px; }
-.ui-refresh .category-card:nth-child(even) { background:color-mix(in srgb,var(--color-primary) 9%,transparent); }
+.ui-refresh .category-card { border-left:3px solid color-mix(in srgb,var(--category-color,var(--color-primary)) 55%,transparent); border-radius:20px; padding:22px; background:color-mix(in srgb,var(--category-color,var(--color-primary)) 4%,transparent); margin-block:12px; }
+.ui-refresh .category-card:nth-child(even) { background:color-mix(in srgb,var(--category-color,var(--color-primary)) 9%,transparent); }
 
 .skeleton-list > .movement-skeleton-row { display:flex; align-items:center; gap:14px; height:auto; min-height:90px; border-radius:0; background:transparent; border-bottom:1px solid var(--line); }
 .movement-skeleton-row > div { flex:1; min-width:0; display:grid; gap:12px; }
@@ -1052,3 +1052,8 @@ input:-webkit-autofill:active {
 
 /* Shared motion from the sidebar language selector for every popup menu. */
 .liquid-glass-panel { --menu-open-duration:320ms; --menu-open-easing:cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Shared viewport dock: identical geometry across both applications. */
+.mobile-floating-actions { position:fixed; bottom:max(20px,env(safe-area-inset-bottom)); margin:0; padding:0; align-items:center; }
+.mobile-floating-actions .floating-month-button { width:60px; height:60px; }
+@media(min-width:640px) { .mobile-floating-actions .floating-month-button { width:72px; height:72px; } }

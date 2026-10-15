@@ -51,7 +51,7 @@ export default function SectionNavigation({ label, sections, className = "" }: {
 
   return <nav className={`settings-navigation ${className}`} aria-label={label}>
     <p className="settings-navigation-label">{label}</p>
-    {sections.map(({ id, title, icon, danger }) => <a key={id} href={`#${id}`} className={danger ? "settings-navigation-danger" : undefined} aria-current={active === id ? "location" : undefined} onClick={event => {
+    {sections.map(({ id, title, icon, danger }) => <a key={id} title={title} href={`#${id}`} className={danger ? "settings-navigation-danger" : undefined} aria-current={active === id ? "location" : undefined} onClick={event => {
       event.preventDefault();
       const section = document.getElementById(id);
       if (!section) return;

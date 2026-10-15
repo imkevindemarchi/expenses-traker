@@ -75,3 +75,33 @@
 .settings-navigation-icon > svg { width: 18px; height: 18px; }
 
 .settings-navigation a > svg { width:18px; height:18px; }
+
+/* Shared inset navigation surface, matching the routine summary treatment. */
+@media (min-width:1024px) {
+  .settings-navigation.settings-navigation,
+  .record-page-navigation-skeleton.record-page-navigation-skeleton {
+    padding:20px;
+    max-height:calc(100dvh - 164px);
+    overflow-y:auto;
+    scrollbar-width:thin;
+    border:1px solid var(--line);
+    border-radius:24px;
+    background:var(--soft);
+    box-shadow:0 2px 8px rgb(0 0 0 / 4%);
+  }
+  .settings-navigation.settings-navigation .settings-navigation-label { padding:0 10px 12px; }
+}
+
+@media (min-width:1024px) {
+  .settings-layout:has(> .settings-navigation),
+  .record-page-layout.has-section-navigation:has(> .record-page-navigation),
+  .routine-editor-layout:has(> .settings-navigation) {
+    grid-template-columns:clamp(268px,25vw,336px) minmax(0,1fr);
+    column-gap:clamp(24px,2.5vw,40px);
+  }
+  .settings-navigation.settings-navigation { padding:16px; }
+  .settings-navigation.settings-navigation a { gap:10px; padding-inline:10px; }
+  .settings-navigation.settings-navigation a > span:not(.settings-navigation-dot,.settings-navigation-icon,.routine-editor-nav-icon) { min-width:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .settings-navigation.settings-navigation .settings-navigation-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .settings-navigation.settings-navigation .settings-navigation-dot { flex-shrink:0; }
+}

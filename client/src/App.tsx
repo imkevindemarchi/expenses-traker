@@ -1,13 +1,14 @@
 import IconButton from "./components/IconButton.component";
 import AuthShell from "./components/AuthShell.component";
 import Bootloader from "./components/Bootloader.component";
+import EntriesSkeleton, { PaginationSkeleton, SettingsPageSkeleton } from "./components/EntriesSkeleton.component";
 import { OverviewSkeleton, CategoriesSkeleton } from "./components/LoadingSkeleton.component";
 import EntryModal from "./components/EntryModal.component";
 import { CurrencyContext, useMoney } from "./contexts/currency.context";
 import FilteredBalance from "./components/FilteredBalance.component";
 import Autocomplete from "./components/Autocomplete.component";
 import FilterFloatingMenu from "./components/FilterFloatingMenu.component";
-import AnnualPage from "./pages/Annual.page";
+const AnnualPage = lazy(() => import("./pages/Annual.page"));
 import SpendingBreakdown from "./components/SpendingBreakdown.component";
 import Pagination from "./components/Pagination.component";
 import EntriesTable from "./components/EntriesTable.component";
@@ -16,12 +17,12 @@ import { INCOME_COLOR, EXPENSE_COLOR } from "./assets/constants/transaction-colo
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { ROUTE_PATHS, pageFromPath, safeReturnPath } from "./routes/routes.config";
 import { usePageTitle } from "./hooks/use-page-title.hook";
-import SettingsPage from "./pages/Settings.page";
+const SettingsPage = lazy(() => import("./pages/Settings.page"));
 import MonthlyBudget from "./components/MonthlyBudget.component";
 import LanguageSelector from "./components/LanguageSelector.component";
 import { useTranslation } from "react-i18next";
 import { tr, locale } from "./i18n";
-import { useEffect, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -150,10 +151,12 @@ export default function App() {
   const [pageLimit, setPageLimit] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
   const [totalEntries, setTotalEntries] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [summaryLoading, setSummaryLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ error: boolean; message: string } | null>(null);
   const [refresh, setRefresh] = useState(0);
+  const [categoryRevision, setCategoryRevision] = useState(0);
   const [entryEdit, setEntryEdit] = useState<{ id?: string; form: EntryForm } | null>(null);
   const [manageEdit, setManageEdit] = useState<ManageForm | null>(null);
   const [deleteAction, setDeleteAction] = useState<DeleteAction | null>(null);
@@ -205,8 +208,9 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
     let active = true;
+    const controller = new AbortController();
     setCategoriesLoading(true);
-    api<{ categories: Category[]; subcategories: Subcategory[] }>("/categories")
+    api<{ categories: Category[]; subcategories: Subcategory[] }>("/categories", { signal: controller.signal })
       .then((data) => {
         if (active) {
           setCategories(data.categories);
@@ -221,59 +225,61 @@ export default function App() {
       });
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [user, refresh]);
+  }, [user?.id, categoryRevision]);
+  const needsMonthlyData = page === "dashboard" || page === "entries";
   useEffect(() => {
-    if (!user) return;
+    if (!user || !needsMonthlyData) return;
     let active = true;
+    const controller = new AbortController();
     setLoading(true);
-    const timer = window.setTimeout(
-      () => {
-        const query = new URLSearchParams({
-          month,
-          page: String(listPage),
-          limit: String(pageLimit),
-        });
+    const timer = window.setTimeout(() => {
+      const query = new URLSearchParams({ month, page: String(listPage), limit: String(pageLimit) });
+      if (page === "entries") {
         if (filterCategory) query.set("category", filterCategory);
         if (filterKind) query.set("kind", filterKind);
         if (search.trim()) query.set("q", search.trim());
-        Promise.all([
-          api<{ entries: Entry[]; total: number; totalPages: number }>(`/entries?${query}`),
-          api<Summary>(`/summary?${page === "entries" ? query : new URLSearchParams({ month })}`),
-        ])
-          .then(([list, totals]) => {
-            if (active) {
-              if (listPage > Math.max(1, list.totalPages)) {
-                setListPage(Math.max(1, list.totalPages));
-                return;
-              }
-              setEntries(list.entries);
-              setTotalEntries(list.total);
-              setTotalPages(list.totalPages);
-              setSummary(totals);
-            }
-          })
-          .catch((error) => {
-            if (active) setNotice({ error: true, message: errorText(error) });
-          })
-          .finally(() => {
-            if (active) setLoading(false);
-          });
-      },
-      search ? 250 : 0,
-    );
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
-  }, [user, month, listPage, pageLimit, filterCategory, filterKind, search, refresh, page]);
-  const categoryById = new Map(categories.map((item) => [item._id, item]));
-  const subcategoryById = new Map(subcategories.map((item) => [item._id, item]));
+      }
+      api<{ entries: Entry[]; total: number; totalPages: number }>(`/entries?${query}`, { signal: controller.signal })
+        .then(list => {
+          if (!active) return;
+          if (listPage > Math.max(1, list.totalPages)) { setListPage(Math.max(1, list.totalPages)); return; }
+          setEntries(list.entries); setTotalEntries(list.total); setTotalPages(list.totalPages);
+        })
+        .catch(error => { if (active) setNotice({ error:true, message:errorText(error) }); })
+        .finally(() => { if (active) setLoading(false); });
+    }, search && page === "entries" ? 250 : 0);
+    return () => { active = false; controller.abort(); window.clearTimeout(timer); };
+  }, [user?.id, needsMonthlyData, month, listPage, pageLimit, filterCategory, filterKind, search, refresh, page]);
+  const summaryCategory = page === "entries" ? filterCategory : "";
+  const summaryKind = page === "entries" ? filterKind : "";
+  const summarySearch = page === "entries" ? search.trim() : "";
+  useEffect(() => {
+    if (!user || !needsMonthlyData) return;
+    let active = true;
+    const controller = new AbortController();
+    setSummaryLoading(true);
+    const timer = window.setTimeout(() => {
+      const query = new URLSearchParams({ month });
+      if (summaryCategory) query.set("category", summaryCategory);
+      if (summaryKind) query.set("kind", summaryKind);
+      if (summarySearch) query.set("q", summarySearch);
+      api<Summary>(`/summary?${query}`, { signal:controller.signal })
+        .then(result => { if (active) setSummary(result); })
+        .catch(error => { if (active) setNotice({ error:true, message:errorText(error) }); })
+        .finally(() => { if (active) setSummaryLoading(false); });
+    }, summarySearch ? 250 : 0);
+    return () => { active = false; controller.abort(); window.clearTimeout(timer); };
+  }, [user?.id, needsMonthlyData, month, summaryCategory, summaryKind, summarySearch, refresh]);
+  const categoryById = useMemo(() => new Map(categories.map((item) => [item._id, item])), [categories]);
+  const subcategoryById = useMemo(() => new Map(subcategories.map((item) => [item._id, item])), [subcategories]);
   const mutate = async (endpoint: string, method: string, body?: unknown) => {
     setBusy(true);
     setNotice(null);
     try {
       await api(endpoint, { method, body });
+      if (/^\/(categories|subcategories)(?:\/|$)/.test(endpoint)) setCategoryRevision(value => value + 1);
       setRefresh((value) => value + 1);
       setNotice({ error: false, message: "Modifica salvata." });
       return true;
@@ -392,13 +398,13 @@ export default function App() {
             <Navigate to={safeReturnPath(location.state?.from)} replace />
           ) : (
             <>
-              <Navbar
+              {page !== "settings" && <Navbar
                 user={user}
                 onLogout={() => {
                   void logout();
                 }}
-              />
-              <main className="app-main ui-refresh">
+              />}
+              <main className={"app-main ui-refresh" + (page === "settings" ? " standalone-settings-page" : "")}>
                 <div className="page-top">
                   <div>
                     <Header
@@ -416,9 +422,7 @@ export default function App() {
                     />
                   </div>
                   {(page === "dashboard" || page === "entries") && (
-                    <div
-                      className="month-filter month-filter-left"
-                    >
+                    <div className="month-filter month-filter-left">
                       <MonthPicker
                         value={month}
                         onChange={(value) => {
@@ -429,12 +433,12 @@ export default function App() {
                     </div>
                   )}
                 </div>
-                <Routes>
+                <Suspense fallback={page === "settings" ? <SettingsPageSkeleton /> : <OverviewSkeleton annual />}><Routes>
                   <Route
                     path={ROUTE_PATHS.dashboard}
                     element={
                       <>
-                        {loading || categoriesLoading ? (
+                        {summaryLoading || categoriesLoading ? (
                           <OverviewSkeleton
                             budget={
                               user.monthlyBudgetCents != null && month === today().slice(0, 7)
@@ -455,7 +459,7 @@ export default function App() {
                                 <p className="muted">
                                   {tr("Entrate meno spese del periodo selezionato.")}
                                 </p>
-                                <span className="balance-chip">
+                                <span className="ui-pill balance-chip">
                                   <TrendingUp size={14} />{" "}
                                   {tr("{{count}} movimenti registrati", { count: summary.count })}
                                 </span>
@@ -514,7 +518,7 @@ export default function App() {
                             </Button>
                           </div>
                           {loading || categoriesLoading ? (
-                            <Skeleton />
+                            <EntriesSkeleton />
                           ) : (
                             <EntriesTable
                               entries={entries.slice(0, 5)}
@@ -539,90 +543,94 @@ export default function App() {
                   <Route
                     path={ROUTE_PATHS.entries}
                     element={
-                      <Glass className="panel">
-                        <div className="section-heading">
-                          <div>
-                            <h2>{tr("Il tuo registro")}</h2>
-                            <p className="muted">
-                              {tr("{{count}} movimenti · {{month}}", {
-                                count: totalEntries,
-                                month,
-                              })}
-                            </p>
+                      <>
+                        <Glass className="panel entries-register">
+                          <div className="section-heading">
+                            <div>
+                              <h2>{tr("Il tuo registro")}</h2>
+                              <p className="muted">
+                                {tr("{{count}} movimenti · {{month}}", {
+                                  count: totalEntries,
+                                  month,
+                                })}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="filters">
-                          <Input
-                            id="search"
-                            placeholder={tr("Cerca un movimento…")}
-                            value={search}
-                            onChange={(event) => {
-                              setSearch(event.target.value);
-                              setListPage(1);
-                            }}
-                          />
-                          <Autocomplete
-                            id="filter-category"
-                            isLoading={categoriesLoading}
-                            placeholder={tr("Tutte le categorie")}
-                            value={categoryById.get(filterCategory) ?? null}
-                            options={categories}
-                            getOptionKey={(item) => item._id}
-                            getOptionLabel={(item) => item.name}
-                            getOptionIcon={(item) => (
-                              <span
-                                className="category-filter-dot"
-                                style={{ background: item.color }}
-                              />
-                            )}
-                            onChange={(item) => {
-                              setFilterCategory(item?._id ?? "");
-                              setListPage(1);
-                            }}
-                          />
-                        </div>
-                        <FilteredBalance summary={summary} kind={filterKind} loading={loading} />
-                        {loading ? (
-                          <Skeleton />
-                        ) : (
-                          <EntriesTable
-                            entries={entries}
-                            categories={categoryById}
-                            subcategories={subcategoryById}
-                            onEdit={openEntry}
-                            onDelete={(item) =>
-                              setDeleteAction({
-                                endpoint: `/entries/${item._id}`,
-                                label:
-                                  (item.subcategory
-                                    ? subcategoryById.get(item.subcategory)?.name
-                                    : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                              })
-                            }
-                          />
+                          <div className="filters">
+                            <Input
+                              id="search"
+                              placeholder={tr("Cerca un movimento…")}
+                              value={search}
+                              onChange={(event) => {
+                                setSearch(event.target.value);
+                                setListPage(1);
+                              }}
+                            />
+                            <Autocomplete
+                              id="filter-category"
+                              isLoading={categoriesLoading}
+                              placeholder={tr("Tutte le categorie")}
+                              value={categoryById.get(filterCategory) ?? null}
+                              options={categories}
+                              getOptionKey={(item) => item._id}
+                              getOptionLabel={(item) => item.name}
+                              getOptionIcon={(item) => (
+                                <span
+                                  className="category-filter-dot"
+                                  style={{ background: item.color }}
+                                />
+                              )}
+                              onChange={(item) => {
+                                setFilterCategory(item?._id ?? "");
+                                setListPage(1);
+                              }}
+                            />
+                          </div>
+                          <FilteredBalance summary={summary} kind={filterKind} loading={summaryLoading} />
+                          {loading ? (
+                            <EntriesSkeleton />
+                          ) : (
+                            <EntriesTable
+                              entries={entries}
+                              categories={categoryById}
+                              subcategories={subcategoryById}
+                              onEdit={openEntry}
+                              onDelete={(item) =>
+                                setDeleteAction({
+                                  endpoint: `/entries/${item._id}`,
+                                  label:
+                                    (item.subcategory
+                                      ? subcategoryById.get(item.subcategory)?.name
+                                      : categoryById.get(item.category)?.name) ?? tr("Categoria"),
+                                })
+                              }
+                            />
+                          )}
+                        </Glass>
+                        {loading ? <div className="entries-pagination"><PaginationSkeleton /></div> : (
+                          <div className="entries-pagination">
+                            <Pagination
+                              pagination={{
+                                page: listPage,
+                                limit: pageLimit,
+                                total_items: totalEntries,
+                                total_pages: Math.max(1, totalPages),
+                                has_next_page: listPage < totalPages,
+                                has_previous_page: listPage > 1,
+                              }}
+                              limitOptions={[10, 20, 50]}
+                              selectId="entries-pagination"
+                              flush
+                              compactDesktop
+                              onPageChange={setListPage}
+                              onLimitChange={(limit) => {
+                                setPageLimit(limit);
+                                setListPage(1);
+                              }}
+                            />
+                          </div>
                         )}
-                        {!loading && (
-                          <Pagination
-                            pagination={{
-                              page: listPage,
-                              limit: pageLimit,
-                              total_items: totalEntries,
-                              total_pages: Math.max(1, totalPages),
-                              has_next_page: listPage < totalPages,
-                              has_previous_page: listPage > 1,
-                            }}
-                            limitOptions={[10, 20, 50]}
-                            selectId="entries-pagination"
-                            flush
-                            compactDesktop
-                            onPageChange={setListPage}
-                            onLimitChange={(limit) => {
-                              setPageLimit(limit);
-                              setListPage(1);
-                            }}
-                          />
-                        )}
-                      </Glass>
+                      </>
                     }
                   />
                   <Route
@@ -645,9 +653,13 @@ export default function App() {
                         ) : (
                           <div className="category-grid">
                             {categories.map((category) => (
-                              <Shadowbox key={category._id} className="category-card">
+                              <Shadowbox
+                                key={category._id}
+                                className="category-card"
+                                style={{ "--category-color": category.color } as CSSProperties}
+                              >
                                 <div className="category-header">
-<IconButton
+                                  <IconButton
                                     className="quiet-icon"
                                     aria-label={tr("Modifica {{name}}", { name: category.name })}
                                     onClick={() =>
@@ -671,10 +683,10 @@ export default function App() {
                                         label: category.name,
                                       })
                                     }
-                                   variant="danger">
+                                    variant="danger"
+                                  >
                                     <Trash2 size={16} />
                                   </IconButton>
-
 
                                   <span
                                     className="category-orb"
@@ -686,7 +698,7 @@ export default function App() {
                                     <Shapes size={22} />
                                   </span>
                                   <h2>{category.name}</h2>
-                                  </div>
+                                </div>
                                 <Accordion
                                   defaultOpen
                                   ariaLabel={tr("Sottocategorie di {{name}}", {
@@ -710,7 +722,7 @@ export default function App() {
                                     .filter((item) => item.category === category._id)
                                     .map((item) => (
                                       <div className="subcategory" key={item._id}>
-<IconButton
+                                        <IconButton
                                           className="quiet-icon"
                                           aria-label={tr("Modifica {{name}}", { name: item.name })}
                                           onClick={() =>
@@ -734,16 +746,16 @@ export default function App() {
                                               label: item.name,
                                             })
                                           }
-                                         variant="danger">
+                                          variant="danger"
+                                        >
                                           <Trash2 size={15} />
                                         </IconButton>
-
 
                                         <span>
                                           <i style={{ background: category.color }} />
                                           {item.name}
                                         </span>
-                                        </div>
+                                      </div>
                                     ))}
                                   <Button
                                     variant="secondary"
@@ -813,7 +825,7 @@ export default function App() {
                     }
                   />
                   <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                </Routes></Suspense>
                 <footer className="app-footer">
                   <img
                     src="/expenses-logo.png?v=2"
@@ -825,7 +837,7 @@ export default function App() {
                   expenses-traker <span>{tr("Uno spazio personale. Una visione chiara.")}</span>
                 </footer>
               </main>
-              {page !== "settings" && page !== "annual" && (
+              {page !== "settings" && (
                 <div className="mobile-floating-actions floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 max-[359px]:gap-2">
                   {page === "entries" && (
                     <>
@@ -866,7 +878,7 @@ export default function App() {
                     </>
                   )}
                   <FloatingButton
-                    alwaysVisibleOnMobile={page === "management"}
+                    alwaysVisibleOnMobile
                     ariaLabel={
                       page === "management" ? tr("Crea categoria") : tr("Registra movimento")
                     }
@@ -996,8 +1008,9 @@ export default function App() {
                   </form>
                 )}
               </Modal>
-              <Modal intent="danger"
-        isOpen={Boolean(deleteAction)}
+              <Modal
+                intent="danger"
+                isOpen={Boolean(deleteAction)}
                 title={tr("Conferma eliminazione")}
                 description={tr("Vuoi eliminare “{{name}}”?", { name: deleteAction?.label ?? "" })}
                 maxWidth="sm"
@@ -1086,6 +1099,7 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
       const result = await api<{ user: User }>(register ? "/auth/register" : "/auth/login", {
         method: "POST",
         body: form,
+        globalLoader: false,
       });
       onLogin(result.user);
     } catch (error) {
@@ -1095,89 +1109,94 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
     }
   };
   return (
-    <AuthShell brand="Expenses Traker" logo={<img src="/expenses-logo.png?v=2" alt="" />} title={register ? tr("Crea il tuo account") : tr("Accedi al tuo account")} description={tr(register ? "Crea il tuo account per iniziare." : "Accedi per continuare.")}>
-          <form onSubmit={submit} className="auth-form" noValidate aria-busy={busy}>
-            {register && (
-              <Input
-                id="auth-name"
-                label={tr("Il tuo nome")}
-                placeholder={tr("Inserisci il tuo nome")}
-                error={fieldErrors.name ? tr(fieldErrors.name!) : undefined}
-                icon={<UserRound size={17} />}
-                autoComplete="name"
-                required
-                disabled={busy}
-                maxLength={60}
-                value={form.name}
-                onChange={(event) => changeField("name", event.target.value)}
-              />
+    <AuthShell
+      brand="Expenses Traker"
+      logo={<img src="/expenses-logo.png?v=2" alt="" />}
+      title={register ? tr("Crea il tuo account") : tr("Accedi al tuo account")}
+      description={tr(register ? "Crea il tuo account per iniziare." : "Accedi per continuare.")}
+    >
+      <form onSubmit={submit} className="auth-form" noValidate aria-busy={busy}>
+        {register && (
+          <Input
+            id="auth-name"
+            label={tr("Il tuo nome")}
+            placeholder={tr("Inserisci il tuo nome")}
+            error={fieldErrors.name ? tr(fieldErrors.name!) : undefined}
+            icon={<UserRound size={17} />}
+            autoComplete="name"
+            required
+            disabled={busy}
+            maxLength={60}
+            value={form.name}
+            onChange={(event) => changeField("name", event.target.value)}
+          />
+        )}
+        <Input
+          id="auth-email"
+          label={tr("Email")}
+          error={fieldErrors.email ? tr(fieldErrors.email!) : undefined}
+          placeholder={tr("Inserisci la tua email")}
+          icon={<Mail size={17} />}
+          autoComplete="email"
+          type="email"
+          required
+          disabled={busy}
+          value={form.email}
+          onChange={(event) => changeField("email", event.target.value)}
+        />
+        <Input
+          id="auth-password"
+          label={tr("Password")}
+          error={fieldErrors.password ? tr(fieldErrors.password!) : undefined}
+          placeholder={tr("Inserisci la tua password")}
+          icon={<LockKeyhole size={17} />}
+          autoComplete={register ? "new-password" : "current-password"}
+          type={showPassword ? "text" : "password"}
+          endIcon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          endIconAriaLabel={showPassword ? tr("Nascondi password") : tr("Mostra password")}
+          onEndIconClick={() => setShowPassword((value) => !value)}
+          minLength={register ? 10 : undefined}
+          required
+          disabled={busy}
+          value={form.password}
+          onChange={(event) => changeField("password", event.target.value)}
+        />
+        {register && (
+          <small className="auth-hint">
+            {tr(
+              "Almeno 10 caratteri. Le tue categorie iniziali saranno Lavoro, Extra e Necessità.",
             )}
-            <Input
-              id="auth-email"
-              label={tr("Email")}
-              error={fieldErrors.email ? tr(fieldErrors.email!) : undefined}
-              placeholder={tr("Inserisci la tua email")}
-              icon={<Mail size={17} />}
-              autoComplete="email"
-              type="email"
-              required
-              disabled={busy}
-              value={form.email}
-              onChange={(event) => changeField("email", event.target.value)}
-            />
-            <Input
-              id="auth-password"
-              label={tr("Password")}
-              error={fieldErrors.password ? tr(fieldErrors.password!) : undefined}
-              placeholder={tr("Inserisci la tua password")}
-              icon={<LockKeyhole size={17} />}
-              autoComplete={register ? "new-password" : "current-password"}
-              type={showPassword ? "text" : "password"}
-              endIcon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              endIconAriaLabel={showPassword ? tr("Nascondi password") : tr("Mostra password")}
-              onEndIconClick={() => setShowPassword((value) => !value)}
-              minLength={register ? 10 : undefined}
-              required
-              disabled={busy}
-              value={form.password}
-              onChange={(event) => changeField("password", event.target.value)}
-            />
-            {register && (
-              <small className="auth-hint">
-                {tr(
-                  "Almeno 10 caratteri. Le tue categorie iniziali saranno Lavoro, Extra e Necessità.",
-                )}
-              </small>
-            )}
-            {error && (
-              <p role="alert" className="auth-error">
-                {tr(error)}
-              </p>
-            )}
-            <BigButton
-              type="submit"
-              disabled={busy}
-              className="auth-submit"
-              endIcon={<ArrowRight size={18} />}
-            >
-              {busy ? tr("Un momento…") : register ? tr("Crea account") : tr("Accedi")}
-            </BigButton>
-          </form>
-          <p className="auth-switch">
-            {register ? tr("Hai già un account?") : tr("È la tua prima volta?")}{" "}
-            <button
-              disabled={busy}
-              onClick={() => {
-                navigate(register ? ROUTE_PATHS.login : ROUTE_PATHS.register, {
-                  state: location.state,
-                });
-                setError("");
-                setFieldErrors({});
-              }}
-            >
-              {register ? tr("Accedi") : tr("Registrati")}
-            </button>
+          </small>
+        )}
+        {error && (
+          <p role="alert" className="auth-error">
+            {tr(error)}
           </p>
+        )}
+        <BigButton
+          type="submit"
+          disabled={busy}
+          className="auth-submit"
+          endIcon={<ArrowRight size={18} />}
+        >
+          {register ? tr("Crea account") : tr("Accedi")}
+        </BigButton>
+      </form>
+      <p className="auth-switch">
+        {register ? tr("Hai già un account?") : tr("È la tua prima volta?")}{" "}
+        <button
+          disabled={busy}
+          onClick={() => {
+            navigate(register ? ROUTE_PATHS.login : ROUTE_PATHS.register, {
+              state: location.state,
+            });
+            setError("");
+            setFieldErrors({});
+          }}
+        >
+          {register ? tr("Accedi") : tr("Registrati")}
+        </button>
+      </p>
     </AuthShell>
   );
 }
@@ -1189,16 +1208,6 @@ function Empty({ text }: { text: string }) {
       </span>
       <h3>{tr("Un nuovo inizio.")}</h3>
       <p>{text}</p>
-    </div>
-  );
-}
-function Skeleton() {
-  return (
-    <div role="status" aria-label={tr("Caricamento movimenti")} className="skeleton-list">
-        <div className="movement-skeleton-heading" aria-hidden="true">{[0,1,2,3].map(i=><span key={i} className="skeleton-block" />)}</div>
-      {[1, 2, 3].map((value) => (
-        <div key={value} className="movement-skeleton-row" aria-hidden="true"><div className="movement-skeleton-actions"><span className="skeleton-block" /><span className="skeleton-block" /></div><span className="skeleton-block movement-skeleton-icon" /><div><span className="skeleton-block skeleton-label" /><span className="skeleton-block skeleton-bar" /></div><span className="skeleton-block movement-skeleton-amount" /></div>
-      ))}
     </div>
   );
 }

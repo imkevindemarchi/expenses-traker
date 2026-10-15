@@ -39,9 +39,10 @@ export default function AnnualPage({
   const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     setSummary(null);
     setError("");
-    api<AnnualSummary>(`/annual-summary?year=${year}`)
+    api<AnnualSummary>(`/annual-summary?year=${year}`, { signal:controller.signal })
       .then((result) => {
         if (active) setSummary(result);
       })
@@ -50,6 +51,7 @@ export default function AnnualPage({
       });
     return () => {
       active = false;
+      controller.abort();
     };
   }, [year, refresh]);
   return (
@@ -75,7 +77,7 @@ export default function AnnualPage({
               </div>
               <p className="balance-value">{money(summary.balance)}</p>
               <p className="muted">{tr("Entrate meno spese del periodo selezionato.")}</p>
-              <span className="balance-chip">
+              <span className="ui-pill balance-chip">
                 <TrendingUp size={14} />
                 {tr("{{count}} movimenti registrati", { count: summary.count })}
               </span>
