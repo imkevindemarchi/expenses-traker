@@ -1,5 +1,5 @@
+import { Shape } from "./LoadingShapes.component";
 import { useTranslation } from "react-i18next";
-import { SkeletonBlock } from "./LoadingSkeleton.component";
 import { useMoney } from "../contexts/currency.context";
 import { ArrowDownLeft, ArrowUpRight, Wallet } from "lucide-react";
 import { tr } from "../i18n";
@@ -35,7 +35,7 @@ export default function FilteredBalance({
           )}
         </p>
         <strong className={expense || (!income && amount < 0) ? "expense-text" : "income-text"}>
-          {loading ? <SkeletonBlock className="skeleton-amount" /> : money(amount)}
+          {loading ? <Shape width={140} height={32} /> : money(amount)}
         </strong>
       </div>
     </div>

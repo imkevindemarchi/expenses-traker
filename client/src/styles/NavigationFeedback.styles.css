@@ -1,0 +1,5 @@
+/* Keep native scrolling/zooming while making a completed tap feel responsive. */
+:where(button, a, [role="button"], [role="link"], [data-preload-path]) { touch-action: manipulation; }
+@media (hover: none) {
+  :where(button, a, [role="button"], [role="link"], .user-list-card):active { filter: brightness(.88); }
+}

@@ -1,14 +1,14 @@
+import PageSkeleton from "./components/PageSkeleton.component";
+import RouteSkeleton from "./components/RouteSkeleton.component";
+import { lazyPage as lazy, useNavigationPreload } from "./utils/navigation-preload";
 import IconButton from "./components/IconButton.component";
 import AuthShell from "./components/AuthShell.component";
-import Bootloader from "./components/Bootloader.component";
-import EntriesSkeleton, { PaginationSkeleton, SettingsPageSkeleton } from "./components/EntriesSkeleton.component";
-import { OverviewSkeleton, CategoriesSkeleton, AnnualPageSkeleton } from "./components/LoadingSkeleton.component";
+
 import EntryModal from "./components/EntryModal.component";
 import { CurrencyContext, useMoney } from "./contexts/currency.context";
 import FilteredBalance from "./components/FilteredBalance.component";
 import Autocomplete from "./components/Autocomplete.component";
 import EntryFiltersModal from "./components/EntryFiltersModal.component";
-const AnnualPage = lazy(() => import("./pages/Annual.page"));
 import SpendingBreakdown from "./components/SpendingBreakdown.component";
 import Pagination from "./components/Pagination.component";
 import EntriesTable from "./components/EntriesTable.component";
@@ -17,38 +17,13 @@ import { INCOME_COLOR, EXPENSE_COLOR } from "./assets/constants/transaction-colo
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { ROUTE_PATHS, pageFromPath, safeReturnPath } from "./routes/routes.config";
 import { usePageTitle } from "./hooks/use-page-title.hook";
-const SettingsPage = lazy(() => import("./pages/Settings.page"));
 import MonthlyBudget from "./components/MonthlyBudget.component";
-import LanguageSelector from "./components/LanguageSelector.component";
 import { useTranslation } from "react-i18next";
-import { tr, locale } from "./i18n";
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Wallet,
-  Plus,
-  Pencil,
-  Trash2,
-  ListFilter,
-  RotateCcw,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Mail,
-  LockKeyhole,
-  UserRound,
-  CircleCheck,
-  AlertCircle,
-  Shapes,
-  Euro,
-  X,
-  TrendingUp,
-} from "lucide-react";
+import { tr } from "./i18n";
+import { Suspense, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import { ArrowDownLeft, ArrowUpRight, Wallet, Plus, Pencil, Trash2, ListFilter, RotateCcw, ArrowRight, Eye, EyeOff, Mail, LockKeyhole, UserRound, Shapes, X, TrendingUp } from "lucide-react";
 import { ThemeContext, type ThemePreference } from "./contexts/theme.context";
-import { api, ApiError, money as formatMoney, today, displayDate } from "./api";
+import { api, ApiError, money as formatMoney, today } from "./api";
 import type { User, Category, Subcategory, Entry, Summary } from "./types";
 import Navbar, { type Page } from "./components/Navbar.component";
 import Glass from "./components/Glass.component";
@@ -56,7 +31,8 @@ import Button from "./components/Button.component";
 import FloatingButton from "./components/FloatingButton.component";
 import Modal from "./components/Modal.component";
 import Input from "./components/Input.component";
-import InputNumber from "./components/InputNumber.component";
+const AnnualPage = lazy(() => import("./pages/Annual.page"), ["/annual"]);
+const SettingsPage = lazy(() => import("./pages/Settings.page"), ["/settings"]);
 
 import Header from "./components/Header.component";
 import Accordion from "./components/Accordion.component";
@@ -91,6 +67,7 @@ type ManageForm = {
 type DeleteAction = { endpoint: string; label: string };
 
 export default function App() {
+  useNavigationPreload(["/annual"]);
   useTranslation();
   const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
     const saved = localStorage.getItem("expenses-theme");
@@ -371,7 +348,7 @@ export default function App() {
       <ThemeContext.Provider
         value={{ theme, preference: themePreference, setPreference: setThemePreference }}
       >
-        <Bootloader>
+        <>
           {notice && (
             <Popup
               key={notice.message}
@@ -451,17 +428,13 @@ export default function App() {
                     </div>
                   )}
                 </div>
-                <Suspense fallback={page === "settings" ? <SettingsPageSkeleton /> : <AnnualPageSkeleton />}><Routes>
+                <Suspense fallback={<RouteSkeleton />}><Routes>
                   <Route
                     path={ROUTE_PATHS.dashboard}
                     element={
                       <>
                         {summaryLoading || categoriesLoading ? (
-                          <OverviewSkeleton
-                            budget={
-                              user.monthlyBudgetCents != null && month === today().slice(0, 7)
-                            }
-                          />
+                          <PageSkeleton layout="overview" budget={user.monthlyBudgetCents != null} />
                         ) : (
                           <>
                             {" "}
@@ -536,7 +509,7 @@ export default function App() {
                             </Button>
                           </div>
                           {loading || categoriesLoading ? (
-                            <EntriesSkeleton />
+                            <PageSkeleton layout="entries" />
                           ) : (
                             <EntriesTable
                               entries={entries.slice(0, 5)}
@@ -601,7 +574,7 @@ export default function App() {
                           )}
                           <FilteredBalance summary={summary} kind={filterKind} loading={summaryLoading} />
                           {loading ? (
-                            <EntriesSkeleton />
+                            <PageSkeleton layout="entries" rows={pageLimit} />
                           ) : (
                             <EntriesTable
                               entries={entries}
@@ -620,7 +593,7 @@ export default function App() {
                             />
                           )}
                         </Glass>
-                        {loading ? <div className="entries-pagination"><PaginationSkeleton /></div> : (
+                        {loading ? <PageSkeleton layout="pagination" /> : (
                           <div className="entries-pagination">
                             <Pagination
                               pagination={{
@@ -662,7 +635,7 @@ export default function App() {
                           </div>
                         </Glass>
                         {categoriesLoading ? (
-                          <CategoriesSkeleton />
+                          <PageSkeleton layout="categories" />
                         ) : (
                           <div className="category-grid">
                             {categories.map((category) => (
@@ -1062,7 +1035,7 @@ export default function App() {
               </Modal>
             </>
           )}
-        </Bootloader>
+        </>
       </ThemeContext.Provider>
     </CurrencyContext.Provider>
   );

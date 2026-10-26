@@ -496,7 +496,7 @@ export default function SettingsPage({
       </form>
       </div>
       <div className="settings-floating-actions mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
-        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={() => location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)} disabled={busy || deleteBusy || dataBusy} />
+        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={() => location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)} />
         <FloatingButton
           type="submit"
           form="account-settings-form"

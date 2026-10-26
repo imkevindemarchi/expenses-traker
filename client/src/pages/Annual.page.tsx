@@ -1,4 +1,5 @@
-import { OverviewSkeleton } from "../components/LoadingSkeleton.component";
+import PageSkeleton from "../components/PageSkeleton.component";
+import { annualYear } from "../utils/annual-year";
 import { useMoney } from "../contexts/currency.context";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -31,11 +32,7 @@ export default function AnnualPage({
   useTranslation();
   const [params, setParams] = useSearchParams();
   const currentYear = Number(today().slice(0, 4));
-  const requested = params.get("year") ?? String(currentYear);
-  const year =
-    /^\d{4}$/.test(requested) && Number(requested) >= 2000 && Number(requested) <= currentYear
-      ? requested
-      : String(currentYear);
+  const year = annualYear(params.get("year"), currentYear);
   const [summary, setSummary] = useState<AnnualSummary | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -65,7 +62,7 @@ export default function AnnualPage({
           {tr(error)}
         </p>
       ) : !summary ? (
-        <OverviewSkeleton annual />
+        <PageSkeleton layout="annual" />
       ) : (
         <>
           <div className="overview-grid">

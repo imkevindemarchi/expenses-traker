@@ -1,4 +1,5 @@
 import { locale } from "../i18n";
+
 import { numberFormatter, dateFormatter } from "../utils/formatters.util";
 export class ApiError extends Error {
   status: number;

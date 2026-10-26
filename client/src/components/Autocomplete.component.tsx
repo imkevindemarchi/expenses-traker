@@ -1,5 +1,5 @@
+import PageSkeleton from "./PageSkeleton.component";
 import ModalChoiceField from "./ModalChoiceField.component";
-import { SkeletonBlock } from "./SkeletonBlock.component";
 import {
   type ChangeEvent,
   type CSSProperties,
@@ -38,7 +38,6 @@ interface IProps<TOption> {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
-  loadingMessage?: string;
   error?: string;
   disabled?: boolean;
   isLoading?: boolean;
@@ -68,7 +67,6 @@ const Autocomplete = <TOption,>({
   placeholder,
   searchPlaceholder,
   emptyMessage,
-  loadingMessage,
   error,
   disabled = false,
   isLoading = false,
@@ -88,7 +86,6 @@ const Autocomplete = <TOption,>({
   const resolvedSearchPlaceholder: string =
     searchPlaceholder ?? t("autocomplete.searchPlaceholder");
   const resolvedEmptyMessage: string = emptyMessage ?? t("autocomplete.emptyMessage");
-  const resolvedLoadingMessage: string = loadingMessage ?? t("autocomplete.loadingMessage");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [insideModal, setInsideModal] = useState(false);
@@ -369,7 +366,7 @@ const Autocomplete = <TOption,>({
   if (insideModal) return <ModalChoiceField
     id={id} label={label} placeholder={resolvedPlaceholder} searchPlaceholder={resolvedSearchPlaceholder}
     value={value} options={options} icon={icon} disabled={disabled} isLoading={isLoading} clearable={clearable}
-    emptyMessage={resolvedEmptyMessage} loadingMessage={resolvedLoadingMessage} error={error}
+    emptyMessage={resolvedEmptyMessage} error={error}
     getOptionKey={getOptionKey} getOptionLabel={getOptionLabel} getOptionDescription={getOptionDescription}
     getOptionIcon={getOptionIcon} onChange={onChange} onSearchChange={onSearchChange}
   />;
@@ -447,11 +444,7 @@ const Autocomplete = <TOption,>({
             className="relative z-10 flex max-h-72 flex-col gap-1 overflow-y-auto overscroll-contain"
           >
             {isLoading ? (
-              <div role="status" aria-label={resolvedLoadingMessage} className="skeleton-stack p-4">
-                {[0, 1, 2].map((index) => (
-                  <SkeletonBlock key={index} className="skeleton-bar" />
-                ))}
-              </div>
+              <PageSkeleton layout="options" />
             ) : visibleOptions.length === 0 ? (
               <div
                 className={`flex min-h-24 items-center justify-center rounded-2xl px-4 text-center text-sm ${

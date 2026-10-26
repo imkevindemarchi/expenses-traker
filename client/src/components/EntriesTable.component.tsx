@@ -77,6 +77,9 @@ export default function EntriesTable({
                 } as CSSProperties
               }
             >
+              <button type="button" className="entry-card-open"
+                aria-label={tr("Modifica {{name}}", { name: title })}
+                onClick={() => onEdit(entry)} />
               <div className="entry-card-main">
                 <span
                   className="entry-card-icon"
@@ -128,7 +131,17 @@ export default function EntriesTable({
               (entry.subcategory ? subcategories.get(entry.subcategory)?.name : category?.name) ??
               tr("Categoria");
             return (
-              <tr key={entry._id} className="entry-row">
+              <tr key={entry._id} className="entry-row"
+                role="button" tabIndex={0} aria-label={tr("Modifica {{name}}", { name: displayTitle })}
+                onClick={(event) => {
+                  if (event.target instanceof Element && !event.target.closest("a, button, input, select, textarea")) onEdit(entry);
+                }}
+                onKeyDown={(event) => {
+                  if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    onEdit(entry);
+                  }
+                }}>
                 <td className="entry-actions">{renderActions(entry, displayTitle)}</td>
                 <td>
                   <span

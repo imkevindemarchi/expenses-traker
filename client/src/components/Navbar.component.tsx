@@ -6,15 +6,15 @@ import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router";
 import { PROTECTED_ROUTES } from "../routes/routes.config";
 import type { User } from "../types";
+import { getLiquidGlassClass } from "../assets/constants";
+import "../styles/LiquidGlass.styles.css";
+import "../styles/Navbar.styles.css";
+import "../styles/NavbarGlass.styles.css";
 export type { Page } from "../routes/routes.config";
 type IRoute = (typeof PROTECTED_ROUTES)[number];
 // assets
 const logoImg = "/expenses-logo.png?v=2";
 const logoDarkImg = "/expenses-logo.png?v=2";
-import { getLiquidGlassClass } from "../assets/constants";
-import "../styles/LiquidGlass.styles.css";
-import "../styles/Navbar.styles.css";
-import "../styles/NavbarGlass.styles.css";
 
 // components
 import AccountMenu from "./AccountMenu.component";

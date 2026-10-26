@@ -93,9 +93,9 @@
 }
 
 @media (min-width:1024px) {
-  .settings-layout:has(> .settings-navigation),
-  .record-page-layout.has-section-navigation:has(> .record-page-navigation),
-  .routine-editor-layout:has(> .settings-navigation) {
+  .settings-layout:has(> :is(.settings-navigation, .loading-settings-navigation)),
+  .record-page-layout.has-section-navigation:has(> :is(.record-page-navigation, .record-page-navigation-skeleton)),
+  .routine-editor-layout:has(> :is(.settings-navigation, .loading-settings-navigation)) {
     grid-template-columns:clamp(268px,25vw,336px) minmax(0,1fr);
     column-gap:clamp(24px,2.5vw,40px);
   }

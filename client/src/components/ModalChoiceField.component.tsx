@@ -1,3 +1,4 @@
+import PageSkeleton from "./PageSkeleton.component";
 import {
   useId,
   useLayoutEffect,
@@ -23,7 +24,6 @@ type Props<T> = {
   isLoading?: boolean;
   clearable?: boolean;
   emptyMessage?: string;
-  loadingMessage?: string;
   error?: string;
   icon?: ReactNode;
   getOptionKey: (item: T) => string;
@@ -46,7 +46,6 @@ export default function ModalChoiceField<T>({
   isLoading,
   clearable = true,
   emptyMessage,
-  loadingMessage,
   error,
   icon,
   getOptionKey,
@@ -239,9 +238,7 @@ export default function ModalChoiceField<T>({
               className="modal-choice-options"
             >
               {isLoading ? (
-                <p className="modal-choice-status" role="status">
-                  {loadingMessage || t("autocomplete.loadingMessage")}
-                </p>
+                <PageSkeleton layout="options" />
               ) : !visible.length ? (
                 <p className="modal-choice-status">
                   {emptyMessage || t("autocomplete.emptyMessage")}

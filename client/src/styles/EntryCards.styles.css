@@ -5,12 +5,18 @@
   min-width: 0;
 }
 .entry-card {
+  position: relative;
   min-width: 0;
   padding: 16px;
   border: 1px solid color-mix(in srgb, var(--entry-card-category) 16%, var(--line));
   border-radius: 20px;
   background: color-mix(in srgb, var(--entry-card-category) 4%, var(--canvas));
 }
+.entry-card-open { position:absolute; inset:0; z-index:1; border:0; border-radius:inherit; background:transparent; padding:0; cursor:pointer; }
+.entry-card-actions { position:relative; z-index:2; }
+.entry-card:has(.entry-card-open:focus-visible) { outline:2px solid var(--color-primary); outline-offset:3px; }
+.entry-row[role="button"] { cursor:pointer; }
+.entry-row[role="button"]:focus-visible { outline:2px solid var(--color-primary); outline-offset:-2px; }
 .entry-card-main {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) auto;
