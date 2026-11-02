@@ -534,3 +534,20 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--entry-accent) 10%, transparent);
   }
 }
+.entry-currency-field {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.entry-conversion {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--modal-line);
+  border-radius: 16px;
+  color: var(--modal-muted);
+  font-size: 13px;
+}
+.entry-conversion strong {
+  color: var(--modal-ink);
+}

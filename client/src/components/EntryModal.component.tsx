@@ -14,8 +14,9 @@ import {
   Layers3,
 } from "lucide-react";
 import { tr, locale } from "../i18n";
-import { CurrencyContext } from "../contexts/currency.context";
-import type { Category, Subcategory } from "../types";
+import { CurrencyContext, CURRENCIES } from "../contexts/currency.context";
+import { api, money } from "../api";
+import type { Category, Subcategory, Entry } from "../types";
 import Modal from "./Modal.component";
 import Stepper from "./Stepper.component";
 import "../styles/EntryModal.styles.css";
@@ -27,6 +28,7 @@ type EntryForm = {
   category: string;
   subcategory: string;
   amount: string;
+  currency?: string;
   date: string;
 };
 export default function EntryModal({
@@ -37,6 +39,7 @@ export default function EntryModal({
   busy,
   onClose,
   onSave,
+  originalConversion,
 }: {
   initial: EntryForm;
   editing: boolean;
@@ -45,10 +48,55 @@ export default function EntryModal({
   busy: boolean;
   onClose: () => void;
   onSave: (form: EntryForm) => Promise<void>;
+  originalConversion?: Entry["conversion"];
 }) {
   useTranslation();
   const currency = useContext(CurrencyContext);
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState({ ...initial, currency: initial.currency ?? currency });
+  const [quote, setQuote] = useState<{
+    key: string;
+    amountCents: number;
+    conversion: NonNullable<Entry["conversion"]>;
+  } | null>(null);
+  const [quoteError, setQuoteError] = useState<{ key: string; message: string } | null>(null);
+  const [quoteAttempt, setQuoteAttempt] = useState(0);
+  const quoteKey = JSON.stringify([form.amount, form.currency, form.date, currency]);
+  const foreign = form.currency !== currency;
+  const conversionReady = !foreign || quote?.key === quoteKey;
+  useEffect(() => {
+    if (!foreign || !/^\d{1,7}([.,]\d{1,2})?$/.test(form.amount) || !form.date) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      api<{ amountCents: number; conversion: NonNullable<Entry["conversion"]> }>(
+        "/exchange/preview",
+        {
+          method: "POST",
+          body: { amount: form.amount, currency: form.currency, date: form.date },
+          signal: controller.signal,
+        },
+      )
+        .then((result) => {
+          if (!controller.signal.aborted) {
+            setQuote({ ...result, key: quoteKey });
+            setQuoteError(null);
+          }
+        })
+        .catch((error: unknown) => {
+          if (!controller.signal.aborted)
+            setQuoteError({
+              key: quoteKey,
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Cambio non disponibile. Riprova tra poco: il movimento non è stato salvato.",
+            });
+        });
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [form.amount, form.currency, form.date, currency, foreign, quoteKey, quoteAttempt]);
   const [step, setStep] = useState(0);
   const [chosenKind, setChosenKind] = useState(editing);
   const [search, setSearch] = useState("");
@@ -70,6 +118,7 @@ export default function EntryModal({
     event.preventDefault();
     if (busy) return;
     if (!editing && step < 3) return;
+    if (!conversionReady) return;
     const amount = Number(form.amount.replace(",", "."));
     if (
       !/^\d{1,7}([.,]\d{1,2})?$/.test(form.amount) ||
@@ -118,6 +167,81 @@ export default function EntryModal({
       item.category === form.category &&
       item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
   );
+  const currencyField = (
+    <div className="entry-currency-field">
+      <ModalChoiceField
+        id={editing ? "entry-edit-currency" : "entry-currency"}
+        label={tr("Valuta del movimento")}
+        searchPlaceholder={tr("Cerca valuta")}
+        value={form.currency}
+        options={[...CURRENCIES]}
+        disabled={busy}
+        clearable={false}
+        getOptionKey={(code) => code}
+        getOptionLabel={(code) => `${code} · ${tr(`currency.${code}`)}`}
+        onChange={(code) => {
+          if (code) update({ currency: code });
+        }}
+      />
+      {foreign && (
+        <div className="entry-conversion" role="status" aria-live="polite">
+          {quote?.key === quoteKey ? (
+            <>
+              <strong>
+                {tr("Verranno registrati {{amount}}", {
+                  amount: money(quote.amountCents, currency),
+                })}
+              </strong>
+              <span>
+                {tr("Cambio del {{date}}: 1 {{from}} = {{rate}} {{to}}", {
+                  date: quote.conversion.rateDate,
+                  from: form.currency,
+                  to: currency,
+                  rate: numberFormatter(locale(), { maximumFractionDigits: 6 }).format(
+                    quote.conversion.rate,
+                  ),
+                })}
+              </span>
+              <small>
+                {tr("Tasso di riferimento BCE. La conversione resta fissata al salvataggio.")}
+              </small>
+            </>
+          ) : quoteError?.key === quoteKey ? (
+            <>
+              <span className="form-error">{tr(quoteError.message)}</span>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={busy}
+                onClick={() => {
+                  setQuoteError(null);
+                  setQuoteAttempt((attempt) => attempt + 1);
+                }}
+              >
+                {tr("Riprova cambio")}
+              </Button>
+            </>
+          ) : (
+            <span>
+              {tr(
+                form.amount
+                  ? "Recupero del cambio…"
+                  : "Inserisci un importo per vedere la conversione.",
+              )}
+            </span>
+          )}
+        </div>
+      )}
+      {editing && originalConversion && !foreign && (
+        <p className="muted">
+          {tr("Importo originale: {{amount}} · cambio del {{date}}", {
+            amount: money(originalConversion.originalCents, originalConversion.from),
+            date: originalConversion.rateDate,
+          })}
+        </p>
+      )}
+    </div>
+  );
   if (editing)
     return (
       <Modal
@@ -136,7 +260,13 @@ export default function EntryModal({
               className="entry-save"
               type="submit"
               form="entry-edit"
-              disabled={busy || !form.category || !form.subcategory || !categories.length}
+              disabled={
+                busy ||
+                !conversionReady ||
+                !form.category ||
+                !form.subcategory ||
+                !categories.length
+              }
               icon={<Check size={17} />}
             >
               {tr(busy ? "Salvataggio…" : "Salva modifiche")}
@@ -177,8 +307,8 @@ export default function EntryModal({
               <InputNumber
                 id="entry-edit-amount"
                 className="entry-amount-field"
-                suffix={currency}
-                label={tr("Importo {{currency}}", { currency })}
+                suffix={form.currency}
+                label={tr("Importo {{currency}}", { currency: form.currency })}
                 value={form.amount}
                 allowDecimal
                 inputMode="decimal"
@@ -200,6 +330,7 @@ export default function EntryModal({
                 }
               />
             </div>
+            {currencyField}
             <div className="entry-edit-classification">
               <ModalChoiceField
                 id="entry-edit-category"
@@ -281,7 +412,13 @@ export default function EntryModal({
                 className={`entry-save ${form.kind}`}
                 type="submit"
                 form="entry-wizard"
-                disabled={busy || !form.category || !form.subcategory || !categories.length}
+                disabled={
+                  busy ||
+                  !conversionReady ||
+                  !form.category ||
+                  !form.subcategory ||
+                  !categories.length
+                }
                 icon={<Check size={17} />}
               >
                 {tr(
@@ -448,14 +585,15 @@ export default function EntryModal({
           {step === 3 && (
             <>
               <h3>{tr("Quanto e quando?")}</h3>
+              {currencyField}
               <div className="entry-amount-layout">
                 <div>
                   <InputNumber
                     id="entry-amount"
                     className="entry-amount-field"
-                    suffix={currency}
+                    suffix={form.currency}
                     autoFocus
-                    label={tr("Importo {{currency}}", { currency })}
+                    label={tr("Importo {{currency}}", { currency: form.currency })}
                     value={form.amount}
                     allowDecimal
                     inputMode="decimal"

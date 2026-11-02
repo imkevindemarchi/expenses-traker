@@ -50,6 +50,26 @@ const entry = new Schema(
       validate: Number.isSafeInteger,
     },
     date: { type: String, required: true },
+    conversion: {
+      type: new Schema(
+        {
+          from: { type: String, enum: CURRENCIES, required: true },
+          to: { type: String, enum: CURRENCIES, required: true },
+          originalCents: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 100_000_000,
+            validate: Number.isSafeInteger,
+          },
+          rate: { type: Number, required: true, min: Number.MIN_VALUE },
+          rateDate: { type: String, required: true },
+          provider: { type: String, enum: ["ECB"], required: true },
+        },
+        { _id: false },
+      ),
+      default: null,
+    },
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     subcategory: { type: Schema.Types.ObjectId, ref: "Subcategory", required: true },
   },

@@ -324,5 +324,17 @@
   "Scegli la valuta": "Choose currency",
   "Cerca valuta": "Search currencies",
   "Cerca per nome o codice…": "Search by name or code…",
-  "Valute disponibili": "Available currencies"
+  "Valute disponibili": "Available currencies",
+  "Valuta del movimento": "Transaction currency",
+  "Verranno registrati {{amount}}": "{{amount}} will be recorded",
+  "Cambio del {{date}}: 1 {{from}} = {{rate}} {{to}}": "Rate on {{date}}: 1 {{from}} = {{rate}} {{to}}",
+  "Tasso di riferimento BCE. La conversione resta fissata al salvataggio.": "ECB reference rate. Conversion is fixed when saved.",
+  "Recupero del cambio…": "Fetching exchange rate…",
+  "Inserisci un importo per vedere la conversione.": "Enter an amount to see the conversion.",
+  "Importo originale: {{amount}} · cambio del {{date}}": "Original amount: {{amount}} · rate on {{date}}",
+  "La conversione non è disponibile per date future.": "Currency conversion is unavailable for future dates.",
+  "Cambio non disponibile. Riprova tra poco: il movimento non è stato salvato.": "Exchange rate unavailable. Try again shortly: the transaction has not been saved.",
+  "L’importo convertito deve essere compreso tra 0,01 e 1.000.000.": "The converted amount must be between 0.01 and 1,000,000.",
+  "Dati di conversione non validi nel backup.": "Invalid currency conversion data in the backup.",
+  "Riprova cambio": "Retry exchange rate"
 }

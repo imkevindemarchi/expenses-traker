@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { backupConversion } from "./exchange.js";
 import { Category, Subcategory, Entry } from "./models.js";
 import { fail, text, color, dateKey, objectId, owned } from "./validation.js";
 
@@ -67,6 +68,9 @@ export function validateBackup(body) {
     return {
       kind: item.kind,
       amountCents: item.amountCents,
+      ...(item.conversion != null
+        ? { conversion: backupConversion(item.conversion, item.amountCents, item.date) }
+        : {}),
       date: dateKey(item.date),
       category,
       subcategory,
@@ -125,6 +129,7 @@ export async function importBackup(
             user,
             kind: item.kind,
             amountCents: item.amountCents,
+            ...(item.conversion ? { conversion: item.conversion } : {}),
             date: item.date,
             category: categoryIds.get(item.category),
             subcategory: subcategoryIds.get(item.subcategory),

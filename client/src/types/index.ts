@@ -19,6 +19,14 @@ export type Entry = {
   _id: string;
   kind: "income" | "expense";
   amountCents: number;
+  conversion?: {
+    from: string;
+    to: string;
+    originalCents: number;
+    rate: number;
+    rateDate: string;
+    provider: string;
+  } | null;
   date: string;
   category: string;
   subcategory: string | null;

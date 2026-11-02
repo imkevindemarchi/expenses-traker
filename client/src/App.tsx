@@ -1027,6 +1027,9 @@ export default function App() {
               {entryEdit && (
                 <EntryModal
                   initial={entryEdit.form}
+                  originalConversion={
+                    entries.find((entry) => entry._id === entryEdit.id)?.conversion
+                  }
                   editing={Boolean(entryEdit.id)}
                   categories={categories}
                   subcategories={subcategories}

@@ -324,5 +324,17 @@
   "Scegli la valuta": "Scegli la valuta",
   "Cerca valuta": "Cerca valuta",
   "Cerca per nome o codice…": "Cerca per nome o codice…",
-  "Valute disponibili": "Valute disponibili"
+  "Valute disponibili": "Valute disponibili",
+  "Valuta del movimento": "Valuta del movimento",
+  "Verranno registrati {{amount}}": "Verranno registrati {{amount}}",
+  "Cambio del {{date}}: 1 {{from}} = {{rate}} {{to}}": "Cambio del {{date}}: 1 {{from}} = {{rate}} {{to}}",
+  "Tasso di riferimento BCE. La conversione resta fissata al salvataggio.": "Tasso di riferimento BCE. La conversione resta fissata al salvataggio.",
+  "Recupero del cambio…": "Recupero del cambio…",
+  "Inserisci un importo per vedere la conversione.": "Inserisci un importo per vedere la conversione.",
+  "Importo originale: {{amount}} · cambio del {{date}}": "Importo originale: {{amount}} · cambio del {{date}}",
+  "La conversione non è disponibile per date future.": "La conversione non è disponibile per date future.",
+  "Cambio non disponibile. Riprova tra poco: il movimento non è stato salvato.": "Cambio non disponibile. Riprova tra poco: il movimento non è stato salvato.",
+  "L’importo convertito deve essere compreso tra 0,01 e 1.000.000.": "L’importo convertito deve essere compreso tra 0,01 e 1.000.000.",
+  "Dati di conversione non validi nel backup.": "Dati di conversione non validi nel backup.",
+  "Riprova cambio": "Riprova cambio"
 }

@@ -1,4 +1,5 @@
 import { changePassword } from "./password.js";
+import { entryMoney } from "./exchange.js";
 import { deleteAccount } from "./delete-account.js";
 import { profileInput } from "./profile.js";
 import { saveAccountSettings } from "./account-settings.js";
@@ -366,9 +367,19 @@ export const entryInput = (body) => {
     subcategory: objectId(body.subcategory),
   };
 };
-const entryFields = "_id user kind amountCents date category subcategory createdAt updatedAt";
+const entryFields =
+  "_id user kind amountCents date category subcategory conversion createdAt updatedAt";
+app.post(
+  "/api/exchange/preview",
+  asyncRoute(async (req, res) => {
+    res.json(await entryMoney(req.body, req.account.currency ?? "EUR"));
+  }),
+);
 const saveEntry = async (req, id) => {
   const input = entryInput(req.body);
+  const existing = id ? await Entry.findOne(owned(userId(req), id)) : null;
+  if (id && !existing) fail("Movimento non trovato.", 404);
+  Object.assign(input, await entryMoney(req.body, req.account.currency ?? "EUR", existing));
   let result;
   await mongoose.connection.transaction(async (session) => {
     const category = await touchCategory(input.category, userId(req), session);
