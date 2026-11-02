@@ -1,6 +1,7 @@
+import { dateFormatter } from "./formatters.util.ts";
 /** Calendar limits use the same Rome day as the trackers, independent of the device timezone. */
 export function todayDateKey(now = new Date()): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  const parts = dateFormatter("en-CA", {
     timeZone: "Europe/Rome",
     year: "numeric",
     month: "2-digit",

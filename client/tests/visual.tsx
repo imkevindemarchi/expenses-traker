@@ -96,9 +96,12 @@ window.fetch = async (request, init) => {
   if (url.pathname.endsWith("/auth/me")) data = { user: demoUser };
   else if (url.pathname.endsWith("/backup/import")) {
     const body = JSON.parse(String(init?.body));
-    data = { categories: body.categories.length, subcategories: body.subcategories.length, entries: body.entries.length };
-  }
-  else if (url.pathname.endsWith("/account/settings")) {
+    data = {
+      categories: body.categories.length,
+      subcategories: body.subcategories.length,
+      entries: body.entries.length,
+    };
+  } else if (url.pathname.endsWith("/account/settings")) {
     const body = JSON.parse(String(init?.body));
     demoUser = {
       ...demoUser,

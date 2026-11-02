@@ -1,3 +1,4 @@
+import { numberFormatter } from "../utils/formatters.util";
 import ModalChoiceField from "./ModalChoiceField.component";
 import { useTranslation } from "react-i18next";
 import DatePicker from "./DatePicker.component";
@@ -95,7 +96,14 @@ export default function EntryModal({
       )
     ) {
       if (!editing) move(1);
-      else document.getElementById(categories.some((item) => item._id === form.category) ? "entry-edit-subcategory" : "entry-edit-category")?.focus();
+      else
+        document
+          .getElementById(
+            categories.some((item) => item._id === form.category)
+              ? "entry-edit-subcategory"
+              : "entry-edit-category",
+          )
+          ?.focus();
       setError("Seleziona una categoria valida.");
       return;
     }
@@ -174,9 +182,7 @@ export default function EntryModal({
                 value={form.amount}
                 allowDecimal
                 inputMode="decimal"
-                placeholder={new Intl.NumberFormat(locale(), { minimumFractionDigits: 2 }).format(
-                  0,
-                )}
+                placeholder={numberFormatter(locale(), { minimumFractionDigits: 2 }).format(0)}
                 onChange={(amount) => update({ amount })}
               />
               <DatePicker
@@ -196,21 +202,49 @@ export default function EntryModal({
             </div>
             <div className="entry-edit-classification">
               <ModalChoiceField
-                id="entry-edit-category" label={tr("Categoria")} placeholder={tr("Scegli una categoria")}
-                searchPlaceholder={tr("Cerca categoria…")} icon={<Shapes size={19} />}
-                value={selectedCategory ?? null} options={categories} disabled={busy} clearable={false}
-                getOptionKey={(item) => item._id} getOptionLabel={(item) => item.name}
-                getOptionIcon={(item) => <i className="category-filter-dot" style={{ background: item.color }} />}
-                onChange={(item) => { if (item) update({ category: item._id, subcategory: item._id === form.category ? form.subcategory : "" }); }}
+                id="entry-edit-category"
+                label={tr("Categoria")}
+                placeholder={tr("Scegli una categoria")}
+                searchPlaceholder={tr("Cerca categoria…")}
+                icon={<Shapes size={19} />}
+                value={selectedCategory ?? null}
+                options={categories}
+                disabled={busy}
+                clearable={false}
+                getOptionKey={(item) => item._id}
+                getOptionLabel={(item) => item.name}
+                getOptionIcon={(item) => (
+                  <i className="category-filter-dot" style={{ background: item.color }} />
+                )}
+                onChange={(item) => {
+                  if (item)
+                    update({
+                      category: item._id,
+                      subcategory: item._id === form.category ? form.subcategory : "",
+                    });
+                }}
               />
               <ModalChoiceField
-                id="entry-edit-subcategory" label={tr("Sottocategoria")} placeholder={tr("Scegli una sottocategoria")}
-                searchPlaceholder={tr("Cerca sottocategoria…")} icon={<Layers3 size={19} />}
+                id="entry-edit-subcategory"
+                label={tr("Sottocategoria")}
+                placeholder={tr("Scegli una sottocategoria")}
+                searchPlaceholder={tr("Cerca sottocategoria…")}
+                icon={<Layers3 size={19} />}
                 value={subcategories.find((item) => item._id === form.subcategory) ?? null}
-                options={subcategories.filter((item) => item.category === form.category)} disabled={busy || !form.category} clearable={false}
-                getOptionKey={(item) => item._id} getOptionLabel={(item) => item.name}
-                getOptionIcon={() => <i className="category-filter-dot" style={{ background: selectedCategory?.color }} />}
-                onChange={(item) => { if (item) update({ subcategory: item._id }); }}
+                options={subcategories.filter((item) => item.category === form.category)}
+                disabled={busy || !form.category}
+                clearable={false}
+                getOptionKey={(item) => item._id}
+                getOptionLabel={(item) => item.name}
+                getOptionIcon={() => (
+                  <i
+                    className="category-filter-dot"
+                    style={{ background: selectedCategory?.color }}
+                  />
+                )}
+                onChange={(item) => {
+                  if (item) update({ subcategory: item._id });
+                }}
               />
             </div>
           </fieldset>
@@ -278,8 +312,12 @@ export default function EntryModal({
                   <span>{selectedCategory?.name}</span>
                   {form.subcategory && (
                     <>
-                      <span className="entry-context-separator" aria-hidden="true">/</span>
-                      <span>{subcategories.find((item) => item._id === form.subcategory)?.name}</span>
+                      <span className="entry-context-separator" aria-hidden="true">
+                        /
+                      </span>
+                      <span>
+                        {subcategories.find((item) => item._id === form.subcategory)?.name}
+                      </span>
                     </>
                   )}
                 </span>
@@ -421,7 +459,7 @@ export default function EntryModal({
                     value={form.amount}
                     allowDecimal
                     inputMode="decimal"
-                    placeholder={new Intl.NumberFormat(locale(), {
+                    placeholder={numberFormatter(locale(), {
                       minimumFractionDigits: 2,
                     }).format(0)}
                     onChange={(amount) => update({ amount })}

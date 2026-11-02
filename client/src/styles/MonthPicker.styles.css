@@ -51,13 +51,37 @@
   outline-offset: 3px;
 }
 
-.month-picker-panel .month-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.period-picker-compact.month-picker-panel { padding: 12px; }
-.period-picker-compact .month-picker-panel-heading p { display: none; }
-.period-picker-compact .month-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
-.period-picker-compact .month-tile { min-height: 32px; padding: 6px 4px; font-size: 11px; }
-.period-picker-compact .month-year-bar { margin: 8px 0; }
-.period-picker-compact .month-picker-panel-heading { margin-bottom: 8px; }
-.period-picker-compact .month-current { margin-top: 8px; padding: 8px; }
+.month-picker-panel .month-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.period-picker-compact.month-picker-panel {
+  padding: 12px;
+}
+.period-picker-compact .month-picker-panel-heading p {
+  display: none;
+}
+.period-picker-compact .month-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+.period-picker-compact .month-tile {
+  min-height: 32px;
+  padding: 6px 4px;
+  font-size: 11px;
+}
+.period-picker-compact .month-year-bar {
+  margin: 8px 0;
+}
+.period-picker-compact .month-picker-panel-heading {
+  margin-bottom: 8px;
+}
+.period-picker-compact .month-current {
+  margin-top: 8px;
+  padding: 8px;
+}
 
-.month-tile:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.month-tile:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}

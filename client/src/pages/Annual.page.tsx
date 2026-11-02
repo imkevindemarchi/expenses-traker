@@ -40,7 +40,7 @@ export default function AnnualPage({
     const controller = new AbortController();
     setSummary(null);
     setError("");
-    api<AnnualSummary>(`/annual-summary?year=${year}`, { signal:controller.signal })
+    api<AnnualSummary>(`/annual-summary?year=${year}`, { signal: controller.signal })
       .then((result) => {
         if (active) setSummary(result);
       })

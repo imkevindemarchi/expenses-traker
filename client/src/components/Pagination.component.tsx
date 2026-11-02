@@ -54,7 +54,14 @@ const Pagination: FC<IProps> = ({
   useEffect(() => {
     if (inputPagination.limit !== pagination.limit) onLimitChange(pagination.limit);
     else if (inputPagination.page !== pagination.page) onPageChange(pagination.page);
-  }, [inputPagination.limit, inputPagination.page, pagination.limit, pagination.page, onLimitChange, onPageChange]);
+  }, [
+    inputPagination.limit,
+    inputPagination.page,
+    pagination.limit,
+    pagination.page,
+    onLimitChange,
+    onPageChange,
+  ]);
   const paginationItems: TPaginationItem[] = (() => {
     const totalPages: number = pagination.total_pages;
     const currentPage: number = pagination.page;
@@ -115,7 +122,12 @@ const Pagination: FC<IProps> = ({
   };
 
   const handlePageClick = (page: number): void => {
-    if (!Number.isInteger(page) || page < 1 || page > pagination.total_pages || page === pagination.page) {
+    if (
+      !Number.isInteger(page) ||
+      page < 1 ||
+      page > pagination.total_pages ||
+      page === pagination.page
+    ) {
       return;
     }
 

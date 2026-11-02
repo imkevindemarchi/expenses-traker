@@ -23,7 +23,11 @@ const ReactCountryFlag = ({
   <img
     aria-hidden="true"
     alt=""
-    src={countryCode.toLowerCase() === "it" ? 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%203%202%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M0%200h3v2H0z%22%2F%3E%3Cpath%20fill%3D%22%23009246%22%20d%3D%22M0%200h1v2H0z%22%2F%3E%3Cpath%20fill%3D%22%23ce2b37%22%20d%3D%22M2%200h1v2H2z%22%2F%3E%3C%2Fsvg%3E' : 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20741%20390%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M0%200h741v390H0z%22%2F%3E%3Cpath%20stroke%3D%22%23b22234%22%20stroke-width%3D%2230%22%20d%3D%22M0%2015h741M0%2075h741M0%20135h741M0%20195h741M0%20255h741M0%20315h741M0%20375h741%22%2F%3E%3Cpath%20fill%3D%22%233c3b6e%22%20d%3D%22M0%200h296v210H0z%22%2F%3E%3Cdefs%3E%3Cpath%20id%3D%22s%22%20fill%3D%22%23fff%22%20d%3D%22m0-7%202%205h5L3%201l2%205-5-3-5%203%202-5-4-3h5z%22%2F%3E%3C%2Fdefs%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%22196%22%2F%3E%3C%2Fsvg%3E'}
+    src={
+      countryCode.toLowerCase() === "it"
+        ? "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%203%202%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M0%200h3v2H0z%22%2F%3E%3Cpath%20fill%3D%22%23009246%22%20d%3D%22M0%200h1v2H0z%22%2F%3E%3Cpath%20fill%3D%22%23ce2b37%22%20d%3D%22M2%200h1v2H2z%22%2F%3E%3C%2Fsvg%3E"
+        : "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20741%20390%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M0%200h741v390H0z%22%2F%3E%3Cpath%20stroke%3D%22%23b22234%22%20stroke-width%3D%2230%22%20d%3D%22M0%2015h741M0%2075h741M0%20135h741M0%20195h741M0%20255h741M0%20315h741M0%20375h741%22%2F%3E%3Cpath%20fill%3D%22%233c3b6e%22%20d%3D%22M0%200h296v210H0z%22%2F%3E%3Cdefs%3E%3Cpath%20id%3D%22s%22%20fill%3D%22%23fff%22%20d%3D%22m0-7%202%205h5L3%201l2%205-5-3-5%203%202-5-4-3h5z%22%2F%3E%3C%2Fdefs%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%2212%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%2235%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%2258%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%2281%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%22104%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%22127%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%22150%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2248%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2297%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22146%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22195%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22244%22%20y%3D%22173%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2224%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%2273%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22122%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22171%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22220%22%20y%3D%22196%22%2F%3E%3Cuse%20href%3D%22%23s%22%20x%3D%22269%22%20y%3D%22196%22%2F%3E%3C%2Fsvg%3E"
+    }
     style={{ ...style, objectFit: "contain" }}
   />
 );
@@ -97,10 +101,16 @@ const LanguageSelector: FC<IProps> = ({
       availableWidth,
     );
 
-    const availableHeight = Math.max(0, isDropdownOnTop
-      ? triggerRect.top - DROPDOWN_GAP - VIEWPORT_PADDING
-      : window.innerHeight - triggerRect.bottom - DROPDOWN_GAP - VIEWPORT_PADDING);
-    const dropdownHeight = Math.min(dropdownRef.current?.offsetHeight ?? AVAILABLE_LANGUAGES.length * 53 + 12, availableHeight);
+    const availableHeight = Math.max(
+      0,
+      isDropdownOnTop
+        ? triggerRect.top - DROPDOWN_GAP - VIEWPORT_PADDING
+        : window.innerHeight - triggerRect.bottom - DROPDOWN_GAP - VIEWPORT_PADDING,
+    );
+    const dropdownHeight = Math.min(
+      dropdownRef.current?.offsetHeight ?? AVAILABLE_LANGUAGES.length * 53 + 12,
+      availableHeight,
+    );
 
     const preferredLeft: number = isDropdownAlignedLeft
       ? triggerRect.left
@@ -124,23 +134,31 @@ const LanguageSelector: FC<IProps> = ({
       ? triggerRect.left + 24
       : triggerRect.right - 24;
 
-    setDropdownOrigin(previous => {
+    setDropdownOrigin((previous) => {
       const next: { x: number; y: number } = {
-      x: Math.min(Math.max(triggerAnchorX - clampedLeft, 0), dropdownWidth),
-      y: isDropdownOnTop ? dropdownHeight : 0,
-    };
-      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
+        x: Math.min(Math.max(triggerAnchorX - clampedLeft, 0), dropdownWidth),
+        y: isDropdownOnTop ? dropdownHeight : 0,
+      };
+      return Object.keys(next).every(
+        (key) => previous[key as keyof typeof previous] === next[key as keyof typeof next],
+      )
+        ? previous
+        : next;
     });
 
-    setDropdownStyle(previous => {
+    setDropdownStyle((previous) => {
       const next: CSSProperties = {
-      left: clampedLeft,
-      top: clampedTop,
-      width: dropdownWidth,
-      maxHeight: availableHeight,
-      overflowY: "auto",
-    };
-      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
+        left: clampedLeft,
+        top: clampedTop,
+        width: dropdownWidth,
+        maxHeight: availableHeight,
+        overflowY: "auto",
+      };
+      return Object.keys(next).every(
+        (key) => previous[key as keyof typeof previous] === next[key as keyof typeof next],
+      )
+        ? previous
+        : next;
     });
   }, [isDropdownAlignedLeft, isDropdownOnTop]);
 

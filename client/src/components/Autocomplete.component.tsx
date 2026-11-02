@@ -89,7 +89,9 @@ const Autocomplete = <TOption,>({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [insideModal, setInsideModal] = useState(false);
-  useLayoutEffect(() => { setInsideModal(Boolean(containerRef.current?.closest('[role="dialog"]'))); }, []);
+  useLayoutEffect(() => {
+    setInsideModal(Boolean(containerRef.current?.closest('[role="dialog"]')));
+  }, []);
   const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -363,13 +365,29 @@ const Autocomplete = <TOption,>({
     };
   }, [isOpen, updateMenuPosition]);
 
-  if (insideModal) return <ModalChoiceField
-    id={id} label={label} placeholder={resolvedPlaceholder} searchPlaceholder={resolvedSearchPlaceholder}
-    value={value} options={options} icon={icon} disabled={disabled} isLoading={isLoading} clearable={clearable}
-    emptyMessage={resolvedEmptyMessage} error={error}
-    getOptionKey={getOptionKey} getOptionLabel={getOptionLabel} getOptionDescription={getOptionDescription}
-    getOptionIcon={getOptionIcon} onChange={onChange} onSearchChange={onSearchChange}
-  />;
+  if (insideModal)
+    return (
+      <ModalChoiceField
+        id={id}
+        label={label}
+        placeholder={resolvedPlaceholder}
+        searchPlaceholder={resolvedSearchPlaceholder}
+        value={value}
+        options={options}
+        icon={icon}
+        disabled={disabled}
+        isLoading={isLoading}
+        clearable={clearable}
+        emptyMessage={resolvedEmptyMessage}
+        error={error}
+        getOptionKey={getOptionKey}
+        getOptionLabel={getOptionLabel}
+        getOptionDescription={getOptionDescription}
+        getOptionIcon={getOptionIcon}
+        onChange={onChange}
+        onSearchChange={onSearchChange}
+      />
+    );
   return (
     <>
       <div ref={containerRef} className="w-full">

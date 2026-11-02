@@ -21,7 +21,25 @@ import MonthlyBudget from "./components/MonthlyBudget.component";
 import { useTranslation } from "react-i18next";
 import { tr } from "./i18n";
 import { Suspense, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
-import { ArrowDownLeft, ArrowUpRight, Wallet, Plus, Pencil, Trash2, ListFilter, RotateCcw, ArrowRight, Eye, EyeOff, Mail, LockKeyhole, UserRound, Shapes, X, TrendingUp } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Wallet,
+  Plus,
+  Pencil,
+  Trash2,
+  ListFilter,
+  RotateCcw,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Mail,
+  LockKeyhole,
+  UserRound,
+  Shapes,
+  X,
+  TrendingUp,
+} from "lucide-react";
 import { ThemeContext, type ThemePreference } from "./contexts/theme.context";
 import { api, ApiError, money as formatMoney, today } from "./api";
 import type { User, Category, Subcategory, Entry, Summary } from "./types";
@@ -67,7 +85,6 @@ type ManageForm = {
 type DeleteAction = { endpoint: string; label: string };
 
 export default function App() {
-  useNavigationPreload(["/annual"]);
   useTranslation();
   const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
     const saved = localStorage.getItem("expenses-theme");
@@ -81,6 +98,7 @@ export default function App() {
     localStorage.setItem("expenses-theme", themePreference);
   }, [themePreference]);
   const [user, setUser] = useState<User | null>(null);
+  useNavigationPreload(user ? ["/annual"] : []);
   const money = (cents: number) => formatMoney(cents, user?.currency ?? "EUR");
   const [boot, setBoot] = useState(true);
   const location = useLocation();
@@ -191,7 +209,9 @@ export default function App() {
     let active = true;
     const controller = new AbortController();
     setCategoriesLoading(true);
-    api<{ categories: Category[]; subcategories: Subcategory[] }>("/categories", { signal: controller.signal })
+    api<{ categories: Category[]; subcategories: Subcategory[] }>("/categories", {
+      signal: controller.signal,
+    })
       .then((data) => {
         if (active) {
           setCategories(data.categories);
@@ -215,25 +235,59 @@ export default function App() {
     let active = true;
     const controller = new AbortController();
     setLoading(true);
-    const timer = window.setTimeout(() => {
-      const query = new URLSearchParams({ month, page: String(page === "dashboard" ? 1 : listPage), limit: String(page === "dashboard" ? 5 : pageLimit) });
-      if (page === "entries") {
-        if (filterCategory) query.set("category", filterCategory);
-        if (filterSubcategory) query.set("subcategory", filterSubcategory);
-        if (filterKind) query.set("kind", filterKind);
-        if (search.trim()) query.set("q", search.trim());
-      }
-      api<{ entries: Entry[]; total: number; totalPages: number }>(`/entries?${query}`, { signal: controller.signal })
-        .then(list => {
-          if (!active) return;
-          if (page === "entries" && listPage > Math.max(1, list.totalPages)) { setListPage(Math.max(1, list.totalPages)); return; }
-          setEntries(list.entries); setTotalEntries(list.total); setTotalPages(list.totalPages);
+    const timer = window.setTimeout(
+      () => {
+        const query = new URLSearchParams({
+          month,
+          page: String(page === "dashboard" ? 1 : listPage),
+          limit: String(page === "dashboard" ? 5 : pageLimit),
+        });
+        if (page === "entries") {
+          if (filterCategory) query.set("category", filterCategory);
+          if (filterSubcategory) query.set("subcategory", filterSubcategory);
+          if (filterKind) query.set("kind", filterKind);
+          if (search.trim()) query.set("q", search.trim());
+        }
+        api<{ entries: Entry[]; total: number; totalPages: number }>(`/entries?${query}`, {
+          signal: controller.signal,
         })
-        .catch(error => { if (active) setNotice({ error:true, message:errorText(error) }); })
-        .finally(() => { if (active) setLoading(false); });
-    }, search && page === "entries" ? 250 : 0);
-    return () => { active = false; controller.abort(); window.clearTimeout(timer); };
-  }, [user?.id, needsMonthlyData, month, listPage, pageLimit, filterCategory, filterSubcategory, filterKind, search, refresh, page]);
+          .then((list) => {
+            if (!active) return;
+            if (page === "entries" && listPage > Math.max(1, list.totalPages)) {
+              setListPage(Math.max(1, list.totalPages));
+              return;
+            }
+            setEntries(list.entries);
+            setTotalEntries(list.total);
+            setTotalPages(list.totalPages);
+          })
+          .catch((error) => {
+            if (active) setNotice({ error: true, message: errorText(error) });
+          })
+          .finally(() => {
+            if (active) setLoading(false);
+          });
+      },
+      search && page === "entries" ? 250 : 0,
+    );
+    return () => {
+      active = false;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [
+    user?.id,
+    needsMonthlyData,
+    month,
+    listPage,
+    pageLimit,
+    filterCategory,
+    filterSubcategory,
+    filterKind,
+    search,
+    refresh,
+    page,
+  ]);
   const summaryCategory = page === "entries" ? filterCategory : "";
   const summarySubcategory = page === "entries" ? filterSubcategory : "";
   const summaryKind = page === "entries" ? filterKind : "";
@@ -243,21 +297,49 @@ export default function App() {
     let active = true;
     const controller = new AbortController();
     setSummaryLoading(true);
-    const timer = window.setTimeout(() => {
-      const query = new URLSearchParams({ month });
-      if (summaryCategory) query.set("category", summaryCategory);
-      if (summarySubcategory) query.set("subcategory", summarySubcategory);
-      if (summaryKind) query.set("kind", summaryKind);
-      if (summarySearch) query.set("q", summarySearch);
-      api<Summary>(`/summary?${query}`, { signal:controller.signal })
-        .then(result => { if (active) setSummary(result); })
-        .catch(error => { if (active) setNotice({ error:true, message:errorText(error) }); })
-        .finally(() => { if (active) setSummaryLoading(false); });
-    }, summarySearch ? 250 : 0);
-    return () => { active = false; controller.abort(); window.clearTimeout(timer); };
-  }, [user?.id, needsMonthlyData, month, summaryCategory, summarySubcategory, summaryKind, summarySearch, refresh]);
-  const categoryById = useMemo(() => new Map(categories.map((item) => [item._id, item])), [categories]);
-  const subcategoryById = useMemo(() => new Map(subcategories.map((item) => [item._id, item])), [subcategories]);
+    const timer = window.setTimeout(
+      () => {
+        const query = new URLSearchParams({ month });
+        if (summaryCategory) query.set("category", summaryCategory);
+        if (summarySubcategory) query.set("subcategory", summarySubcategory);
+        if (summaryKind) query.set("kind", summaryKind);
+        if (summarySearch) query.set("q", summarySearch);
+        api<Summary>(`/summary?${query}`, { signal: controller.signal })
+          .then((result) => {
+            if (active) setSummary(result);
+          })
+          .catch((error) => {
+            if (active) setNotice({ error: true, message: errorText(error) });
+          })
+          .finally(() => {
+            if (active) setSummaryLoading(false);
+          });
+      },
+      summarySearch ? 250 : 0,
+    );
+    return () => {
+      active = false;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [
+    user?.id,
+    needsMonthlyData,
+    month,
+    summaryCategory,
+    summarySubcategory,
+    summaryKind,
+    summarySearch,
+    refresh,
+  ]);
+  const categoryById = useMemo(
+    () => new Map(categories.map((item) => [item._id, item])),
+    [categories],
+  );
+  const subcategoryById = useMemo(
+    () => new Map(subcategories.map((item) => [item._id, item])),
+    [subcategories],
+  );
   const subcategoriesByCategory = useMemo(() => {
     const groups = new Map<string, Subcategory[]>();
     for (const item of subcategories) {
@@ -272,7 +354,8 @@ export default function App() {
     setNotice(null);
     try {
       await api(endpoint, { method, body });
-      if (/^\/(categories|subcategories)(?:\/|$)/.test(endpoint)) setCategoryRevision(value => value + 1);
+      if (/^\/(categories|subcategories)(?:\/|$)/.test(endpoint))
+        setCategoryRevision((value) => value + 1);
       setRefresh((value) => value + 1);
       setNotice({ error: false, message: "Modifica salvata." });
       return true;
@@ -393,13 +476,19 @@ export default function App() {
             <Navigate to={safeReturnPath(location.state?.from)} replace />
           ) : (
             <>
-              {page !== "settings" && <Navbar
-                user={user}
-                onLogout={() => {
-                  void logout();
-                }}
-              />}
-              <main className={"app-main ui-refresh" + (page === "settings" ? " standalone-settings-page" : "")}>
+              {page !== "settings" && (
+                <Navbar
+                  user={user}
+                  onLogout={() => {
+                    void logout();
+                  }}
+                />
+              )}
+              <main
+                className={
+                  "app-main ui-refresh" + (page === "settings" ? " standalone-settings-page" : "")
+                }
+              >
                 <div className="page-top">
                   <div>
                     <Header
@@ -428,322 +517,370 @@ export default function App() {
                     </div>
                   )}
                 </div>
-                <Suspense fallback={<RouteSkeleton />}><Routes>
-                  <Route
-                    path={ROUTE_PATHS.dashboard}
-                    element={
-                      <>
-                        {summaryLoading || categoriesLoading ? (
-                          <PageSkeleton layout="overview" budget={user.monthlyBudgetCents != null} />
-                        ) : (
-                          <>
-                            {" "}
-                            <div className="overview-grid">
-                              <Glass className="balance-card">
-                                <div className="balance-heading">
-                                  <span className="eyebrow">{tr("BILANCIO DEL MESE")}</span>
-                                  <span className="round-icon">
-                                    <Wallet size={20} />
-                                  </span>
-                                </div>
-                                <p className="balance-value">{money(summary.balance)}</p>
-                                <p className="muted">
-                                  {tr("Entrate meno spese del periodo selezionato.")}
-                                </p>
-                                <span className="ui-pill balance-chip">
-                                  <TrendingUp size={14} />{" "}
-                                  {tr("{{count}} movimenti registrati", { count: summary.count })}
-                                </span>
-                              </Glass>
-                              <Glass className="stat-card income-card">
-                                <span className="stat-icon income">
-                                  <ArrowDownLeft size={24} />
-                                </span>
-                                <p className="muted">{tr("Entrate")}</p>
-                                <strong>{money(summary.income)}</strong>
-                                <small>{tr("Quello che hai guadagnato")}</small>
-                              </Glass>
-                              <Glass className="stat-card expense-card">
-                                <span className="stat-icon expense">
-                                  <ArrowUpRight size={24} />
-                                </span>
-                                <p className="muted">{tr("Spese")}</p>
-                                <strong>{money(summary.expense)}</strong>
-                                <small>{tr("Quello che hai speso")}</small>
-                              </Glass>
-                            </div>
-                            {month === today().slice(0, 7) &&
-                              user.monthlyBudgetCents != null &&
-                              !loading && (
-                                <MonthlyBudget
-                                  limit={user.monthlyBudgetCents}
-                                  spent={summary.expense}
-                                />
-                              )}
-                            <div className="charts-grid">
-                              <Glass className="panel">
-                                <div className="section-heading">
-                                  <div>
-                                    <p className="eyebrow">{tr("COME SI MUOVE IL TUO DENARO")}</p>
-                                    <h2>{tr("Andamento del mese")}</h2>
-                                  </div>
-                                  <span className="legend">
-                                    <i /> {tr("Spese")} <i className="income-dot" /> {tr("Entrate")}
-                                  </span>
-                                </div>
-                                <Trend summary={summary} month={month} />
-                              </Glass>
-                              <Glass className="panel">
-                                <p className="eyebrow">{tr("DOVE VA IL TUO DENARO")}</p>
-                                <h2>{tr("Spese per categoria")}</h2>
-                                <SpendingBreakdown summary={summary} categories={categoryById} />
-                              </Glass>
-                            </div>
-                          </>
-                        )}
-                        <Glass className="panel">
-                          <div className="section-heading">
-                            <h2>{tr("Ultimi movimenti")}</h2>
-                            <Button variant="secondary" onClick={() => changePage("entries")}>
-                              {tr("Vedi tutti")} <ArrowUpRight size={16} />
-                            </Button>
-                          </div>
-                          {loading || categoriesLoading ? (
-                            <PageSkeleton layout="entries" />
-                          ) : (
-                            <EntriesTable
-                              entries={entries.slice(0, 5)}
-                              categories={categoryById}
-                              subcategories={subcategoryById}
-                              onEdit={openEntry}
-                              onDelete={(item) =>
-                                setDeleteAction({
-                                  endpoint: `/entries/${item._id}`,
-                                  label:
-                                    (item.subcategory
-                                      ? subcategoryById.get(item.subcategory)?.name
-                                      : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                                })
+                <Suspense fallback={<RouteSkeleton />}>
+                  <Routes>
+                    <Route
+                      path={ROUTE_PATHS.dashboard}
+                      element={
+                        <>
+                          {summaryLoading || categoriesLoading ? (
+                            <PageSkeleton
+                              layout="overview"
+                              budget={
+                                month === today().slice(0, 7) && user.monthlyBudgetCents != null
                               }
                             />
+                          ) : (
+                            <>
+                              {" "}
+                              <div className="overview-grid">
+                                <Glass className="balance-card">
+                                  <div className="balance-heading">
+                                    <span className="eyebrow">{tr("BILANCIO DEL MESE")}</span>
+                                    <span className="round-icon">
+                                      <Wallet size={20} />
+                                    </span>
+                                  </div>
+                                  <p className="balance-value">{money(summary.balance)}</p>
+                                  <p className="muted">
+                                    {tr("Entrate meno spese del periodo selezionato.")}
+                                  </p>
+                                  <span className="ui-pill balance-chip">
+                                    <TrendingUp size={14} />{" "}
+                                    {tr("{{count}} movimenti registrati", { count: summary.count })}
+                                  </span>
+                                </Glass>
+                                <Glass className="stat-card income-card">
+                                  <span className="stat-icon income">
+                                    <ArrowDownLeft size={24} />
+                                  </span>
+                                  <p className="muted">{tr("Entrate")}</p>
+                                  <strong>{money(summary.income)}</strong>
+                                  <small>{tr("Quello che hai guadagnato")}</small>
+                                </Glass>
+                                <Glass className="stat-card expense-card">
+                                  <span className="stat-icon expense">
+                                    <ArrowUpRight size={24} />
+                                  </span>
+                                  <p className="muted">{tr("Spese")}</p>
+                                  <strong>{money(summary.expense)}</strong>
+                                  <small>{tr("Quello che hai speso")}</small>
+                                </Glass>
+                              </div>
+                              {month === today().slice(0, 7) &&
+                                user.monthlyBudgetCents != null &&
+                                !loading && (
+                                  <MonthlyBudget
+                                    limit={user.monthlyBudgetCents}
+                                    spent={summary.expense}
+                                  />
+                                )}
+                              <div className="charts-grid">
+                                <Glass className="panel">
+                                  <div className="section-heading">
+                                    <div>
+                                      <p className="eyebrow">{tr("COME SI MUOVE IL TUO DENARO")}</p>
+                                      <h2>{tr("Andamento del mese")}</h2>
+                                    </div>
+                                    <span className="legend">
+                                      <i /> {tr("Spese")} <i className="income-dot" />{" "}
+                                      {tr("Entrate")}
+                                    </span>
+                                  </div>
+                                  <Trend summary={summary} month={month} />
+                                </Glass>
+                                <Glass className="panel">
+                                  <p className="eyebrow">{tr("DOVE VA IL TUO DENARO")}</p>
+                                  <h2>{tr("Spese per categoria")}</h2>
+                                  <SpendingBreakdown summary={summary} categories={categoryById} />
+                                </Glass>
+                              </div>
+                            </>
                           )}
-                        </Glass>
-                      </>
-                    }
-                  />
-                  <Route
-                    path={ROUTE_PATHS.entries}
-                    element={
-                      <>
-                        <Glass className="panel entries-register">
-                          <div className="section-heading">
+                          <Glass className="panel">
+                            <div className="section-heading">
+                              <h2>{tr("Ultimi movimenti")}</h2>
+                              <Button variant="secondary" onClick={() => changePage("entries")}>
+                                {tr("Vedi tutti")} <ArrowUpRight size={16} />
+                              </Button>
+                            </div>
+                            {loading || categoriesLoading ? (
+                              <PageSkeleton layout="entries" />
+                            ) : (
+                              <EntriesTable
+                                entries={entries.slice(0, 5)}
+                                categories={categoryById}
+                                subcategories={subcategoryById}
+                                onEdit={openEntry}
+                                onDelete={(item) =>
+                                  setDeleteAction({
+                                    endpoint: `/entries/${item._id}`,
+                                    label:
+                                      (item.subcategory
+                                        ? subcategoryById.get(item.subcategory)?.name
+                                        : categoryById.get(item.category)?.name) ?? tr("Categoria"),
+                                  })
+                                }
+                              />
+                            )}
+                          </Glass>
+                        </>
+                      }
+                    />
+                    <Route
+                      path={ROUTE_PATHS.entries}
+                      element={
+                        <>
+                          <Glass className="panel entries-register">
+                            <div className="section-heading">
+                              <div>
+                                <h2>{tr("Il tuo registro")}</h2>
+                                <p className="muted">
+                                  {tr("{{count}} movimenti · {{month}}", {
+                                    count: totalEntries,
+                                    month,
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="entries-search">
+                              <Input
+                                id="search"
+                                placeholder={tr("Cerca un movimento…")}
+                                value={search}
+                                onChange={(event) => {
+                                  setSearch(event.target.value);
+                                  setListPage(1);
+                                }}
+                              />
+                            </div>
+                            {(filterCategory || filterSubcategory || filterKind) && (
+                              <div
+                                className="entry-active-filters"
+                                aria-label={tr("Filtri attivi")}
+                              >
+                                {[
+                                  {
+                                    value: filterKind,
+                                    label: filterKind === "income" ? tr("Entrate") : tr("Spese"),
+                                    clear: () => setFilterKind(""),
+                                  },
+                                  {
+                                    value: filterCategory,
+                                    label: categoryById.get(filterCategory)?.name,
+                                    clear: () => setFilterCategory(""),
+                                  },
+                                  {
+                                    value: filterSubcategory,
+                                    label: subcategoryById.get(filterSubcategory)?.name,
+                                    clear: () => setFilterSubcategory(""),
+                                  },
+                                ]
+                                  .filter((item) => item.value)
+                                  .map((item, index) => (
+                                    <button
+                                      key={index}
+                                      type="button"
+                                      aria-label={tr("Rimuovi filtro: {{name}}", {
+                                        name: item.label,
+                                      })}
+                                      onClick={() => {
+                                        item.clear();
+                                        setListPage(1);
+                                      }}
+                                    >
+                                      <span>{item.label}</span>
+                                      <X size={14} aria-hidden="true" />
+                                    </button>
+                                  ))}
+                              </div>
+                            )}
+                            <FilteredBalance
+                              summary={summary}
+                              kind={filterKind}
+                              loading={summaryLoading}
+                            />
+                            {loading ? (
+                              <PageSkeleton layout="entries" rows={pageLimit} />
+                            ) : (
+                              <EntriesTable
+                                entries={entries}
+                                categories={categoryById}
+                                subcategories={subcategoryById}
+                                onEdit={openEntry}
+                                onDelete={(item) =>
+                                  setDeleteAction({
+                                    endpoint: `/entries/${item._id}`,
+                                    label:
+                                      (item.subcategory
+                                        ? subcategoryById.get(item.subcategory)?.name
+                                        : categoryById.get(item.category)?.name) ?? tr("Categoria"),
+                                  })
+                                }
+                              />
+                            )}
+                          </Glass>
+                          {loading ? (
+                            <PageSkeleton layout="pagination" />
+                          ) : (
+                            <div className="entries-pagination">
+                              <Pagination
+                                pagination={{
+                                  page: listPage,
+                                  limit: pageLimit,
+                                  total_items: totalEntries,
+                                  total_pages: Math.max(1, totalPages),
+                                  has_next_page: listPage < totalPages,
+                                  has_previous_page: listPage > 1,
+                                }}
+                                limitOptions={[10, 20, 50]}
+                                selectId="entries-pagination"
+                                flush
+                                compactDesktop
+                                onPageChange={setListPage}
+                                onLimitChange={(limit) => {
+                                  setPageLimit(limit);
+                                  setListPage(1);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </>
+                      }
+                    />
+                    <Route
+                      path={ROUTE_PATHS.management}
+                      element={
+                        <>
+                          <Glass className="management-intro">
+                            <Shapes size={24} />
                             <div>
-                              <h2>{tr("Il tuo registro")}</h2>
-                              <p className="muted">
-                                {tr("{{count}} movimenti · {{month}}", {
-                                  count: totalEntries,
-                                  month,
-                                })}
+                              <h2>{tr("Le tue categorie, il tuo ordine.")}</h2>
+                              <p>
+                                {tr(
+                                  "Ogni sottocategoria appartiene a una categoria principale. Tutto quello che crei è visibile solo nel tuo account.",
+                                )}
                               </p>
                             </div>
-                          </div>
-                          <div className="entries-search">
-                            <Input
-                              id="search"
-                              placeholder={tr("Cerca un movimento…")}
-                              value={search}
-                              onChange={(event) => {
-                                setSearch(event.target.value);
-                                setListPage(1);
-                              }}
-                            />
-                          </div>
-                          {(filterCategory || filterSubcategory || filterKind) && (
-                            <div className="entry-active-filters" aria-label={tr("Filtri attivi")}>
-                              {[
-                                { value: filterKind, label: filterKind === "income" ? tr("Entrate") : tr("Spese"), clear: () => setFilterKind("") },
-                                { value: filterCategory, label: categoryById.get(filterCategory)?.name, clear: () => setFilterCategory("") },
-                                { value: filterSubcategory, label: subcategoryById.get(filterSubcategory)?.name, clear: () => setFilterSubcategory("") },
-                              ].filter((item) => item.value).map((item, index) => (
-                                <button key={index} type="button" aria-label={tr("Rimuovi filtro: {{name}}", { name: item.label })}
-                                  onClick={() => { item.clear(); setListPage(1); }}>
-                                  <span>{item.label}</span><X size={14} aria-hidden="true" />
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                          <FilteredBalance summary={summary} kind={filterKind} loading={summaryLoading} />
-                          {loading ? (
-                            <PageSkeleton layout="entries" rows={pageLimit} />
+                          </Glass>
+                          {categoriesLoading ? (
+                            <PageSkeleton layout="categories" />
                           ) : (
-                            <EntriesTable
-                              entries={entries}
-                              categories={categoryById}
-                              subcategories={subcategoryById}
-                              onEdit={openEntry}
-                              onDelete={(item) =>
-                                setDeleteAction({
-                                  endpoint: `/entries/${item._id}`,
-                                  label:
-                                    (item.subcategory
-                                      ? subcategoryById.get(item.subcategory)?.name
-                                      : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                                })
-                              }
-                            />
-                          )}
-                        </Glass>
-                        {loading ? <PageSkeleton layout="pagination" /> : (
-                          <div className="entries-pagination">
-                            <Pagination
-                              pagination={{
-                                page: listPage,
-                                limit: pageLimit,
-                                total_items: totalEntries,
-                                total_pages: Math.max(1, totalPages),
-                                has_next_page: listPage < totalPages,
-                                has_previous_page: listPage > 1,
-                              }}
-                              limitOptions={[10, 20, 50]}
-                              selectId="entries-pagination"
-                              flush
-                              compactDesktop
-                              onPageChange={setListPage}
-                              onLimitChange={(limit) => {
-                                setPageLimit(limit);
-                                setListPage(1);
-                              }}
-                            />
-                          </div>
-                        )}
-                      </>
-                    }
-                  />
-                  <Route
-                    path={ROUTE_PATHS.management}
-                    element={
-                      <>
-                        <Glass className="management-intro">
-                          <Shapes size={24} />
-                          <div>
-                            <h2>{tr("Le tue categorie, il tuo ordine.")}</h2>
-                            <p>
-                              {tr(
-                                "Ogni sottocategoria appartiene a una categoria principale. Tutto quello che crei è visibile solo nel tuo account.",
-                              )}
-                            </p>
-                          </div>
-                        </Glass>
-                        {categoriesLoading ? (
-                          <PageSkeleton layout="categories" />
-                        ) : (
-                          <div className="category-grid">
-                            {categories.map((category) => (
-                              <Shadowbox
-                                key={category._id}
-                                className="category-card"
-                                style={{ "--category-color": category.color } as CSSProperties}
-                              >
-                                <div className="category-header">
-                                  <span
-                                    className="category-orb"
-                                    style={{
-                                      background: category.color + "20",
-                                      color: category.color,
-                                    }}
-                                  >
-                                    <Shapes size={22} />
-                                  </span>
-                                  <h2>{category.name}</h2>
-                                  <div className="category-actions">
-                                  <IconButton
-                                    className="quiet-icon"
-                                    aria-label={tr("Modifica {{name}}", { name: category.name })}
-                                    onClick={() =>
-                                      setManageEdit({
-                                        mode: "category",
-                                        id: category._id,
-                                        name: category.name,
-                                        color: category.color,
-                                        category: "",
-                                      })
-                                    }
-                                  >
-                                    <Pencil size={16} />
-                                  </IconButton>
-                                  <IconButton
-                                    className="quiet-icon danger"
-                                    aria-label={tr("Elimina {{name}}", { name: category.name })}
-                                    onClick={() =>
-                                      setDeleteAction({
-                                        endpoint: `/categories/${category._id}`,
-                                        label: category.name,
-                                      })
-                                    }
-                                    variant="danger"
-                                  >
-                                    <Trash2 size={16} />
-                                  </IconButton>
-                                  </div>
-                                </div>
-                                <Accordion
-                                  ariaLabel={tr("Sottocategorie di {{name}}", {
-                                    name: category.name,
-                                  })}
-                                  header={
-                                    <span className="muted">
-                                      {tr("Sottocategorie")}{" "}
-                                      <span className="count">
-                                        {
-                                          (subcategoriesByCategory.get(category._id)?.length ?? 0)
-                                        }
-                                      </span>
-                                    </span>
-                                  }
-                                  contentClassName="subcategory-list"
+                            <div className="category-grid">
+                              {categories.map((category) => (
+                                <Shadowbox
+                                  key={category._id}
+                                  className="category-card"
+                                  style={{ "--category-color": category.color } as CSSProperties}
                                 >
-                                  {(subcategoriesByCategory.get(category._id) ?? []).map((item) => (
-                                      <div className="subcategory" key={item._id}>
-                                        <IconButton
-                                          className="quiet-icon"
-                                          aria-label={tr("Modifica {{name}}", { name: item.name })}
-                                          onClick={() =>
-                                            setManageEdit({
-                                              mode: "subcategory",
-                                              id: item._id,
-                                              name: item.name,
-                                              color: category.color,
-                                              category: category._id,
-                                            })
-                                          }
-                                        >
-                                          <Pencil size={15} />
-                                        </IconButton>
-                                        <IconButton
-                                          className="quiet-icon danger"
-                                          aria-label={tr("Elimina {{name}}", { name: item.name })}
-                                          onClick={() =>
-                                            setDeleteAction({
-                                              endpoint: `/subcategories/${item._id}`,
-                                              label: item.name,
-                                            })
-                                          }
-                                          variant="danger"
-                                        >
-                                          <Trash2 size={15} />
-                                        </IconButton>
-
-                                        <span>
-                                          <i style={{ background: category.color }} />
-                                          {item.name}
+                                  <div className="category-header">
+                                    <span
+                                      className="category-orb"
+                                      style={{
+                                        background: category.color + "20",
+                                        color: category.color,
+                                      }}
+                                    >
+                                      <Shapes size={22} />
+                                    </span>
+                                    <h2>{category.name}</h2>
+                                    <div className="category-actions">
+                                      <IconButton
+                                        className="quiet-icon"
+                                        aria-label={tr("Modifica {{name}}", {
+                                          name: category.name,
+                                        })}
+                                        onClick={() =>
+                                          setManageEdit({
+                                            mode: "category",
+                                            id: category._id,
+                                            name: category.name,
+                                            color: category.color,
+                                            category: "",
+                                          })
+                                        }
+                                      >
+                                        <Pencil size={16} />
+                                      </IconButton>
+                                      <IconButton
+                                        className="quiet-icon danger"
+                                        aria-label={tr("Elimina {{name}}", { name: category.name })}
+                                        onClick={() =>
+                                          setDeleteAction({
+                                            endpoint: `/categories/${category._id}`,
+                                            label: category.name,
+                                          })
+                                        }
+                                        variant="danger"
+                                      >
+                                        <Trash2 size={16} />
+                                      </IconButton>
+                                    </div>
+                                  </div>
+                                  <Accordion
+                                    ariaLabel={tr("Sottocategorie di {{name}}", {
+                                      name: category.name,
+                                    })}
+                                    header={
+                                      <span className="muted">
+                                        {tr("Sottocategorie")}{" "}
+                                        <span className="count">
+                                          {subcategoriesByCategory.get(category._id)?.length ?? 0}
                                         </span>
-                                      </div>
-                                    ))}
-                                </Accordion>
+                                      </span>
+                                    }
+                                    contentClassName="subcategory-list"
+                                  >
+                                    {(subcategoriesByCategory.get(category._id) ?? []).map(
+                                      (item) => (
+                                        <div className="subcategory" key={item._id}>
+                                          <IconButton
+                                            className="quiet-icon"
+                                            aria-label={tr("Modifica {{name}}", {
+                                              name: item.name,
+                                            })}
+                                            onClick={() =>
+                                              setManageEdit({
+                                                mode: "subcategory",
+                                                id: item._id,
+                                                name: item.name,
+                                                color: category.color,
+                                                category: category._id,
+                                              })
+                                            }
+                                          >
+                                            <Pencil size={15} />
+                                          </IconButton>
+                                          <IconButton
+                                            className="quiet-icon danger"
+                                            aria-label={tr("Elimina {{name}}", { name: item.name })}
+                                            onClick={() =>
+                                              setDeleteAction({
+                                                endpoint: `/subcategories/${item._id}`,
+                                                label: item.name,
+                                              })
+                                            }
+                                            variant="danger"
+                                          >
+                                            <Trash2 size={15} />
+                                          </IconButton>
+
+                                          <span>
+                                            <i style={{ background: category.color }} />
+                                            {item.name}
+                                          </span>
+                                        </div>
+                                      ),
+                                    )}
+                                  </Accordion>
                                   <Button
                                     variant="secondary"
                                     className="category-add-subcategory"
-                                    icon={<span className="category-add-icon"><Plus size={17} /></span>}
+                                    icon={
+                                      <span className="category-add-icon">
+                                        <Plus size={17} />
+                                      </span>
+                                    }
                                     onClick={() =>
                                       setManageEdit({
                                         mode: "subcategory",
@@ -755,64 +892,65 @@ export default function App() {
                                   >
                                     {tr("Nuova sottocategoria")}
                                   </Button>
-                              </Shadowbox>
-                            ))}
-                          </div>
-                        )}
-                        {!categoriesLoading && !categories.length && (
-                          <Empty text={tr("Crea la tua prima categoria per iniziare.")} />
-                        )}
-                      </>
-                    }
-                  />
-                  <Route
-                    path="/annual"
-                    element={
-                      <AnnualPage
-                        refresh={refresh}
-                        categories={categoryById}
-                        subcategories={subcategoryById}
-                        onEdit={openEntry}
-                        onDelete={(item) =>
-                          setDeleteAction({
-                            endpoint: `/entries/${item._id}`,
-                            label:
-                              (item.subcategory
-                                ? subcategoryById.get(item.subcategory)?.name
-                                : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                          })
-                        }
-                      />
-                    }
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      <SettingsPage
-                        onDeleted={() => {
-                          setUser(null);
-                          setCategories([]);
-                          setSubcategories([]);
-                          setEntries([]);
-                          setSummary(emptySummary);
-                          setEntryEdit(null);
-                          setManageEdit(null);
-                          setDeleteAction(null);
-                          navigate(ROUTE_PATHS.login, { replace: true });
-                          setNotice({ error: false, message: "Account eliminato." });
-                        }}
-                        user={user}
-                        onImported={() => {
-                          setCategoryRevision((value) => value + 1);
-                          setRefresh((value) => value + 1);
-                        }}
-                        onSaved={setUser}
-                        onNotice={(error, message) => setNotice({ error, message })}
-                      />
-                    }
-                  />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes></Suspense>
+                                </Shadowbox>
+                              ))}
+                            </div>
+                          )}
+                          {!categoriesLoading && !categories.length && (
+                            <Empty text={tr("Crea la tua prima categoria per iniziare.")} />
+                          )}
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/annual"
+                      element={
+                        <AnnualPage
+                          refresh={refresh}
+                          categories={categoryById}
+                          subcategories={subcategoryById}
+                          onEdit={openEntry}
+                          onDelete={(item) =>
+                            setDeleteAction({
+                              endpoint: `/entries/${item._id}`,
+                              label:
+                                (item.subcategory
+                                  ? subcategoryById.get(item.subcategory)?.name
+                                  : categoryById.get(item.category)?.name) ?? tr("Categoria"),
+                            })
+                          }
+                        />
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <SettingsPage
+                          onDeleted={() => {
+                            setUser(null);
+                            setCategories([]);
+                            setSubcategories([]);
+                            setEntries([]);
+                            setSummary(emptySummary);
+                            setEntryEdit(null);
+                            setManageEdit(null);
+                            setDeleteAction(null);
+                            navigate(ROUTE_PATHS.login, { replace: true });
+                            setNotice({ error: false, message: "Account eliminato." });
+                          }}
+                          user={user}
+                          onImported={() => {
+                            setCategoryRevision((value) => value + 1);
+                            setRefresh((value) => value + 1);
+                          }}
+                          onSaved={setUser}
+                          onNotice={(error, message) => setNotice({ error, message })}
+                        />
+                      }
+                    />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
                 <footer className="app-footer">
                   <img
                     src="/expenses-logo.png?v=2"
@@ -868,7 +1006,11 @@ export default function App() {
               )}
               {filtersModalOpen && page === "entries" && (
                 <EntryFiltersModal
-                  initial={{ category: filterCategory, subcategory: filterSubcategory, kind: filterKind }}
+                  initial={{
+                    category: filterCategory,
+                    subcategory: filterSubcategory,
+                    kind: filterKind,
+                  }}
                   categories={categories}
                   subcategories={subcategories}
                   loading={categoriesLoading}
@@ -906,7 +1048,11 @@ export default function App() {
               )}
               <Modal
                 isOpen={Boolean(manageEdit)}
-                accentColor={manageEdit?.mode === "category" ? manageEdit.color : categoryById.get(manageEdit?.category ?? "")?.color}
+                accentColor={
+                  manageEdit?.mode === "category"
+                    ? manageEdit.color
+                    : categoryById.get(manageEdit?.category ?? "")?.color
+                }
                 title={tr(
                   manageEdit?.mode === "category"
                     ? manageEdit.id

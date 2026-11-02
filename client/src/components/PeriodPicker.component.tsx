@@ -1,3 +1,4 @@
+import { dateFormatter } from "../utils/formatters.util";
 import { isSelectablePeriod } from "../utils/date-limits";
 import { fitStaticPanel } from "../utils/fitStaticPanel";
 import {
@@ -43,7 +44,7 @@ export default function PeriodPicker({
   const wrapper = useRef<HTMLDivElement>(null);
   const glass = getLiquidGlassClass(theme);
   const months = Array.from({ length: 12 }, (_, month) =>
-    new Intl.DateTimeFormat(locale(), { month: "long" }).format(new Date(2020, month, 1)),
+    dateFormatter(locale(), { month: "long" }).format(new Date(2020, month, 1)),
   );
   const annual = mode === "year";
   const currentYear = Number(today().slice(0, 4));
@@ -75,7 +76,11 @@ export default function PeriodPicker({
     const height = panel.current?.offsetHeight || 340;
     const next = fitStaticPanel(rect, 344, height, viewport, "below", 12, 8, "left");
     const originX = Math.max(0, Math.min(next.width, rect.left + rect.width / 2 - next.left));
-    setPosition({ ...next, transformOrigin: `${originX}px ${next.top < rect.top ? height : 0}px`, overflow:"hidden" });
+    setPosition({
+      ...next,
+      transformOrigin: `${originX}px ${next.top < rect.top ? height : 0}px`,
+      overflow: "hidden",
+    });
   }, []);
   const close = () => {
     setOpen(false);
@@ -95,7 +100,11 @@ export default function PeriodPicker({
     }
     const next = new Date(Number(value.slice(0, 4)), selectedMonth + direction, 1);
     const nextYear = next.getFullYear();
-    if (nextYear < 2000 || !isSelectablePeriod(`${nextYear}-${String(next.getMonth() + 1).padStart(2, "0")}`, current)) return;
+    if (
+      nextYear < 2000 ||
+      !isSelectablePeriod(`${nextYear}-${String(next.getMonth() + 1).padStart(2, "0")}`, current)
+    )
+      return;
     onChange(`${nextYear}-${String(next.getMonth() + 1).padStart(2, "0")}`);
     setOpen(false);
   };

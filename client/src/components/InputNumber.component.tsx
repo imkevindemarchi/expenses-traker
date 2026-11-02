@@ -63,7 +63,11 @@ const InputNumber: FC<IProps> = ({
     <div className={`ui-field w-full ${className || ""}`}>
       <label
         htmlFor={inputId}
-        className={hideLabel ? "sr-only" : `ui-field-label ${compact ? "mb-1 block text-xs font-semibold" : "mb-2 block text-base font-semibold sm:text-sm"} ${theme === "light" ? "text-black" : "text-white"}`}
+        className={
+          hideLabel
+            ? "sr-only"
+            : `ui-field-label ${compact ? "mb-1 block text-xs font-semibold" : "mb-2 block text-base font-semibold sm:text-sm"} ${theme === "light" ? "text-black" : "text-white"}`
+        }
       >
         {label}
       </label>
@@ -92,7 +96,11 @@ const InputNumber: FC<IProps> = ({
           {...props}
         />
 
-        {suffix && <span className="input-number-suffix" aria-hidden="true">{suffix}</span>}
+        {suffix && (
+          <span className="input-number-suffix" aria-hidden="true">
+            {suffix}
+          </span>
+        )}
         <div
           className={`absolute bottom-0 left-0 h-px w-full transition-colors duration-300 ${error ? "bg-red-500" : theme === "light" ? "bg-black/20" : "bg-white/20"}`}
         />

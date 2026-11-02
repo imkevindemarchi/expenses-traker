@@ -61,7 +61,9 @@ const Select = <TValue extends string = string>({
 
   const selectRef = useRef<HTMLDivElement>(null);
   const [insideModal, setInsideModal] = useState(false);
-  useLayoutEffect(() => { setInsideModal(Boolean(selectRef.current?.closest('[role="dialog"]'))); }, []);
+  useLayoutEffect(() => {
+    setInsideModal(Boolean(selectRef.current?.closest('[role="dialog"]')));
+  }, []);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -129,21 +131,29 @@ const Select = <TValue extends string = string>({
 
     setIsMenuAbove(shouldOpenAbove);
 
-    setMenuOrigin(previous => {
+    setMenuOrigin((previous) => {
       const next = {
-      x: Math.min(Math.max(triggerCenterX - clampedLeft, 0), menuWidth),
-      y: shouldOpenAbove ? menuHeight : 0,
+        x: Math.min(Math.max(triggerCenterX - clampedLeft, 0), menuWidth),
+        y: shouldOpenAbove ? menuHeight : 0,
       };
-      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
+      return Object.keys(next).every(
+        (key) => previous[key as keyof typeof previous] === next[key as keyof typeof next],
+      )
+        ? previous
+        : next;
     });
 
-    setMenuStyle(previous => {
+    setMenuStyle((previous) => {
       const next = {
-      left: clampedLeft,
-      top: clampedTop,
-      width: menuWidth,
+        left: clampedLeft,
+        top: clampedTop,
+        width: menuWidth,
       };
-      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
+      return Object.keys(next).every(
+        (key) => previous[key as keyof typeof previous] === next[key as keyof typeof next],
+      )
+        ? previous
+        : next;
     });
   }, [openUpwardOnMobile]);
 
@@ -197,7 +207,10 @@ const Select = <TValue extends string = string>({
     let frame = 0;
     const schedulePosition = () => {
       if (frame) return;
-      frame = requestAnimationFrame(() => { frame = 0; updateMenuPosition(); });
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        updateMenuPosition();
+      });
     };
     updateMenuPosition();
 
@@ -211,13 +224,26 @@ const Select = <TValue extends string = string>({
     };
   }, [isOpen, updateMenuPosition]);
 
-  if (insideModal) return <ModalChoiceField
-    id={id} label={label} placeholder={translatedPlaceholder} value={selectedOption ?? null}
-    options={options} icon={icon} disabled={disabled} clearable={false}
-    getOptionKey={(item) => item.value} getOptionLabel={(item) => item.label}
-    getOptionDescription={(item) => item.description} getOptionIcon={(item) => item.icon}
-    onChange={(item) => { if (item) onChange(item.value); }}
-  />;
+  if (insideModal)
+    return (
+      <ModalChoiceField
+        id={id}
+        label={label}
+        placeholder={translatedPlaceholder}
+        value={selectedOption ?? null}
+        options={options}
+        icon={icon}
+        disabled={disabled}
+        clearable={false}
+        getOptionKey={(item) => item.value}
+        getOptionLabel={(item) => item.label}
+        getOptionDescription={(item) => item.description}
+        getOptionIcon={(item) => item.icon}
+        onChange={(item) => {
+          if (item) onChange(item.value);
+        }}
+      />
+    );
   return (
     <>
       <div ref={selectRef} className="w-full">
@@ -236,12 +262,6 @@ const Select = <TValue extends string = string>({
           data-glass-theme={theme}
           className={`group relative isolate w-full overflow-hidden rounded-2xl ${getLiquidGlassClass(theme)}`}
         >
-          {/* <span className="pointer-events-none absolute inset-px rounded-2xl bg-linear-to-b from-white/30 via-white/5 to-transparent opacity-70 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:inset-0 group-hover:opacity-100" />
-
-          <span className="pointer-events-none absolute -left-6 -top-8 size-16 rounded-2xl bg-white/45 blur-xl transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-700 ease-out group-hover:translate-x-10 group-hover:translate-y-8 group-hover:scale-125" />
-
-          <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:ring-white/40" /> */}
-
           <button
             ref={triggerRef}
             id={selectId}
@@ -340,9 +360,7 @@ const Select = <TValue extends string = string>({
                   {option.icon && (
                     <span
                       className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${
-                        isSelected
-                          ? "bg-white/20 text-white"
-                          : "bg-primary/10 text-primary"
+                        isSelected ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
                       }`}
                     >
                       {option.icon}

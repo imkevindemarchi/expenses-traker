@@ -1,3 +1,4 @@
+import { dateFormatter } from "../utils/formatters.util";
 import { maximumCalendarDate, isSelectableDate } from "../utils/date-limits";
 import { fitStaticPanel } from "../utils/fitStaticPanel";
 import { tr } from "../utils/ui-text";
@@ -14,7 +15,7 @@ import {
   useState,
 } from "react";
 import { ChevronDown } from "lucide-react";
-import Calendar from "react-calendar";
+import Calendar from "./DeferredCalendar.component";
 
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -185,7 +186,7 @@ const DatePicker: FC<IProps> = ({
       return "";
     }
 
-    return new Intl.DateTimeFormat(i18n.resolvedLanguage === "it" ? "it-IT" : "en-US", {
+    return dateFormatter(i18n.resolvedLanguage === "it" ? "it-IT" : "en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -233,7 +234,12 @@ const DatePicker: FC<IProps> = ({
       return;
     }
 
-    if (disabled || (calendarValue && !isSelectableDate(calendarValue, minDate, maximumCalendarDate(maxDate, allowFuture)))) return;
+    if (
+      disabled ||
+      (calendarValue &&
+        !isSelectableDate(calendarValue, minDate, maximumCalendarDate(maxDate, allowFuture)))
+    )
+      return;
     onChange(calendarValue);
     setIsOpen(false);
   };
@@ -282,6 +288,7 @@ const DatePicker: FC<IProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleClickOutside = (event: globalThis.MouseEvent): void => {
       const target: EventTarget | null = event.target;
 
@@ -311,7 +318,7 @@ const DatePicker: FC<IProps> = ({
       document.removeEventListener("mousedown", handleClickOutside, true);
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!autoFocus || disabled) {

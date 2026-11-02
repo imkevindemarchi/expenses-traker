@@ -5,6 +5,10 @@ export type AccountIdentityProps = {
   onLogout?: () => void;
 };
 export default function useAccountIdentity(props: AccountIdentityProps) {
-  return { username: props.username ?? "", surname: props.surname ?? "",
-    email: props.email ?? "", onLogout: props.onLogout ?? (() => {}) };
+  return {
+    username: props.username ?? "",
+    surname: props.surname ?? "",
+    email: props.email ?? "",
+    onLogout: props.onLogout ?? (() => {}),
+  };
 }

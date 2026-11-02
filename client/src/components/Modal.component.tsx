@@ -69,7 +69,9 @@ const Modal: FC<IProps> = ({
   const backdropRef = useRef<HTMLDivElement>(null);
   useModalViewport(isOpen, backdropRef);
   const onCloseRef = useRef(onClose);
-  useLayoutEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+  useLayoutEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -167,7 +169,7 @@ const Modal: FC<IProps> = ({
       data-modal-theme={theme}
       data-modal-appearance={appearance}
       onMouseDown={handleBackdropClick}
-      className="modal-backdrop fixed inset-0 z-1000 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 sm:py-8"
+      className="modal-backdrop fixed inset-0 z-1000 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,var(--app-safe-top))] sm:px-5 sm:py-8"
     >
       <div className="modal-placement flex min-h-full items-center justify-center">
         <div
@@ -177,7 +179,11 @@ const Modal: FC<IProps> = ({
           data-modal-theme={theme}
           data-modal-size={maxWidth}
           data-modal-intent={intent}
-          style={accentColor ? { "--color-primary": accentColor, "--accent-ink": accentColor } as CSSProperties : undefined}
+          style={
+            accentColor
+              ? ({ "--color-primary": accentColor, "--accent-ink": accentColor } as CSSProperties)
+              : undefined
+          }
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
@@ -205,16 +211,17 @@ const Modal: FC<IProps> = ({
                 )}
               </div>
 
-              {appearance !== "choices" && <IconButton
-                type="button"
-                onClick={onClose}
-                disabled={!isClosable}
-                aria-label={t("modal.close")}
-                title={t("modal.close")}
-
-              >
-                <X size={18} strokeWidth={2} />
-              </IconButton>}
+              {appearance !== "choices" && (
+                <IconButton
+                  type="button"
+                  onClick={onClose}
+                  disabled={!isClosable}
+                  aria-label={t("modal.close")}
+                  title={t("modal.close")}
+                >
+                  <X size={18} strokeWidth={2} />
+                </IconButton>
+              )}
             </div>
           </div>
 
@@ -226,9 +233,7 @@ const Modal: FC<IProps> = ({
 
           {footer && (
             <div className="modal-footer shrink-0 px-5 py-4 sm:px-7 sm:py-5">
-              <div className="modal-actions">
-                {footer}
-              </div>
+              <div className="modal-actions">{footer}</div>
             </div>
           )}
         </div>

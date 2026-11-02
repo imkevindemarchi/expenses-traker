@@ -20,10 +20,12 @@ test("filtro per sottocategoria da sola o combinata con categoria e tipo", async
   }
   const unfiltered = await periodFilter({ account: { _id: owner }, query: { month: "2026-10" } });
   assert.equal(unfiltered.subcategory, undefined);
-  await assert.rejects(() => periodFilter({
-    account: { _id: owner },
-    query: { month: "2026-10", subcategory: "invalid" },
-  }));
+  await assert.rejects(() =>
+    periodFilter({
+      account: { _id: owner },
+      query: { month: "2026-10", subcategory: "invalid" },
+    }),
+  );
 });
 test("ricerca delle transazioni per nomi di categoria e sottocategoria, limitata al proprietario e con regex escapata", async (context) => {
   const owner = "a".repeat(24);

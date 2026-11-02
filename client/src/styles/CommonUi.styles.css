@@ -122,27 +122,74 @@ body {
   gap: 4px;
 }
 .month-picker .month-picker-icon,
-.month-picker-panel .month-picker-icon { border: 0; background: transparent; box-shadow: none; color: var(--color-primary); }
-.month-picker .month-picker-trigger { border: 0; border-radius: 12px; min-height: 44px; }
-.month-picker .month-step { width: 44px; height: 44px; border: 0; background: transparent; }
+.month-picker-panel .month-picker-icon {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-primary);
+}
+.month-picker .month-picker-trigger {
+  border: 0;
+  border-radius: 12px;
+  min-height: 44px;
+}
+.month-picker .month-step {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+}
 .month-picker .month-picker-trigger:hover,
 .month-picker .month-picker-trigger.is-open,
-.month-picker .month-step:hover { background: var(--soft); }
+.month-picker .month-step:hover {
+  background: var(--soft);
+}
 .month-picker-panel.liquid-glass-panel,
 .date-picker-static.liquid-glass-panel {
   border: 1px solid var(--glass-rim);
   background: var(--glass-fill);
   box-shadow: var(--glass-shadow);
 }
-.month-picker-panel .month-tile { border: 0; background: transparent; box-shadow: none; }
-.month-picker-panel .month-tile:hover { background: var(--soft); }
-.month-picker-panel .month-tile.is-selected { background: var(--color-primary); color: white; box-shadow: none; }
-.month-picker-panel .month-current { border: 0; background: transparent; }
-.date-picker-control { border: 0; border-radius: 12px; padding-inline: 10px; background: var(--soft); transition: background-color .2s; }
-.date-picker-control input { padding-block: 14px; min-height: 48px; }
-.date-picker-control[data-error="false"] .date-picker-rule { display: none; }
-.date-picker-control:focus-within { outline: 2px solid var(--color-primary); outline-offset: 3px; }
-.date-picker-control > button { border: 0; background: transparent; box-shadow: none; }
+.month-picker-panel .month-tile {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.month-picker-panel .month-tile:hover {
+  background: var(--soft);
+}
+.month-picker-panel .month-tile.is-selected {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: none;
+}
+.month-picker-panel .month-current {
+  border: 0;
+  background: transparent;
+}
+.date-picker-control {
+  border: 0;
+  border-radius: 12px;
+  padding-inline: 10px;
+  background: var(--soft);
+  transition: background-color 0.2s;
+}
+.date-picker-control input {
+  padding-block: 14px;
+  min-height: 48px;
+}
+.date-picker-control[data-error="false"] .date-picker-rule {
+  display: none;
+}
+.date-picker-control:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.date-picker-control > button {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
 
 /* Keep navigation light; floating actions retain their glass appearance. */
 .app-navigation-tabs.glass-surface {
@@ -204,26 +251,69 @@ body {
 
 /* Pagination uses the same open row on every application. */
 .ui-refresh .pagination-surface {
-  padding: 16px 0; border: 0; border-top: 1px solid var(--line);
-  border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none;
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
-.ui-refresh .pagination-surface::before, .ui-refresh .pagination-surface::after { display: none; }
-.ui-refresh .pagination-surface button { min-height: 44px; min-width: 44px; }
-.ui-refresh .input-number-suffix { color: var(--muted); font-size: 14px; padding-right: 8px; }
-.ui-refresh .page-section { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ui-refresh .pagination-surface::before,
+.ui-refresh .pagination-surface::after {
+  display: none;
+}
+.ui-refresh .pagination-surface button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.ui-refresh .input-number-suffix {
+  color: var(--muted);
+  font-size: 14px;
+  padding-right: 8px;
+}
+.ui-refresh .page-section {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
 
 /* Adapt to available space, including tablet panes beside a sidebar. */
-.pagination-surface { container-type:inline-size; contain-intrinsic-inline-size:600px; width:100%; min-width:0; box-sizing:border-box; overflow:visible; }
+.pagination-surface {
+  container-type: inline-size;
+  contain-intrinsic-inline-size: 600px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
 @container (max-width:600px) {
- .pagination-surface > .pagination-mobile-layout { display:flex; }
- .pagination-surface > .pagination-desktop-layout { display:none; }
+  .pagination-surface > .pagination-mobile-layout {
+    display: flex;
+  }
+  .pagination-surface > .pagination-desktop-layout {
+    display: none;
+  }
 }
 @container (min-width:601px) {
- .pagination-surface > .pagination-mobile-layout { display:none; }
- .pagination-surface > .pagination-desktop-layout { display:flex; }
+  .pagination-surface > .pagination-mobile-layout {
+    display: none;
+  }
+  .pagination-surface > .pagination-desktop-layout {
+    display: flex;
+  }
 }
-@media(max-width:639px) {
- .ui-refresh .pagination-surface { padding-block:16px; }
- .pagination-mobile-layout { min-height:52px; }
- .pagination-mobile-layout > button { flex:0 0 44px; width:44px; height:44px; }
+@media (max-width: 639px) {
+  .ui-refresh .pagination-surface {
+    padding-block: 16px;
+  }
+  .pagination-mobile-layout {
+    min-height: 52px;
+  }
+  .pagination-mobile-layout > button {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+  }
 }

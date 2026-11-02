@@ -1,0 +1,35 @@
+/* Reserve system chrome plus breathing room for installed touch apps. */
+:root {
+  --app-safe-top: env(safe-area-inset-top, 0px);
+}
+@media (display-mode: standalone) and (pointer: coarse) {
+  :root {
+    --app-safe-top: calc(env(safe-area-inset-top, 0px) + 16px);
+  }
+}
+@media (max-width: 767px), (max-height: 500px) and (pointer: coarse) {
+  .app-page-container,
+  .app-main,
+  .auth-shell {
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .app-main.ui-refresh:not(.standalone-record-page):not(.standalone-settings-page) {
+    padding-top: calc(120px + var(--app-safe-top));
+  }
+  .auth-shell {
+    padding-top: calc(104px + var(--app-safe-top));
+    padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+  }
+  .auth-shell-language {
+    top: calc(24px + var(--app-safe-top));
+  }
+  .popup-shell {
+    top: calc(var(--app-safe-top) + var(--crm-offset, 0px) + 16px);
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+  }
+  .floating-actions:not(.above-active-workout) {
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}

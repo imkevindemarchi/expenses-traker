@@ -1,3 +1,4 @@
+import { numberFormatter } from "../utils/formatters.util";
 import SectionNavigation from "../components/SectionNavigation.component";
 import CurrencyPicker from "../components/CurrencyPicker.component";
 import "../styles/DeleteConfirmation.styles.css";
@@ -31,16 +32,48 @@ import "../styles/Settings.styles.css";
 import Input from "../components/Input.component";
 import Button from "../components/Button.component";
 import FloatingButton from "../components/FloatingButton.component";
-function SettingsSection({ id, header, children, ariaLabel, collapsible = false }: { id: string; header: ReactNode; children: ReactNode; ariaLabel: string; collapsible?: boolean }) {
+function SettingsSection({
+  id,
+  header,
+  children,
+  ariaLabel,
+  collapsible = false,
+}: {
+  id: string;
+  header: ReactNode;
+  children: ReactNode;
+  ariaLabel: string;
+  collapsible?: boolean;
+}) {
   const [open, setOpen] = useState(!collapsible);
   const contentId = useId();
-  return <section id={id} tabIndex={-1} className="settings-section" aria-label={ariaLabel}>
-    {header}
-    <div className="settings-section-body">
-      {collapsible && <Button unstyled type="button" className="settings-password-toggle" aria-expanded={open} aria-controls={contentId} onClick={() => setOpen(value => !value)}>{ariaLabel}<ChevronDown className={open ? "is-open" : ""} size={18} /></Button>}
-      <div id={contentId} hidden={!open} className={collapsible ? "settings-password-fields" : undefined}>{children}</div>
-    </div>
-  </section>;
+  return (
+    <section id={id} tabIndex={-1} className="settings-section" aria-label={ariaLabel}>
+      {header}
+      <div className="settings-section-body">
+        {collapsible && (
+          <Button
+            unstyled
+            type="button"
+            className="settings-password-toggle"
+            aria-expanded={open}
+            aria-controls={contentId}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {ariaLabel}
+            <ChevronDown className={open ? "is-open" : ""} size={18} />
+          </Button>
+        )}
+        <div
+          id={contentId}
+          hidden={!open}
+          className={collapsible ? "settings-password-fields" : undefined}
+        >
+          {children}
+        </div>
+      </div>
+    </section>
+  );
 }
 export default function SettingsPage({
   user,
@@ -90,9 +123,15 @@ export default function SettingsPage({
       } catch {
         throw new Error(tr("Seleziona un backup JSON valido di ExpensesTraker."));
       }
-      const result = await api<{ entries: number }>("/backup/import", { method: "POST", body: data });
+      const result = await api<{ entries: number }>("/backup/import", {
+        method: "POST",
+        body: data,
+      });
       onImported();
-      onNotice(false, tr("Importazione completata: {{count}} movimenti aggiunti.", { count: result.entries }));
+      onNotice(
+        false,
+        tr("Importazione completata: {{count}} movimenti aggiunti.", { count: result.entries }),
+      );
     } catch (cause) {
       onNotice(true, cause instanceof Error ? cause.message : "Si è verificato un errore.");
     } finally {
@@ -189,20 +228,28 @@ export default function SettingsPage({
   return (
     <div className="subscription-settings-page">
       <div className="settings-layout">
-      <SectionNavigation label={tr("Impostazioni")} sections={[
-        { id: "expense-settings-0", title: tr("Profilo"), icon: <UserRound size={18} /> },
-        { id: "expense-settings-1", title: tr("Valuta e budget mensile"), icon: <Settings size={18} /> },
-        { id: "expense-settings-2", title: tr("Sicurezza"), icon: <LockKeyhole size={18} /> },
-        { id: "expense-settings-3", title: tr("Gestione dati"), icon: <Database size={18} /> },
-      ]} />
-      <form
-        id="account-settings-form"
-        className="settings-sections settings-redesign"
-        onSubmit={save}
-        noValidate
-        aria-busy={busy}
-      >
-        <SettingsSection id="expense-settings-0"
+        <SectionNavigation
+          label={tr("Impostazioni")}
+          sections={[
+            { id: "expense-settings-0", title: tr("Profilo"), icon: <UserRound size={18} /> },
+            {
+              id: "expense-settings-1",
+              title: tr("Valuta e budget mensile"),
+              icon: <Settings size={18} />,
+            },
+            { id: "expense-settings-2", title: tr("Sicurezza"), icon: <LockKeyhole size={18} /> },
+            { id: "expense-settings-3", title: tr("Gestione dati"), icon: <Database size={18} /> },
+          ]}
+        />
+        <form
+          id="account-settings-form"
+          className="settings-sections settings-redesign"
+          onSubmit={save}
+          noValidate
+          aria-busy={busy}
+        >
+          <SettingsSection
+            id="expense-settings-0"
             ariaLabel={tr("Profilo")}
             header={
               <div className="settings-section-heading">
@@ -246,8 +293,9 @@ export default function SettingsPage({
                 />
               </div>
             </div>
-        </SettingsSection>
-        <SettingsSection id="expense-settings-1"
+          </SettingsSection>
+          <SettingsSection
+            id="expense-settings-1"
             ariaLabel={tr("Valuta e budget mensile")}
             header={
               <div className="settings-section-heading">
@@ -266,16 +314,18 @@ export default function SettingsPage({
             }
           >
             <div className="form-stack">
-              <CurrencyPicker value={currency} onChange={setCurrency} disabled={busy || deleteBusy || dataBusy} />
+              <CurrencyPicker
+                value={currency}
+                onChange={setCurrency}
+                disabled={busy || deleteBusy || dataBusy}
+              />
               <p className="muted">
                 {tr("Cambiare valuta non converte gli importi già registrati.")}
               </p>
               <InputNumber
                 id="monthly-budget"
                 label={tr("Limite di spesa mensile {{currency}}", { currency })}
-                placeholder={new Intl.NumberFormat(locale(), { minimumFractionDigits: 2 }).format(
-                  0,
-                )}
+                placeholder={numberFormatter(locale(), { minimumFractionDigits: 2 }).format(0)}
                 icon={<span className="text-xs">{currency}</span>}
                 allowDecimal
                 value={amount}
@@ -297,8 +347,9 @@ export default function SettingsPage({
                 </p>
               )}
             </div>
-        </SettingsSection>
-        <SettingsSection id="expense-settings-2"
+          </SettingsSection>
+          <SettingsSection
+            id="expense-settings-2"
             ariaLabel={tr("Cambia password")}
             collapsible
             header={
@@ -353,8 +404,9 @@ export default function SettingsPage({
                 />
               ))}
             </div>
-        </SettingsSection>
-        <SettingsSection id="expense-settings-3"
+          </SettingsSection>
+          <SettingsSection
+            id="expense-settings-3"
             ariaLabel={tr("I tuoi dati")}
             header={
               <div className="settings-section-heading">
@@ -363,9 +415,7 @@ export default function SettingsPage({
                 </span>
                 <div>
                   <h2>{tr("I tuoi dati")}</h2>
-                  <p className="muted">
-                    {tr("Gestisci i dati dell’applicativo.")}
-                  </p>
+                  <p className="muted">{tr("Gestisci i dati dell’applicativo.")}</p>
                 </div>
               </div>
             }
@@ -415,7 +465,9 @@ export default function SettingsPage({
                 />
               </div>
               <p className="muted settings-data-note">
-                {tr("L’importazione aggiunge categorie, sottocategorie e movimenti al tuo account. Importare più volte lo stesso backup può duplicare i movimenti.")}
+                {tr(
+                  "L’importazione aggiunge categorie, sottocategorie e movimenti al tuo account. Importare più volte lo stesso backup può duplicare i movimenti.",
+                )}
               </p>
             </div>
             <div className={`settings-delete-box ${deleteConfirm ? "is-confirming" : ""}`}>
@@ -487,16 +539,23 @@ export default function SettingsPage({
                 </p>
               )}
             </div>
-        </SettingsSection>
-        {error && (
-          <p className="form-error settings-panel" role="alert">
-            {tr(error)}
-          </p>
-        )}
-      </form>
+          </SettingsSection>
+          {error && (
+            <p className="form-error settings-panel" role="alert">
+              {tr(error)}
+            </p>
+          )}
+        </form>
       </div>
       <div className="settings-floating-actions mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex gap-3 -translate-x-1/2">
-        <FloatingButton alwaysVisibleOnMobile ariaLabel={tr("Indietro")} icon={<ChevronLeft size={27} />} onClick={() => location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)} />
+        <FloatingButton
+          alwaysVisibleOnMobile
+          ariaLabel={tr("Indietro")}
+          icon={<ChevronLeft size={27} />}
+          onClick={() =>
+            location.key === "default" ? navigate("/", { replace: true }) : navigate(-1)
+          }
+        />
         <FloatingButton
           type="submit"
           form="account-settings-form"

@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 
 // Only window scrolling changes visibility; scrolling inside menus does not.
 export default function useMobileFloatingVisibility(alwaysVisible = false): boolean {
-  const [visible, setVisible] = useState(true);
+  const { pathname } = useLocation();
+  const [visibility, setVisibility] = useState({ pathname, visible: true });
+  if (visibility.pathname !== pathname) {
+    setVisibility({ pathname, visible: true });
+  }
   useEffect(() => {
     if (alwaysVisible) return;
+    const setVisible = (visible: boolean) =>
+      setVisibility((previous) =>
+        previous.pathname === pathname && previous.visible === visible
+          ? previous
+          : { pathname, visible },
+      );
     const media = window.matchMedia("(max-width: 639px)");
     let previousY = Math.max(0, window.scrollY);
     const update = () => {
@@ -27,6 +38,6 @@ export default function useMobileFloatingVisibility(alwaysVisible = false): bool
       window.removeEventListener("scroll", update);
       media.removeEventListener("change", reset);
     };
-  }, [alwaysVisible]);
-  return alwaysVisible || visible;
+  }, [alwaysVisible, pathname]);
+  return alwaysVisible || visibility.pathname !== pathname || visibility.visible;
 }

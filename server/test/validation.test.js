@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { amountCents, dateKey, monthRange, owned, credentials, transactionPageLimit } from "../src/validation.js";
+import {
+  amountCents,
+  dateKey,
+  monthRange,
+  owned,
+  credentials,
+  transactionPageLimit,
+} from "../src/validation.js";
 import { auth } from "../src/auth.js";
 
 test("il riepilogo accetta 5 movimenti e la paginazione mantiene i limiti previsti", () => {

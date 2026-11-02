@@ -1,6 +1,21 @@
-.settings-navigation { display: none; min-width: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-.settings-navigation { --ink:#242126; --muted:#706a72; --line:rgb(36 33 38 / 11%); --accent-ink:var(--color-primary); --soft:rgb(36 33 38 / 4%); }
-[data-theme="dark"] .settings-navigation { --ink:#f4f2f5; --muted:#aaa4af; --line:rgb(244 242 245 / 12%); --soft:rgb(244 242 245 / 4%); }
+.settings-navigation {
+  display: none;
+  min-width: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.settings-navigation {
+  --ink: #242126;
+  --muted: #706a72;
+  --line: rgb(36 33 38 / 11%);
+  --accent-ink: var(--color-primary);
+  --soft: rgb(36 33 38 / 4%);
+}
+[data-theme="dark"] .settings-navigation {
+  --ink: #f4f2f5;
+  --muted: #aaa4af;
+  --line: rgb(244 242 245 / 12%);
+  --soft: rgb(244 242 245 / 4%);
+}
 @media (min-width: 1024px) {
   .settings-navigation {
     display: flex;
@@ -69,39 +84,77 @@
     background: rgb(239 68 68 / 0.08);
   }
 }
-.settings-navigation a, .settings-navigation a * { transition: none; }
-.settings-navigation a > span:not(.settings-navigation-dot) { min-width: 0; overflow-wrap: anywhere; }
-.settings-navigation-icon { display: flex; flex-shrink: 0; }
-.settings-navigation-icon > svg { width: 18px; height: 18px; }
-
-.settings-navigation a > svg { width:18px; height:18px; }
-
-/* Shared inset navigation surface, matching the routine summary treatment. */
-@media (min-width:1024px) {
-  .settings-navigation.settings-navigation,
-  .record-page-navigation-skeleton.record-page-navigation-skeleton {
-    padding:20px;
-    max-height:calc(100dvh - 164px);
-    overflow-y:auto;
-    scrollbar-width:thin;
-    border:1px solid var(--line);
-    border-radius:24px;
-    background:var(--soft);
-    box-shadow:0 2px 8px rgb(0 0 0 / 4%);
-  }
-  .settings-navigation.settings-navigation .settings-navigation-label { padding:0 10px 12px; }
+.settings-navigation a,
+.settings-navigation a * {
+  transition: none;
+}
+.settings-navigation a > span:not(.settings-navigation-dot) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.settings-navigation-icon {
+  display: flex;
+  flex-shrink: 0;
+}
+.settings-navigation-icon > svg {
+  width: 18px;
+  height: 18px;
 }
 
-@media (min-width:1024px) {
-  .settings-layout:has(> :is(.settings-navigation, .loading-settings-navigation)),
-  .record-page-layout.has-section-navigation:has(> :is(.record-page-navigation, .record-page-navigation-skeleton)),
-  .routine-editor-layout:has(> :is(.settings-navigation, .loading-settings-navigation)) {
-    grid-template-columns:clamp(268px,25vw,336px) minmax(0,1fr);
-    column-gap:clamp(24px,2.5vw,40px);
+.settings-navigation a > svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Shared inset navigation surface, matching the routine summary treatment. */
+@media (min-width: 1024px) {
+  .settings-navigation.settings-navigation,
+  .record-page-navigation-skeleton.record-page-navigation-skeleton {
+    padding: 20px;
+    max-height: calc(100dvh - 164px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: var(--soft);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
   }
-  .settings-navigation.settings-navigation { padding:16px; }
-  .settings-navigation.settings-navigation a { gap:10px; padding-inline:10px; }
-  .settings-navigation.settings-navigation a > span:not(.settings-navigation-dot,.settings-navigation-icon,.routine-editor-nav-icon) { min-width:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .settings-navigation.settings-navigation .settings-navigation-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .settings-navigation.settings-navigation .settings-navigation-dot { flex-shrink:0; }
+  .settings-navigation.settings-navigation .settings-navigation-label {
+    padding: 0 10px 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .settings-layout:has(> :is(.settings-navigation, .loading-settings-navigation)),
+  .record-page-layout.has-section-navigation:has(
+      > :is(.record-page-navigation, .record-page-navigation-skeleton)
+    ),
+  .routine-editor-layout:has(> :is(.settings-navigation, .loading-settings-navigation)) {
+    grid-template-columns: clamp(268px, 25vw, 336px) minmax(0, 1fr);
+    column-gap: clamp(24px, 2.5vw, 40px);
+  }
+  .settings-navigation.settings-navigation {
+    padding: 16px;
+  }
+  .settings-navigation.settings-navigation a {
+    gap: 10px;
+    padding-inline: 10px;
+  }
+  .settings-navigation.settings-navigation
+    a
+    > span:not(.settings-navigation-dot, .settings-navigation-icon, .routine-editor-nav-icon) {
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .settings-navigation.settings-navigation .settings-navigation-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .settings-navigation.settings-navigation .settings-navigation-dot {
+    flex-shrink: 0;
+  }
 }

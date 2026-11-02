@@ -106,7 +106,6 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
         const isMainRoute: boolean = protectedRoute.path === "/";
         const RouteIcon = protectedRoute.icon;
 
-
         return (
           <NavLink
             key={protectedRoute.path}
@@ -162,12 +161,12 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 w-full overflow-visible bg-transparent">
-        <div className="relative flex h-[calc(6rem+env(safe-area-inset-top))] w-full items-center justify-start overflow-visible px-5 pt-[env(safe-area-inset-top)] md:hidden">
+        <div className="relative flex h-[calc(6rem+var(--app-safe-top))] w-full items-center justify-start overflow-visible px-5 pt-[var(--app-safe-top)] md:hidden">
           <NavLink
             to="/"
             end
             aria-label={t("navbar.goToHomepage")}
-            className="app-brand-logo group inline-flex absolute bottom-4 left-5 size-18 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            className="app-brand-logo group inline-flex absolute bottom-4 left-[max(1.25rem,env(safe-area-inset-left))] size-18 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             data-glass-theme={theme}
           >
             <img
@@ -222,12 +221,8 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
         aria-expanded={isSidebarOpen}
         aria-controls="mobile-sidebar"
         data-glass-theme={theme}
-        className={`glass-surface group fixed right-5 top-[calc(env(safe-area-inset-top)+1.5rem)] z-100 flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border transition-transform duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:scale-[0.9] md:hidden ${isSidebarOpen ? "rotate-90" : "rotate-0"}`}
+        className={`glass-surface group fixed right-[max(1.25rem,env(safe-area-inset-right))] top-[calc(var(--app-safe-top)+1.5rem)] z-100 flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border transition-transform duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:scale-[0.9] md:hidden ${isSidebarOpen ? "rotate-90" : "rotate-0"}`}
       >
-        {/* <span className="pointer-events-none absolute inset-px rounded-[17px] bg-linear-to-b from-white/35 via-white/5 to-transparent opacity-70" />
-        <span className="pointer-events-none absolute -left-7 -top-9 size-16 rounded-full bg-white/45 blur-2xl transition-transform duration-700 group-hover:translate-x-14 group-hover:translate-y-10" />
-        <span className="pointer-events-none absolute inset-0 rounded-[18px] ring-1 ring-inset ring-white/12" /> */}
-
         <span className="relative z-10 block h-7 w-8 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.08] group-active:scale-90">
           <span
             className={`absolute left-0 h-0.75 w-8 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${isSidebarOpen ? "top-3 rotate-45 bg-primary" : `top-0.5 rotate-0 ${theme === "light" ? "bg-black" : "bg-white"}`}`}
@@ -251,7 +246,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
 
       <div
         inert={!isSidebarOpen}
-        className={`liquid-glass-sidebar-motion liquid-glass-sidebar-surface ${getLiquidGlassClass(theme)} fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[max(0.75rem,env(safe-area-inset-top))] z-80 md:hidden ${isSidebarOpen ? "liquid-glass-sidebar-motion--open" : "liquid-glass-sidebar-motion--closed"}`}
+        className={`liquid-glass-sidebar-motion liquid-glass-sidebar-surface ${getLiquidGlassClass(theme)} fixed left-[max(0.75rem,env(safe-area-inset-left))] right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[max(0.75rem,var(--app-safe-top))] z-80 md:hidden ${isSidebarOpen ? "liquid-glass-sidebar-motion--open" : "liquid-glass-sidebar-motion--closed"}`}
       >
         <aside
           id="mobile-sidebar"

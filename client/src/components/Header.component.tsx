@@ -137,7 +137,7 @@ const Header: FC<IProps> = ({
           <div
             className={`${
               isCompact
-                ? "fixed left-1/2 top-[calc(env(safe-area-inset-top)+1.5rem)] z-90 flex h-14 max-w-[calc(100vw-11rem)] -translate-x-1/2 items-center justify-center sm:static sm:h-auto sm:max-w-none sm:translate-x-0"
+                ? "fixed left-1/2 top-[calc(var(--app-safe-top)+1.5rem)] z-90 flex h-14 max-w-[calc(100vw-11rem)] -translate-x-1/2 items-center justify-center sm:static sm:h-auto sm:max-w-none sm:translate-x-0"
                 : "flex w-full items-center justify-center"
             }`}
           >

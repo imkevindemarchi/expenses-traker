@@ -3,10 +3,10 @@ import {
   type CSSProperties,
   type FC,
   useCallback,
-  useEffect, useLayoutEffect,
+  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
-
 } from "react";
 import { ChevronDown, LogOut, Settings, UserRound, Mail, Monitor, Moon, Sun } from "lucide-react";
 import useAccountIdentity from "../hooks/useAccountIdentity.hook";
@@ -51,7 +51,12 @@ const AccountMenu: FC<IProps> = ({
   const navigate = useNavigate();
   const { theme, preference, setPreference } = useTheme();
   const { t } = useTranslation();
-  const { username, surname, email, onLogout } = useAccountIdentity({ username: suppliedUsername, surname: suppliedSurname, email: suppliedEmail, onLogout: suppliedOnLogout });
+  const { username, surname, email, onLogout } = useAccountIdentity({
+    username: suppliedUsername,
+    surname: suppliedSurname,
+    email: suppliedEmail,
+    onLogout: suppliedOnLogout,
+  });
   const fullName = [username, surname]
     .map((value) => value.trim())
     .filter(Boolean)
@@ -91,9 +96,12 @@ const AccountMenu: FC<IProps> = ({
     const menuWidth: number = Math.min(Math.max(triggerRect.width, MENU_MIN_WIDTH), availableWidth);
 
     // Measure the rendered menu after its mobile width has been applied.
-    const availableHeight = Math.max(0, isMenuOnTop
-      ? triggerRect.top - MENU_GAP - VIEWPORT_PADDING
-      : window.innerHeight - triggerRect.bottom - MENU_GAP - VIEWPORT_PADDING);
+    const availableHeight = Math.max(
+      0,
+      isMenuOnTop
+        ? triggerRect.top - MENU_GAP - VIEWPORT_PADDING
+        : window.innerHeight - triggerRect.bottom - MENU_GAP - VIEWPORT_PADDING,
+    );
     const menuHeight = Math.min(menuRef.current?.offsetHeight ?? 120, availableHeight);
 
     const preferredLeft: number = isMenuAlignedLeft
@@ -118,23 +126,31 @@ const AccountMenu: FC<IProps> = ({
       ? triggerRect.left + 28
       : triggerRect.right - 28;
 
-    setMenuOrigin(previous => {
+    setMenuOrigin((previous) => {
       const next: { x: number; y: number } = {
-      x: Math.min(Math.max(triggerAnchorX - clampedLeft, 0), menuWidth),
-      y: isMenuOnTop ? menuHeight : 0,
-    };
-      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
+        x: Math.min(Math.max(triggerAnchorX - clampedLeft, 0), menuWidth),
+        y: isMenuOnTop ? menuHeight : 0,
+      };
+      return Object.keys(next).every(
+        (key) => previous[key as keyof typeof previous] === next[key as keyof typeof next],
+      )
+        ? previous
+        : next;
     });
 
-    setMenuStyle(previous => {
+    setMenuStyle((previous) => {
       const next: CSSProperties = {
-      left: clampedLeft,
-      top: clampedTop,
-      width: menuWidth,
-      maxHeight: availableHeight,
-      overflowY: "auto",
-    };
-      return Object.keys(next).every(key => previous[key as keyof typeof previous] === next[key as keyof typeof next]) ? previous : next;
+        left: clampedLeft,
+        top: clampedTop,
+        width: menuWidth,
+        maxHeight: availableHeight,
+        overflowY: "auto",
+      };
+      return Object.keys(next).every(
+        (key) => previous[key as keyof typeof previous] === next[key as keyof typeof next],
+      )
+        ? previous
+        : next;
     });
   }, [isMenuAlignedLeft, isMenuOnTop]);
 
@@ -216,12 +232,6 @@ const AccountMenu: FC<IProps> = ({
         data-glass-theme={theme}
         className={`group relative isolate overflow-hidden rounded-full ${getLiquidGlassClass(theme)} ${className}`}
       >
-        {/* <span className="pointer-events-none absolute inset-px rounded-full bg-linear-to-b from-white/30 via-white/5 to-transparent opacity-70 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:inset-0 group-hover:opacity-100" />
-
-        <span className="pointer-events-none absolute -left-6 -top-8 size-16 rounded-full bg-white/45 blur-xl transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-700 ease-out group-hover:translate-x-10 group-hover:translate-y-8 group-hover:scale-125" />
-
-        <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/20 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:ring-white/40" /> */}
-
         <button
           ref={triggerRef}
           type="button"
@@ -299,10 +309,12 @@ const AccountMenu: FC<IProps> = ({
           <div className="account-menu-profile" role="presentation">
             <div className="account-menu-identity">
               {fullName && <strong>{fullName}</strong>}
-              {email && <span className="account-menu-email">
-                <Mail size={13} />
-                <span title={email}>{email}</span>
-              </span>}
+              {email && (
+                <span className="account-menu-email">
+                  <Mail size={13} />
+                  <span title={email}>{email}</span>
+                </span>
+              )}
             </div>
           </div>
           <div className="relative z-10 flex flex-col gap-1">
@@ -311,7 +323,9 @@ const AccountMenu: FC<IProps> = ({
               aria-label={t("accountMenu.theme")}
               className={`border-b px-3 pt-2 pb-3 ${theme === "light" ? "border-black/7 text-black" : "border-white/8 text-white"}`}
             >
-              <span className="mb-2 block text-xs font-semibold opacity-65">{t("accountMenu.theme")}</span>
+              <span className="mb-2 block text-xs font-semibold opacity-65">
+                {t("accountMenu.theme")}
+              </span>
               <div className="grid grid-cols-3 gap-1">
                 {(
                   [

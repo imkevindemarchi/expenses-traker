@@ -9,10 +9,10 @@ import App from "./App";
 
 import "./index.css";
 import "./styles/SharedTypography.styles.css";
+import "./styles/SafeArea.styles.css";
 createRoot(document.getElementById("root")!).render(
   // Commit the destination immediately so its loading UI and navigation stay responsive.
   <BrowserRouter unstable_useTransitions={false}>
     <App />
-
   </BrowserRouter>,
 );

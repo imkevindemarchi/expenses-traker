@@ -1,13 +1,6 @@
 import ModalChoiceField from "./ModalChoiceField.component";
 import { useState } from "react";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Check,
-  Layers3,
-  Shapes,
-  Wallet,
-} from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Check, Layers3, Shapes, Wallet } from "lucide-react";
 import { tr } from "../i18n";
 import type { Category, Subcategory } from "../types";
 import Modal from "./Modal.component";
@@ -48,7 +41,6 @@ export default function EntryFiltersModal({
         ? { subcategory: "" }
         : {}),
     }));
-
   };
   return (
     <Modal
@@ -96,22 +88,50 @@ export default function EntryFiltersModal({
             ))}
           </div>
         </fieldset>
-        <section className="entry-edit-classification" aria-label={tr("Categorie e sottocategorie")}>
+        <section
+          className="entry-edit-classification"
+          aria-label={tr("Categorie e sottocategorie")}
+        >
           <ModalChoiceField
-            id="entry-filter-category" label={tr("Categoria")} placeholder={tr("Tutte le categorie")}
-            searchPlaceholder={tr("Cerca categoria…")} icon={<Shapes size={19} />}
-            value={selectedCategory ?? null} options={categories} isLoading={loading}
-            getOptionKey={(item) => item._id} getOptionLabel={(item) => item.name}
-            getOptionIcon={(item) => <i className="category-filter-dot" style={{ background: item.color }} />}
+            id="entry-filter-category"
+            label={tr("Categoria")}
+            placeholder={tr("Tutte le categorie")}
+            searchPlaceholder={tr("Cerca categoria…")}
+            icon={<Shapes size={19} />}
+            value={selectedCategory ?? null}
+            options={categories}
+            isLoading={loading}
+            getOptionKey={(item) => item._id}
+            getOptionLabel={(item) => item.name}
+            getOptionIcon={(item) => (
+              <i className="category-filter-dot" style={{ background: item.color }} />
+            )}
             onChange={(item) => choose("category", item?._id ?? "")}
           />
           <ModalChoiceField
-            id="entry-filter-subcategory" label={tr("Sottocategoria")} placeholder={tr("Tutte le sottocategorie")}
-            searchPlaceholder={tr("Cerca sottocategoria…")} icon={<Layers3 size={19} />}
-            value={selectedSubcategory ?? null} options={visibleSubcategories} isLoading={loading}
-            getOptionKey={(item) => item._id} getOptionLabel={(item) => item.name}
-            getOptionDescription={(item) => !draft.category ? categories.find((parent) => parent._id === item.category)?.name : undefined}
-            getOptionIcon={(item) => <i className="category-filter-dot" style={{ background: categories.find((parent) => parent._id === item.category)?.color }} />}
+            id="entry-filter-subcategory"
+            label={tr("Sottocategoria")}
+            placeholder={tr("Tutte le sottocategorie")}
+            searchPlaceholder={tr("Cerca sottocategoria…")}
+            icon={<Layers3 size={19} />}
+            value={selectedSubcategory ?? null}
+            options={visibleSubcategories}
+            isLoading={loading}
+            getOptionKey={(item) => item._id}
+            getOptionLabel={(item) => item.name}
+            getOptionDescription={(item) =>
+              !draft.category
+                ? categories.find((parent) => parent._id === item.category)?.name
+                : undefined
+            }
+            getOptionIcon={(item) => (
+              <i
+                className="category-filter-dot"
+                style={{
+                  background: categories.find((parent) => parent._id === item.category)?.color,
+                }}
+              />
+            )}
             onChange={(item) => choose("subcategory", item?._id ?? "")}
           />
         </section>

@@ -49,8 +49,6 @@ export const today = () => {
     .join("-");
 };
 export const displayDate = (date: string) =>
-  dateFormatter(locale(), { day: "2-digit", month: "short" }).format(
-    new Date(`${date}T12:00:00Z`),
-  );
+  dateFormatter(locale(), { day: "2-digit", month: "short" }).format(new Date(`${date}T12:00:00Z`));
 export const csvCell = (value: string) =>
   `"${(/^[=+\-@\t\r]/.test(value) ? `'${value}` : value).replaceAll('"', '""')}"`;
