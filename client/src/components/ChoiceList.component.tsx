@@ -28,6 +28,7 @@ export default function ChoiceList({
   emptyText,
   disabled = false,
   advance = false,
+  searchPosition = "top",
   onChoose,
 }: {
   title: string;
@@ -39,6 +40,9 @@ export default function ChoiceList({
   disabled?: boolean;
   /** Rows lead to a next step: a chevron instead of an empty trailing slot. */
   advance?: boolean;
+  /** "top": a glass field above the list (filters, like the recipient search
+   *  of Alice & Kevin); "bottom": pinned to the bottom of the sheet. */
+  searchPosition?: "top" | "bottom";
   onChoose: (key: string) => void;
 }) {
   useTranslation();
@@ -53,6 +57,19 @@ export default function ChoiceList({
 
   return (
     <div className="ios-compose__group">
+      {searchable && choices.length > 0 && searchPosition === "top" && (
+        <Input
+          id={`${id}-search`}
+          type="search"
+          className="lg-search-glass"
+          autoComplete="off"
+          aria-label={searchPlaceholder ?? tr("Cerca")}
+          placeholder={searchPlaceholder ?? tr("Cerca")}
+          icon={<Search size={18} />}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      )}
       <p className="ios-compose__header">{title}</p>
       {visible.length ? (
         <div className="ios-compose__list" role="listbox" aria-label={title}>
@@ -93,7 +110,7 @@ export default function ChoiceList({
         </p>
       )}
       {/* Search at the bottom of the sheet, like the Alice & Kevin analytics detail. */}
-      {searchable && choices.length > 0 && (
+      {searchable && choices.length > 0 && searchPosition === "bottom" && (
         <div className="et-choice-search modal-bottom-search">
           <Input
             id={`${id}-search`}
