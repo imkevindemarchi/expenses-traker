@@ -1,7 +1,7 @@
 /* Shared frosted overlay values for sidebars and modal backdrops. */
 :root {
-  --overlay-glass-light: rgb(255 255 255 / 50%);
-  --overlay-glass-dark: rgb(0 0 0 / 50%);
+  --overlay-glass-light: color-mix(in srgb, rgb(255 255 255 / calc(50% * var(--lg-fill-scale, 1))) calc(100% - 100% * var(--lg-clear-t, 0)), var(--lg-input-glass, transparent));
+  --overlay-glass-dark: color-mix(in srgb, rgb(0 0 0 / calc(50% * var(--lg-fill-scale, 1))) calc(100% - 100% * var(--lg-clear-t, 0)), var(--lg-input-glass, transparent));
   --overlay-glass-blur: 12px;
   --overlay-glass-saturation: 1.25;
 }
@@ -14,20 +14,20 @@
 .glass-surface {
   --glass-blur: 4px;
   --glass-saturation: 1.25;
-  --glass-fill: rgb(255 255 255 / 35%);
+  --glass-fill: color-mix(in srgb, rgb(255 255 255 / calc(35% * var(--lg-fill-scale, 1))) calc(100% - 100% * var(--lg-clear-t, 0)), var(--lg-input-glass, transparent));
   --glass-rim: rgb(255 255 255 / 70%);
   --glass-highlight: rgb(255 255 255 / 75%);
   --glass-shadow: 0 12px 32px rgb(15 23 42 / 14%), inset 0 1px 0 var(--glass-highlight);
   border-color: var(--glass-rim);
   background-color: var(--glass-fill);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(var(--glass-saturation));
+  backdrop-filter: blur(calc(var(--glass-blur) * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(var(--glass-saturation));
   box-shadow: var(--glass-shadow);
 }
 
 .glass-surface[data-glass-theme="dark"],
 .glass-surface.glass-surface--dark {
-  --glass-fill: rgb(0 0 0 / 35%);
+  --glass-fill: color-mix(in srgb, rgb(0 0 0 / calc(35% * var(--lg-fill-scale, 1))) calc(100% - 100% * var(--lg-clear-t, 0)), var(--lg-input-glass, transparent));
   --glass-rim: rgb(255 255 255 / 15%);
   --glass-highlight: rgb(255 255 255 / 10%);
   --glass-shadow: 0 12px 32px rgb(0 0 0 / 45%), inset 0 1px 0 var(--glass-highlight);
@@ -49,12 +49,12 @@
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-surface {
-    --glass-fill: rgb(245 245 245 / 88%);
+    --glass-fill: color-mix(in srgb, rgb(245 245 245 / calc(88% * var(--lg-fill-scale, 1))) calc(100% - 100% * var(--lg-clear-t, 0)), var(--lg-input-glass, transparent));
     background-color: var(--glass-fill);
   }
   .glass-surface[data-glass-theme="dark"],
   .glass-surface.glass-surface--dark {
-    --glass-fill: rgb(22 22 22 / 92%);
+    --glass-fill: color-mix(in srgb, rgb(22 22 22 / calc(92% * var(--lg-fill-scale, 1))) calc(100% - 100% * var(--lg-clear-t, 0)), var(--lg-input-glass, transparent));
     background-color: var(--glass-fill);
   }
 }

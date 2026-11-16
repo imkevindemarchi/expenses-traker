@@ -1,0 +1,232 @@
+/* ==========================================================================
+   Floating glass tab bar (phones)
+   ========================================================================== */
+
+.lg-tabbar-dock {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left, 0px));
+  right: max(14px, env(safe-area-inset-right, 0px));
+  bottom: max(14px, var(--lg-safe-bottom));
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .lg-tabbar-dock {
+    display: none;
+  }
+}
+
+.lg-tabbar,
+.lg-tabbar-more {
+  pointer-events: auto;
+  height: var(--lg-tabbar-height);
+  border: 0.5px solid transparent;
+  border-radius: var(--lg-radius-pill);
+}
+
+.lg-tabbar {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--lg-tab-count), minmax(0, 1fr));
+  align-items: stretch;
+  padding: 5px;
+  overflow: hidden;
+}
+
+/* The selection "drop": a lighter lens that slides between tabs. */
+.lg-tabbar__bubble {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  width: calc((100% - 10px) / var(--lg-tab-count));
+  border-radius: var(--lg-radius-pill);
+  translate: calc(100% * var(--lg-tab-index)) 0;
+  background: var(--lg-fill-strong);
+  box-shadow:
+    inset 0 1px 0.5px rgb(255 255 255 / 40%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 10%);
+  transition:
+    translate 520ms var(--lg-spring),
+    opacity 200ms ease,
+    scale 300ms var(--lg-spring);
+}
+[data-theme="light"] .lg-tabbar__bubble {
+  background: rgb(0 0 0 / 7%);
+  box-shadow:
+    inset 0 1px 0.5px rgb(255 255 255 / 90%),
+    inset 0 0 0 0.5px rgb(0 0 0 / 4%);
+}
+.lg-tabbar__bubble[data-hidden] {
+  opacity: 0;
+  scale: 0.6;
+}
+
+.lg-tabbar__item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  border-radius: var(--lg-radius-pill);
+  color: var(--lg-label);
+  text-decoration: none;
+  transition:
+    color 200ms ease,
+    scale 380ms var(--lg-spring);
+}
+.lg-tabbar__item:active {
+  scale: 0.9;
+}
+.lg-tabbar__item--active {
+  color: var(--lg-tint);
+}
+.lg-tabbar__icon {
+  width: 23px;
+  height: 23px;
+}
+.lg-tabbar__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.lg-tabbar-more {
+  flex: 0 0 var(--lg-tabbar-height);
+  width: var(--lg-tabbar-height);
+  display: grid;
+  place-items: center;
+  color: var(--lg-label);
+  cursor: pointer;
+}
+.lg-tabbar-dock[data-more-open] .lg-tabbar-more {
+  color: var(--lg-tint);
+}
+.lg-tabbar-more__icon {
+  position: relative;
+  display: grid;
+  width: 26px;
+  height: 26px;
+}
+.lg-tabbar-more__icon > svg {
+  grid-area: 1 / 1;
+  width: 26px;
+  height: 26px;
+  transition:
+    opacity 200ms ease,
+    rotate 420ms var(--lg-spring),
+    scale 420ms var(--lg-spring);
+}
+.lg-tabbar-more__icon > svg:last-child {
+  opacity: 0;
+  rotate: -90deg;
+  scale: 0.5;
+}
+.lg-tabbar-more__icon[data-open] > svg:first-child {
+  opacity: 0;
+  rotate: 90deg;
+  scale: 0.5;
+}
+.lg-tabbar-more__icon[data-open] > svg:last-child {
+  opacity: 1;
+  rotate: 0deg;
+  scale: 1;
+}
+
+/* Page content and floating actions make room for the bar. */
+@media (max-width: 767px) {
+  .app-layout--tabbar .app-page-container {
+    padding-bottom: calc(var(--lg-tabbar-offset) + 96px) !important;
+  }
+    .app-layout--tabbar [data-back-to-top] {
+    bottom: calc(var(--lg-tabbar-offset) + 72px) !important;
+  }
+}
+
+/* ==========================================================================
+   "More" sheet: grows out of the ••• button above the tab bar
+   ========================================================================== */
+.lg-more-sheet {
+  left: max(14px, env(safe-area-inset-left, 0px));
+  right: max(14px, env(safe-area-inset-right, 0px));
+  bottom: calc(var(--lg-tabbar-offset) - 2px);
+  top: auto;
+  border-radius: var(--lg-radius-xl) !important;
+  transform-origin: calc(100% - 32px) 100%;
+  transition:
+    opacity 220ms ease,
+    scale 520ms var(--lg-spring),
+    translate 520ms var(--lg-spring) !important;
+}
+.lg-more-sheet.liquid-glass-sidebar-motion--closed {
+  scale: 0.4 0.25;
+  translate: 0 24px;
+}
+.lg-more-sheet.liquid-glass-sidebar-motion--open {
+  scale: 1;
+  translate: 0 0;
+}
+.lg-more-sheet > aside {
+  height: auto !important;
+  max-height: calc(100dvh - var(--lg-tabbar-offset) - var(--app-safe-top) - 24px);
+  padding: 10px !important;
+  border-radius: var(--lg-radius-xl) !important;
+}
+/* The sheet doesn't need the big logo header, nor the decorative inner frames. */
+.lg-more-sheet > aside > span[aria-hidden="true"],
+.lg-more-sheet > aside > div:has(> a .app-brand-logo),
+.lg-more-sheet > aside > div:has(> a > .app-brand-logo) {
+  display: none !important;
+}
+.lg-more-sheet .nav-tab-card {
+  min-height: 0 !important;
+  padding: 12px !important;
+  border-radius: var(--lg-radius-md) !important;
+}
+
+/* On phones the logo scrolls away with the page, like an iOS large title,
+   so it never collides with the compact glass title. */
+@media (max-width: 767px) {
+  header.crm-navbar {
+    position: absolute !important;
+  }
+}
+
+/* ==========================================================================
+   Desktop: one glass capsule, items are plain labels with a selection lens
+   ========================================================================== */
+@media (min-width: 768px) {
+    .crm-navbar nav > div > button.glass-surface {
+    border-color: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-radius: var(--lg-radius-pill) !important;
+  }
+    .crm-navbar nav > div > button.glass-surface:hover {
+    background-color: var(--lg-fill) !important;
+  }
+  /* The capsule that holds the items. */
+  .crm-navbar .glass-surface:has(> nav) {
+    border-radius: var(--lg-radius-pill) !important;
+    padding: 5px !important;
+  }
+  /* Right-hand round controls. */
+  .crm-navbar .glass-surface:not(:has(> nav)):not(.nav-tab) {
+    border-radius: var(--lg-radius-pill) !important;
+  }
+}

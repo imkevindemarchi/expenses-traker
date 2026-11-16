@@ -4,6 +4,8 @@ import { deleteAccount } from "./delete-account.js";
 import { profileInput } from "./profile.js";
 import { saveAccountSettings } from "./account-settings.js";
 import { importBackup } from "./backup.js";
+import { allowedOrigin } from "./origins.js";
+import cors from "cors";
 import express from "express";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
@@ -42,24 +44,33 @@ app.use((req, res, next) => {
       "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
     );
   if (req.path.startsWith("/api")) res.set("Cache-Control", "no-store");
-  const allowedOrigins = [process.env.APP_ORIGIN, ...(process.env.APP_ORIGINS || "").split(",")]
-    .map((origin) => origin?.trim())
-    .filter(Boolean);
-  if (process.env.NODE_ENV !== "production")
-    allowedOrigins.push(
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-      "http://localhost:4101",
-      "http://127.0.0.1:4101",
-    );
-  if (
-    !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
-    req.headers.origin &&
-    !allowedOrigins.includes(req.headers.origin)
-  )
-    return next(new ApiError(403, "Origine della richiesta non autorizzata."));
   next();
 });
+
+// CORS: same setup as Alice & Kevin 2.0 (server/src/app.ts). Requests without
+// an Origin (curl, server-to-server) pass; browsers must come from an allowed
+// origin: APP_ORIGIN / APP_ORIGINS, plus — outside production — this PC's
+// own network addresses on the app ports, so a phone on the same Wi-Fi works.
+// Credentials stay on because the session is an httpOnly cookie.
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    if (allowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+    console.error(`CORS blocked origin: ${origin}`);
+    callback(new ApiError(403, "Origine della richiesta non autorizzata."));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+app.use(cors(corsOptions));
 app.use("/api/backup/import", express.json({ limit: "10mb" }));
 app.use(express.json({ limit: "32kb" }));
 app.use((req, res, next) => {
@@ -181,6 +192,21 @@ app.patch(
     const account = await Account.findOneAndUpdate(
       { _id: userId(req) },
       { $set: profile },
+      { new: true, runValidators: true },
+    );
+    if (!account) fail("Account non trovato.", 404);
+    res.json({ user: publicAccount(account) });
+  }),
+);
+app.patch(
+  "/api/account/appearance",
+  asyncRoute(async (req, res) => {
+    const value = req.body?.glassClarity;
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 1)
+      fail("Richiesta non valida.");
+    const account = await Account.findOneAndUpdate(
+      { _id: userId(req) },
+      { $set: { glassClarity: Math.round(value * 1000) / 1000 } },
       { new: true, runValidators: true },
     );
     if (!account) fail("Account non trovato.", 404);

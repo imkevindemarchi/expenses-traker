@@ -1,4 +1,3 @@
-import { ChartNoAxesCombined, ListOrdered, Shapes, Settings, CalendarRange } from "lucide-react";
 export const ROUTE_PATHS = {
   login: "/login",
   register: "/register",
@@ -9,12 +8,12 @@ export const ROUTE_PATHS = {
   annual: "/annual",
 } as const;
 export type Page = "dashboard" | "entries" | "management" | "settings" | "annual";
-export const PROTECTED_ROUTES = [
-  { path: ROUTE_PATHS.dashboard, name: "dashboard", icon: ChartNoAxesCombined },
-  { path: ROUTE_PATHS.annual, name: "annual", icon: CalendarRange },
-  { path: ROUTE_PATHS.entries, name: "entries", icon: ListOrdered },
-  { path: ROUTE_PATHS.management, name: "management", icon: Shapes },
-  { path: ROUTE_PATHS.settings, name: "settings", icon: Settings, is_hidden: true },
+const PROTECTED_ROUTES = [
+  { path: ROUTE_PATHS.dashboard, name: "dashboard" },
+  { path: ROUTE_PATHS.annual, name: "annual" },
+  { path: ROUTE_PATHS.entries, name: "entries" },
+  { path: ROUTE_PATHS.management, name: "management" },
+  { path: ROUTE_PATHS.settings, name: "settings" },
 ];
 export const pageFromPath = (path: string): Page =>
   (PROTECTED_ROUTES.find((route) => route.path === path)?.name as Page) || "dashboard";

@@ -4,6 +4,8 @@ export type TSelectOption<T extends string = string> = {
   label: string;
   description?: string;
   icon?: ReactNode;
+  /** Own colour of the option (e.g. expenses red, income green) instead of the tint. */
+  color?: string;
 };
 export type User = {
   id: string;
@@ -12,6 +14,8 @@ export type User = {
   email: string;
   monthlyBudgetCents: number | null;
   currency: string;
+  /** Liquid Glass clarity saved on the account (0 frosted … 1 clear). */
+  glassClarity?: number;
 };
 export type Category = { _id: string; name: string; color: string };
 export type Subcategory = { _id: string; name: string; category: string };

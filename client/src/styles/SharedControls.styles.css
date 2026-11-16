@@ -52,28 +52,3 @@
   color: var(--muted, #706a72);
   margin-bottom: 9px;
 }
-.account-menu-theme .settings-theme-options {
-  gap: 6px;
-  flex-wrap: nowrap;
-}
-.account-menu-theme .settings-theme-option {
-  flex: 1;
-  font-size: 11px;
-  padding: 8px;
-  gap: 5px;
-}
-.liquid-glass-panel .skeleton-block {
-  display: block;
-  background: currentColor;
-  opacity: 0.1;
-  border-radius: 8px;
-}
-.liquid-glass-panel .skeleton-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.liquid-glass-panel .skeleton-bar {
-  width: 100%;
-  height: 20px;
-}

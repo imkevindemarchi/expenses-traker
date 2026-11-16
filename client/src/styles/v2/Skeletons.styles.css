@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Skeletons on the real page markup (Skeletons.component.tsx)
+   ========================================================================== */
+.ios-skeleton {
+  pointer-events: none;
+  animation: loading-breathe 1.8s ease-in-out infinite;
+}
+.ios-skeleton .loading-shape {
+  background: var(--lg-fill-2, color-mix(in srgb, currentColor 9%, transparent));
+}
+.ios-skeleton__push {
+  flex: 1;
+}
+.ios-skeleton__bars {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: end;
+  gap: 8px;
+  padding: 8px 4px 0;
+}
+.ios-skeleton__bars .loading-shape {
+  border-radius: 6px 6px 2px 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ios-skeleton {
+    animation: none;
+  }
+}
+
+/* A skeleton line sits in a box as tall as the real line of text (--line),
+   centred like the glyphs, so swapping in the content moves nothing. */
+.ios-skeleton__text {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: var(--line, 20px);
+}
+.ios-skeleton__text--hero {
+  /* .ios-hero__value: clamp(40px, 11vw, 56px) at line-height 1.05, 2px margins. */
+  height: calc(clamp(40px, 11vw, 56px) * 1.05);
+  margin: 2px 0;
+}

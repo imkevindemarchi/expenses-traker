@@ -1,0 +1,134 @@
+/* ==========================================================================
+   aliceandkevin v2 — Liquid Glass design tokens
+   Loaded after every legacy stylesheet so these values win.
+   ========================================================================== */
+
+:root {
+  /* Typography: SF on Apple devices, closest system face elsewhere. */
+  --lg-font:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Inter",
+    system-ui, sans-serif;
+  --lg-font-rounded: ui-rounded, "SF Pro Rounded", var(--lg-font);
+
+  /* Accent: the brand green, used like an iOS tint colour. */
+  --lg-tint: #2eb82e;
+  --lg-tint-strong: #249624;
+  --lg-tint-soft: color-mix(in srgb, var(--lg-tint) 14%, transparent);
+
+  /* Geometry: concentric radii, capsules everywhere controls float. */
+  --lg-radius-xs: 12px;
+  --lg-radius-sm: 16px;
+  --lg-radius-md: 22px;
+  --lg-radius-lg: 28px;
+  --lg-radius-xl: 34px;
+  --lg-radius-pill: 999px;
+
+  /* Motion: the springy curves Apple uses for glass morphing. A gentle
+     overshoot (~5%) reads as fluid; a strong one reads as a wobble. */
+  --lg-spring: cubic-bezier(0.3, 1.15, 0.45, 1);
+  --lg-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Bottom chrome (tab bar) so floating actions can sit above it. */
+  --lg-tabbar-height: 64px;
+  --lg-tabbar-gap: 12px;
+  --lg-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --lg-tabbar-offset: calc(
+    var(--lg-tabbar-height) + var(--lg-tabbar-gap) + max(14px, var(--lg-safe-bottom))
+  );
+}
+
+/* ---------- Light appearance ---------- */
+:root,
+[data-theme="light"] {
+  --lg-bg: #f3faf3;
+  --lg-label: #1c1c1e;
+  --lg-label-2: rgb(60 60 67 / 72%);
+  --lg-label-3: rgb(60 60 67 / 45%);
+  --lg-separator: rgb(60 60 67 / 14%);
+  --lg-fill: rgb(120 120 128 / 10%);
+  --lg-fill-strong: rgb(120 120 128 / 18%);
+
+  /* Glass material ("regular" variant). */
+  --lg-glass-fill: rgb(255 255 255 / 40%);
+  --lg-glass-fill-clear: rgb(255 255 255 / 18%);
+  --lg-glass-fill-strong: rgb(255 255 255 / 60%);
+  --lg-glass-tint: rgb(255 255 255 / 0%);
+  --lg-glass-blur: 22px;
+  --lg-glass-sat: 190%;
+  --lg-glass-rim: rgb(255 255 255 / 85%);
+  --lg-glass-rim-low: rgb(255 255 255 / 35%);
+  --lg-glass-edge: rgb(0 0 0 / 6%);
+  --lg-glass-shadow: 0 10px 30px -8px rgb(12 34 12 / 18%), 0 2px 6px rgb(12 34 12 / 6%);
+  --lg-glass-specular: linear-gradient(
+    150deg,
+    rgb(255 255 255 / 55%) 0%,
+    rgb(255 255 255 / 0%) 34%,
+    rgb(255 255 255 / 0%) 70%,
+    rgb(255 255 255 / 22%) 100%
+  );
+
+  /* Cards (content layer, not glass: Apple keeps glass for controls). */
+  --lg-card: rgb(255 255 255 / 74%);
+  --lg-card-edge: rgb(255 255 255 / 90%);
+  --lg-card-shadow: 0 1px 2px rgb(12 34 12 / 5%), 0 8px 24px -12px rgb(12 34 12 / 14%);
+
+  /* Page background: the grouped system background, warmed by the brand green. */
+  --lg-wash-1: rgb(50 205 50 / 22%);
+  --lg-wash-2: rgb(120 220 120 / 16%);
+}
+
+/* ---------- Dark appearance ---------- */
+[data-theme="dark"] {
+  --lg-bg: #080b08;
+  --lg-label: #f5f5f7;
+  --lg-label-2: rgb(235 235 245 / 68%);
+  --lg-label-3: rgb(235 235 245 / 38%);
+  --lg-separator: rgb(84 84 88 / 50%);
+  --lg-fill: rgb(120 120 128 / 22%);
+  --lg-fill-strong: rgb(120 120 128 / 34%);
+
+  --lg-tint: #32cd32;
+  --lg-tint-strong: #5fdc5f;
+
+  --lg-glass-fill: rgb(38 38 40 / 28%);
+  --lg-glass-fill-clear: rgb(30 30 32 / 18%);
+  --lg-glass-fill-strong: rgb(44 44 46 / 55%);
+  --lg-glass-blur: 22px;
+  --lg-glass-sat: 170%;
+  --lg-glass-rim: rgb(255 255 255 / 26%);
+  --lg-glass-rim-low: rgb(255 255 255 / 8%);
+  --lg-glass-edge: rgb(0 0 0 / 50%);
+  --lg-glass-shadow: 0 12px 34px -8px rgb(0 0 0 / 65%), 0 2px 8px rgb(0 0 0 / 35%);
+  --lg-glass-specular: linear-gradient(
+    150deg,
+    rgb(255 255 255 / 16%) 0%,
+    rgb(255 255 255 / 0%) 32%,
+    rgb(255 255 255 / 0%) 72%,
+    rgb(255 255 255 / 7%) 100%
+  );
+
+  --lg-card: rgb(21 27 22 / 72%);
+  --lg-card-edge: rgb(255 255 255 / 8%);
+  --lg-card-shadow: 0 1px 0 rgb(255 255 255 / 5%) inset, 0 10px 30px -14px rgb(0 0 0 / 70%);
+
+  --lg-wash-1: rgb(50 205 50 / 24%);
+  --lg-wash-2: rgb(50 205 50 / 10%);
+}
+
+/* Legacy Tailwind theme colours mapped onto the new palette. */
+:root {
+  --color-primary: var(--lg-tint);
+  --color-canvas-light: #f3faf3;
+  --color-canvas-dark: #080b08;
+  --color-surface-light: rgb(255 255 255 / 78%);
+  --color-surface-dark: rgb(28 28 30 / 72%);
+  --color-darkgray: #1c1c1e;
+  --color-gray: rgb(235 235 245 / 60%);
+  --color-success: #34c759;
+  --color-danger: #ff3b30;
+  --color-warning: #ff9f0a;
+  --color-info: #0a84ff;
+}
+[data-theme="light"] {
+  --color-gray: rgb(60 60 67 / 60%);
+}

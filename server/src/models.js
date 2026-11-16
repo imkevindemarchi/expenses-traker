@@ -16,6 +16,9 @@ const account = new Schema(
       validate: (value) => value == null || Number.isSafeInteger(value),
     },
     currency: { type: String, enum: CURRENCIES, default: "EUR" },
+    // Liquid Glass clarity (Settings → Appearance), the same on every device:
+    // 0 = frosted, 1 = clear. Clear by default.
+    glassClarity: { type: Number, default: 1, min: 0, max: 1 },
     sessionVersion: { type: Number, default: 0 },
   },
   { timestamps: true },

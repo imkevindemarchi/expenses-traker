@@ -15,6 +15,7 @@ export const publicAccount = (user) => ({
   email: user.email,
   monthlyBudgetCents: user.monthlyBudgetCents ?? null,
   currency: user.currency ?? "EUR",
+  glassClarity: typeof user.glassClarity === "number" ? user.glassClarity : 1,
 });
 export const loginCookie = (res, user) => {
   const token = jwt.sign({ version: user.sessionVersion }, process.env.JWT_SECRET, {

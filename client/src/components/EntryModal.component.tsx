@@ -1,28 +1,41 @@
 import { numberFormatter } from "../utils/formatters.util";
-import ModalChoiceField from "./ModalChoiceField.component";
 import { useTranslation } from "react-i18next";
 import DatePicker from "./DatePicker.component";
-import { useContext, useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  Search,
+  Banknote,
   Check,
   ChevronLeft,
   ChevronRight,
-  Shapes,
   Layers3,
+  Save,
+  Shapes,
+  Trash2,
+  X,
 } from "lucide-react";
 import { tr, locale } from "../i18n";
-import { CurrencyContext, CURRENCIES } from "../contexts/currency.context";
+import { CurrencyContext, CURRENCIES, CURRENCY_SYMBOLS } from "../contexts/currency.context";
 import { api, money } from "../api";
 import type { Category, Subcategory, Entry } from "../types";
 import Modal from "./Modal.component";
-import Stepper from "./Stepper.component";
-import "../styles/EntryModal.styles.css";
 import Button from "./Button.component";
-import Input from "./Input.component";
-import InputNumber from "./InputNumber.component";
+import ChoiceList from "./ChoiceList.component";
+import IconButton from "./IconButton.component";
+import InlineDeleteConfirm from "./InlineDeleteConfirm.component";
+import "../styles/v2/Compose.styles.css";
+import "../styles/v2/Expenses.styles.css";
+
 type EntryForm = {
   kind: "income" | "expense";
   category: string;
@@ -31,6 +44,20 @@ type EntryForm = {
   currency?: string;
   date: string;
 };
+type TView = "form" | "category" | "subcategory" | "currency";
+
+const KIND_COLOR = { expense: "#ff453a", income: "#30d158" } as const;
+const AMOUNT_PATTERN = /^\d{1,7}([.,]\d{1,2})?$/;
+const toDateKey = (date: Date | null) =>
+  date
+    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+    : "";
+
+/**
+ * New / edit movement, as an Alice & Kevin compose sheet: a new movement is
+ * a short flow (type → category → subcategory → amount), an existing one a
+ * grouped form whose rows open their choices inside the same sheet.
+ */
 export default function EntryModal({
   initial,
   editing,
@@ -39,6 +66,7 @@ export default function EntryModal({
   busy,
   onClose,
   onSave,
+  onDelete,
   originalConversion,
 }: {
   initial: EntryForm;
@@ -48,6 +76,8 @@ export default function EntryModal({
   busy: boolean;
   onClose: () => void;
   onSave: (form: EntryForm) => Promise<void>;
+  /** Deletes the movement (edit only), after the inline confirmation. */
+  onDelete?: () => void | Promise<void>;
   originalConversion?: Entry["conversion"];
 }) {
   useTranslation();
@@ -64,7 +94,7 @@ export default function EntryModal({
   const foreign = form.currency !== currency;
   const conversionReady = !foreign || quote?.key === quoteKey;
   useEffect(() => {
-    if (!foreign || !/^\d{1,7}([.,]\d{1,2})?$/.test(form.amount) || !form.date) return;
+    if (!foreign || !AMOUNT_PATTERN.test(form.amount) || !form.date) return;
     const controller = new AbortController();
     const timer = setTimeout(() => {
       api<{ amountCents: number; conversion: NonNullable<Entry["conversion"]> }>(
@@ -97,23 +127,54 @@ export default function EntryModal({
       controller.abort();
     };
   }, [form.amount, form.currency, form.date, currency, foreign, quoteKey, quoteAttempt]);
+
+  // New movement: 0 type · 1 category · 2 subcategory · 3 amount and date.
   const [step, setStep] = useState(0);
   const [chosenKind, setChosenKind] = useState(editing);
-  const [search, setSearch] = useState("");
+  // Choices open inside the sheet ("form" = the grouped form itself).
+  const [view, setView] = useState<TView>("form");
   const [error, setError] = useState("");
-  const stepHeading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    if (!editing && step > 0 && step < 3) stepHeading.current?.focus({ preventScroll: true });
-  }, [editing, step]);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // New movement: the amount gets the focus on its step once the sheet is in
+  // place, without the browser scrolling the page under it.
+  const amountRef = useRef<HTMLInputElement>(null);
+  const amountStep = !editing && step === 3 && view === "form";
+  useLayoutEffect(() => {
+    if (amountStep) amountRef.current?.focus({ preventScroll: true });
+  }, [amountStep]);
   const update = (patch: Partial<EntryForm>) => {
     setForm((value) => ({ ...value, ...patch }));
     setError("");
   };
   const move = (next: number) => {
     setStep(next);
-    setSearch("");
+    setView("form");
     setError("");
   };
+
+  const selectedCategory = categories.find((item) => item._id === form.category);
+  const selectedSubcategory = subcategories.find((item) => item._id === form.subcategory);
+  const categoryChoices = categories.map((item) => ({
+    key: item._id,
+    label: item.name,
+    color: item.color,
+    icon: <Shapes size={17} />,
+  }));
+  const subcategoryChoices = subcategories
+    .filter((item) => item.category === form.category)
+    .map((item) => ({
+      key: item._id,
+      label: item.name,
+      color: selectedCategory?.color,
+      icon: <Layers3 size={17} />,
+    }));
+  const currencyChoices = CURRENCIES.map((code) => ({
+    key: code,
+    label: tr(`currency.${code}`),
+    description: code,
+    icon: <span className="text-[13px] font-semibold">{CURRENCY_SYMBOLS[code]}</span>,
+  }));
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (busy) return;
@@ -121,7 +182,7 @@ export default function EntryModal({
     if (!conversionReady) return;
     const amount = Number(form.amount.replace(",", "."));
     if (
-      !/^\d{1,7}([.,]\d{1,2})?$/.test(form.amount) ||
+      !AMOUNT_PATTERN.test(form.amount) ||
       !Number.isFinite(amount) ||
       amount <= 0 ||
       amount > 1000000
@@ -138,53 +199,55 @@ export default function EntryModal({
       return;
     }
     if (
-      !categories.some((item) => item._id === form.category) ||
+      !selectedCategory ||
       !form.subcategory ||
       !subcategories.some(
         (item) => item._id === form.subcategory && item.category === form.category,
       )
     ) {
       if (!editing) move(1);
-      else
-        document
-          .getElementById(
-            categories.some((item) => item._id === form.category)
-              ? "entry-edit-subcategory"
-              : "entry-edit-category",
-          )
-          ?.focus();
+      else setView(selectedCategory ? "subcategory" : "category");
       setError("Seleziona una categoria valida.");
       return;
     }
     await onSave(form);
   };
-  const selectedCategory = categories.find((item) => item._id === form.category);
-  const filteredCategories = categories.filter((item) =>
-    item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  );
-  const filteredSubcategories = subcategories.filter(
-    (item) =>
-      item.category === form.category &&
-      item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  );
-  const currencyField = (
-    <div className="entry-currency-field">
-      <ModalChoiceField
-        id={editing ? "entry-edit-currency" : "entry-currency"}
-        label={tr("Valuta del movimento")}
-        searchPlaceholder={tr("Cerca valuta")}
-        value={form.currency}
-        options={[...CURRENCIES]}
+
+  const kindStyle = { "--kind-color": KIND_COLOR[form.kind] } as CSSProperties;
+  const canSave =
+    !busy &&
+    conversionReady &&
+    Boolean(form.category) &&
+    Boolean(form.subcategory) &&
+    categories.length > 0;
+
+  const amountField = (
+    <label className="et-amount" style={kindStyle}>
+      <span className="sr-only">{tr("Importo {{currency}}", { currency: form.currency })}</span>
+      <input
+        id={editing ? "entry-edit-amount" : "entry-amount"}
+        inputMode="decimal"
+        autoComplete="off"
+        ref={amountRef}
+        placeholder={numberFormatter(locale(), { minimumFractionDigits: 2 }).format(0)}
+        value={form.amount}
         disabled={busy}
-        clearable={false}
-        getOptionKey={(code) => code}
-        getOptionLabel={(code) => `${code} · ${tr(`currency.${code}`)}`}
-        onChange={(code) => {
-          if (code) update({ currency: code });
+        aria-invalid={Boolean(error) || undefined}
+        onChange={(event) => {
+          const next = event.target.value.replace(/[^\d.,]/g, "");
+          if (next === "" || /^\d{0,7}([.,]\d{0,2})?$/.test(next)) update({ amount: next });
         }}
       />
+      <span className="et-amount__currency">
+        {CURRENCY_SYMBOLS[form.currency] ?? form.currency}
+      </span>
+    </label>
+  );
+
+  const conversionNote = (
+    <>
       {foreign && (
-        <div className="entry-conversion" role="status" aria-live="polite">
+        <div className="et-conversion" role="status" aria-live="polite">
           {quote?.key === quoteKey ? (
             <>
               <strong>
@@ -202,24 +265,24 @@ export default function EntryModal({
                   ),
                 })}
               </span>
-              <small>
+              <span>
                 {tr("Tasso di riferimento BCE. La conversione resta fissata al salvataggio.")}
-              </small>
+              </span>
             </>
           ) : quoteError?.key === quoteKey ? (
             <>
-              <span className="form-error">{tr(quoteError.message)}</span>
-              <Button
+              <span className="ios-compose__error">{tr(quoteError.message)}</span>
+              <button
                 type="button"
-                variant="secondary"
+                className="ios-group__action justify-self-start"
                 disabled={busy}
                 onClick={() => {
                   setQuoteError(null);
                   setQuoteAttempt((attempt) => attempt + 1);
                 }}
               >
-                {tr("Riprova cambio")}
-              </Button>
+                {tr("Riprova")}
+              </button>
             </>
           ) : (
             <span>
@@ -233,400 +296,359 @@ export default function EntryModal({
         </div>
       )}
       {editing && originalConversion && !foreign && (
-        <p className="muted">
+        <p className="ios-compose__footnote">
           {tr("Importo originale: {{amount}} · cambio del {{date}}", {
             amount: money(originalConversion.originalCents, originalConversion.from),
             date: originalConversion.rateDate,
           })}
         </p>
       )}
+    </>
+  );
+
+  /** A grouped row that opens one of the choices inside the sheet. */
+  const choiceRow = (
+    target: TView,
+    label: string,
+    value: string | undefined,
+    icon: ReactNode,
+    color: string | undefined,
+    disabled = false,
+  ) => (
+    <button
+      type="button"
+      className="ios-compose__row"
+      style={{ "--row-color": color } as CSSProperties}
+      disabled={busy || disabled}
+      onClick={() => setView(target)}
+    >
+      <span className="ios-compose__icon" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="ios-compose__copy">
+        <strong>{label}</strong>
+        <span>{value ?? tr("Seleziona")}</span>
+      </span>
+      <ChevronRight size={17} className="ios-compose__chevron" aria-hidden="true" />
+    </button>
+  );
+
+  const choiceView =
+    view === "category" ? (
+      <ChoiceList
+        title={tr("Categoria")}
+        choices={categoryChoices}
+        value={form.category}
+        searchPlaceholder={tr("Cerca categoria…")}
+        emptyText={tr("Crea prima una categoria dalla pagina Management.")}
+        onChoose={(key) => {
+          update({ category: key, subcategory: key === form.category ? form.subcategory : "" });
+          setView(key === form.category ? "form" : "subcategory");
+        }}
+      />
+    ) : view === "subcategory" ? (
+      <ChoiceList
+        title={tr("Sottocategoria")}
+        choices={subcategoryChoices}
+        value={form.subcategory}
+        searchPlaceholder={tr("Cerca sottocategoria…")}
+        onChoose={(key) => {
+          update({ subcategory: key });
+          setView("form");
+        }}
+      />
+    ) : view === "currency" ? (
+      <ChoiceList
+        title={tr("Valuta del movimento")}
+        choices={currencyChoices}
+        value={form.currency}
+        searchable={false}
+        onChoose={(key) => {
+          update({ currency: key });
+          setView("form");
+        }}
+      />
+    ) : null;
+
+  const detailsGroup = (
+    <>
+      <div className="ios-compose__field">
+        <DatePicker
+          id={editing ? "entry-edit-date" : "entry-date"}
+          label={tr("Data")}
+          value={form.date ? new Date(form.date + "T12:00:00") : null}
+          disabled={busy}
+          onChange={(date) => update({ date: toDateKey(date) })}
+        />
+      </div>
+      <div className="ios-compose__group">
+        <p className="ios-compose__header">{tr("Valuta del movimento")}</p>
+        <div className="ios-compose__list">
+          {choiceRow(
+            "currency",
+            tr(`currency.${form.currency}`),
+            form.currency,
+            <Banknote size={17} />,
+            "#8e8e93",
+          )}
+        </div>
+        {conversionNote}
+      </div>
+    </>
+  );
+
+  /** Expense or income: two Control Center toggles (Alice & Kevin recording device). */
+  const kindPicker = (
+    selected: EntryForm["kind"] | null,
+    onPick: (kind: EntryForm["kind"]) => void,
+  ) => (
+    <div className="et-kind-picker" role="group" aria-label={tr("Tipo")}>
+      {(["expense", "income"] as const).map((kind) => (
+        <button
+          type="button"
+          key={kind}
+          className="et-kind-toggle"
+          data-kind={kind}
+          aria-pressed={selected === kind}
+          disabled={busy}
+          onClick={() => onPick(kind)}
+        >
+          <span className="et-kind-toggle__icon" aria-hidden="true">
+            {kind === "expense" ? (
+              <ArrowUpRight size={22} strokeWidth={2} />
+            ) : (
+              <ArrowDownLeft size={22} strokeWidth={2} />
+            )}
+          </span>
+          <span className="et-kind-toggle__label">
+            {tr(kind === "expense" ? "Spesa" : "Entrata")}
+          </span>
+          <span className="et-kind-toggle__state">
+            {tr(
+              kind === "expense" ? "Acquisti, bollette e uscite" : "Stipendio, rimborsi e incassi",
+            )}
+          </span>
+        </button>
+      ))}
     </div>
   );
+
+  const errorNote = error && (
+    <p className="ios-compose__error" role="alert">
+      {tr(error)}
+    </p>
+  );
+
   if (editing)
     return (
       <Modal
         isOpen
-        appearance="entry"
         title={tr(form.kind === "expense" ? "Modifica spesa" : "Modifica entrata")}
         maxWidth="lg"
         isClosable={!busy}
+        closeOnBackdropClick={!busy}
         onClose={onClose}
         footer={
-          <>
-            <Button variant="secondary" disabled={busy} onClick={onClose}>
-              {tr("Annulla")}
-            </Button>
-            <Button
-              className="entry-save"
-              type="submit"
-              form="entry-edit"
-              disabled={
-                busy ||
-                !conversionReady ||
-                !form.category ||
-                !form.subcategory ||
-                !categories.length
-              }
-              icon={<Check size={17} />}
-            >
-              {tr(busy ? "Salvataggio…" : "Salva modifiche")}
-            </Button>
-          </>
+          <div className="modal-record-actions flex w-full flex-col gap-3">
+            {confirmingDelete && onDelete ? (
+              <InlineDeleteConfirm
+                title={tr(form.kind === "expense" ? "Elimina spesa" : "Elimina entrata")}
+                message={tr("Il movimento verrà eliminato definitivamente.")}
+                confirmLabel={tr("Elimina")}
+                deletingLabel={tr("Eliminazione…")}
+                cancelLabel={tr("Annulla")}
+                isDeleting={busy}
+                onCancel={() => setConfirmingDelete(false)}
+                onConfirm={() => void onDelete()}
+              />
+            ) : view !== "form" ? (
+              <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <Button variant="secondary" disabled={busy} onClick={() => setView("form")}>
+                  <ChevronLeft size={17} strokeWidth={2} />
+                  <span>{tr("Indietro")}</span>
+                </Button>
+              </div>
+            ) : (
+              // Same footer as the note details of Alice & Kevin.
+              <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
+                {onDelete && (
+                  <IconButton
+                    type="button"
+                    variant="danger"
+                    className="mr-auto"
+                    disabled={busy}
+                    aria-label={tr("Elimina")}
+                    title={tr("Elimina")}
+                    onClick={() => setConfirmingDelete(true)}
+                  >
+                    <Trash2 size={17} strokeWidth={2} />
+                  </IconButton>
+                )}
+                <Button variant="secondary" disabled={busy} onClick={onClose}>
+                  <X size={17} strokeWidth={2} />
+                  <span>{tr("Annulla")}</span>
+                </Button>
+                <Button type="submit" form="entry-edit" disabled={!canSave}>
+                  {busy ? null : <Save size={17} strokeWidth={2} />}
+                  <span>{tr(busy ? "Salvataggio…" : "Salva")}</span>
+                </Button>
+              </div>
+            )}
+          </div>
         }
       >
-        <form
-          id="entry-edit"
-          onSubmit={submit}
-          noValidate
-          aria-busy={busy}
-          className={`entry-edit-form ${form.kind}`}
-        >
-          <fieldset disabled={busy} className="entry-edit-fields">
-            <legend className="sr-only">{tr("Modifica movimento")}</legend>
-            <div className="entry-edit-kind" role="group" aria-label={tr("Tipo")}>
-              {(["expense", "income"] as const).map((kind) => (
-                <button
-                  type="button"
-                  key={kind}
-                  className={`entry-kind-option ${kind}`}
-                  aria-label={tr(kind === "expense" ? "Spesa" : "Entrata")}
-                  title={tr(kind === "expense" ? "Spesa" : "Entrata")}
-                  aria-pressed={form.kind === kind}
-                  onClick={() => update({ kind })}
-                >
-                  <span className="entry-kind-icon">
-                    {kind === "expense" ? <ArrowUpRight size={19} /> : <ArrowDownLeft size={19} />}
-                  </span>
-                  <span className="entry-kind-label">
-                    {tr(kind === "expense" ? "Spesa" : "Entrata")}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <div className="entry-edit-details">
-              <InputNumber
-                id="entry-edit-amount"
-                className="entry-amount-field"
-                suffix={form.currency}
-                label={tr("Importo {{currency}}", { currency: form.currency })}
-                value={form.amount}
-                allowDecimal
-                inputMode="decimal"
-                placeholder={numberFormatter(locale(), { minimumFractionDigits: 2 }).format(0)}
-                onChange={(amount) => update({ amount })}
-              />
-              <DatePicker
-                id="entry-edit-date"
-                className="entry-edit-date-field"
-                label={tr("Data")}
-                value={form.date ? new Date(form.date + "T12:00:00") : null}
-                disabled={busy}
-                onChange={(date) =>
-                  update({
-                    date: date
-                      ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-                      : "",
-                  })
-                }
-              />
-            </div>
-            {currencyField}
-            <div className="entry-edit-classification">
-              <ModalChoiceField
-                id="entry-edit-category"
-                label={tr("Categoria")}
-                placeholder={tr("Scegli una categoria")}
-                searchPlaceholder={tr("Cerca categoria…")}
-                icon={<Shapes size={19} />}
-                value={selectedCategory ?? null}
-                options={categories}
-                disabled={busy}
-                clearable={false}
-                getOptionKey={(item) => item._id}
-                getOptionLabel={(item) => item.name}
-                getOptionIcon={(item) => (
-                  <i className="category-filter-dot" style={{ background: item.color }} />
-                )}
-                onChange={(item) => {
-                  if (item)
-                    update({
-                      category: item._id,
-                      subcategory: item._id === form.category ? form.subcategory : "",
-                    });
-                }}
-              />
-              <ModalChoiceField
-                id="entry-edit-subcategory"
-                label={tr("Sottocategoria")}
-                placeholder={tr("Scegli una sottocategoria")}
-                searchPlaceholder={tr("Cerca sottocategoria…")}
-                icon={<Layers3 size={19} />}
-                value={subcategories.find((item) => item._id === form.subcategory) ?? null}
-                options={subcategories.filter((item) => item.category === form.category)}
-                disabled={busy || !form.category}
-                clearable={false}
-                getOptionKey={(item) => item._id}
-                getOptionLabel={(item) => item.name}
-                getOptionIcon={() => (
-                  <i
-                    className="category-filter-dot"
-                    style={{ background: selectedCategory?.color }}
-                  />
-                )}
-                onChange={(item) => {
-                  if (item) update({ subcategory: item._id });
-                }}
-              />
-            </div>
-          </fieldset>
-          {error && (
-            <p className="form-error" role="alert">
-              {tr(error)}
-            </p>
+        <form id="entry-edit" onSubmit={submit} noValidate aria-busy={busy} className="ios-compose">
+          {view !== "form" ? (
+            choiceView
+          ) : (
+            <>
+              {kindPicker(form.kind, (kind) => update({ kind }))}
+              {amountField}
+              <div className="ios-compose__group">
+                <p className="ios-compose__header">{tr("Categoria")}</p>
+                <div className="ios-compose__list">
+                  {choiceRow(
+                    "category",
+                    tr("Categoria"),
+                    selectedCategory?.name,
+                    <Shapes size={17} />,
+                    selectedCategory?.color,
+                  )}
+                  {choiceRow(
+                    "subcategory",
+                    tr("Sottocategoria"),
+                    selectedSubcategory?.name,
+                    <Layers3 size={17} />,
+                    selectedCategory?.color,
+                    !form.category,
+                  )}
+                </div>
+              </div>
+              {detailsGroup}
+            </>
           )}
+          {errorNote}
         </form>
       </Modal>
     );
+
+  const steps = ["Tipo", "Categoria", "Sottocategoria", "Importo"].map((label) => tr(label));
   return (
     <Modal
       isOpen
-      appearance="entry"
       title={tr("Nuovo movimento")}
       description={step === 0 ? tr("Ogni movimento, al posto giusto.") : undefined}
       maxWidth="lg"
       isClosable={!busy}
       onClose={onClose}
       footer={
-        step === 0 ? undefined : (
-          <>
+        <>
+          {step === 0 && view === "form" ? (
+            <Button variant="secondary" disabled={busy} onClick={onClose}>
+              {tr("Annulla")}
+            </Button>
+          ) : (
             <Button
               variant="secondary"
               disabled={busy}
-              onClick={() => (step ? move(step - 1) : onClose())}
-              icon={step ? <ChevronLeft size={17} /> : undefined}
+              onClick={() => (view !== "form" ? setView("form") : move(step - 1))}
             >
-              {tr(step ? "Indietro" : "Annulla")}
+              <ChevronLeft size={17} strokeWidth={2} />
+              <span>{tr("Indietro")}</span>
             </Button>
-            {step === 3 && (
-              <Button
-                className={`entry-save ${form.kind}`}
-                type="submit"
-                form="entry-wizard"
-                disabled={
-                  busy ||
-                  !conversionReady ||
-                  !form.category ||
-                  !form.subcategory ||
-                  !categories.length
-                }
-                icon={<Check size={17} />}
-              >
-                {tr(
-                  busy ? "Salvataggio…" : form.kind === "income" ? "Salva entrata" : "Salva spesa",
-                )}
-              </Button>
-            )}
-          </>
-        )
+          )}
+          {step === 3 && view === "form" && (
+            <Button type="submit" form="entry-wizard" disabled={!canSave}>
+              <Check size={17} strokeWidth={2.4} />
+              <span>{tr(busy ? "Salvataggio…" : "Salva")}</span>
+            </Button>
+          )}
+        </>
       }
     >
-      <form
-        id="entry-wizard"
-        onSubmit={submit}
-        noValidate
-        className={`entry-wizard entry-flow ${chosenKind ? form.kind : "entry-neutral"}`}
-        aria-busy={busy}
-      >
+      <form id="entry-wizard" onSubmit={submit} noValidate aria-busy={busy} className="ios-compose">
         {step > 0 && (
-          <>
-            <div className="entry-context">
-              <span className="ui-pill entry-kind-badge">
-                {form.kind === "expense" ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
-                {tr(form.kind === "expense" ? "Spesa" : "Entrata")}
-              </span>
-              {step > 1 && (
-                <span className="entry-context-category">
-                  <span>{selectedCategory?.name}</span>
-                  {form.subcategory && (
-                    <>
-                      <span className="entry-context-separator" aria-hidden="true">
-                        /
-                      </span>
-                      <span>
-                        {subcategories.find((item) => item._id === form.subcategory)?.name}
-                      </span>
-                    </>
-                  )}
-                </span>
-              )}
+          <div className="ios-compose__progress">
+            <div
+              className="ios-compose__steps"
+              role="progressbar"
+              aria-label={tr("Passaggi del movimento")}
+              aria-valuemin={1}
+              aria-valuemax={steps.length}
+              aria-valuenow={step + 1}
+            >
+              {steps.map((label, index) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="ios-compose__step"
+                  data-state={index < step ? "done" : index === step ? "current" : undefined}
+                  aria-label={label}
+                  disabled={busy || index > step}
+                  onClick={() => move(index)}
+                />
+              ))}
             </div>
-            <Stepper
-              steps={["Tipo", "Categoria", "Sottocategoria", "Importo"].map((label) => ({
-                label: tr(label),
-              }))}
-              activeStep={step}
-              ariaLabel={tr("Passaggi del movimento")}
-              accent="var(--entry-accent)"
-              disabled={busy}
-              onStepClick={move}
-            />
-          </>
+            <p className="ios-compose__step-label">
+              {steps[step]}
+              <span>
+                {step + 1}/{steps.length}
+              </span>
+            </p>
+          </div>
         )}
-        <fieldset key={step} disabled={busy} className="entry-step entry-step-panel">
-          <legend className="sr-only">
-            {tr(["Tipo", "Categoria", "Sottocategoria", "Importo e data"][step])}
-          </legend>
-          {step === 0 && (
-            <>
-              <div className="entry-intro">
-                <h3>{tr("Che movimento vuoi registrare?")}</h3>
-                <p>{tr("Scegli il tipo e aggiungi i dettagli in pochi tocchi.")}</p>
-              </div>
-              <div className="entry-create-kind" role="group" aria-label={tr("Tipo")}>
-                {(["expense", "income"] as const).map((kind) => (
-                  <button
-                    type="button"
-                    key={kind}
-                    className={`entry-kind-option ${kind}`}
-                    aria-label={tr(kind === "expense" ? "Spesa" : "Entrata")}
-                    title={tr(kind === "expense" ? "Spesa" : "Entrata")}
-                    aria-pressed={chosenKind && form.kind === kind}
-                    onClick={() => {
-                      update({ kind });
-                      setChosenKind(true);
-                      move(1);
-                    }}
-                  >
-                    <span className="entry-kind-icon">
-                      {kind === "expense" ? (
-                        <ArrowUpRight size={22} />
-                      ) : (
-                        <ArrowDownLeft size={22} />
-                      )}
-                    </span>
-                    <span className="entry-kind-copy">
-                      <span className="entry-kind-label">
-                        {tr(kind === "expense" ? "Spesa" : "Entrata")}
-                      </span>
-                      <span className="entry-kind-description">
-                        {tr(
-                          kind === "expense"
-                            ? "Acquisti, bollette e uscite"
-                            : "Stipendio, rimborsi e incassi",
-                        )}
-                      </span>
-                    </span>
-                    <ChevronRight className="entry-kind-next" size={20} aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          {(step === 1 || step === 2) && (
-            <>
-              <h3 ref={stepHeading} tabIndex={-1}>
-                {tr(step === 1 ? "Scegli la categoria" : "Scegli la sottocategoria")}
-              </h3>
-              <Input
-                id="entry-category-search"
-                aria-label={tr(step === 1 ? "Cerca categoria…" : "Cerca sottocategoria…")}
-                placeholder={tr(step === 1 ? "Cerca categoria…" : "Cerca sottocategoria…")}
-                icon={<Search size={18} />}
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-              <div
-                className="entry-pills"
-                role="group"
-                aria-label={tr(step === 1 ? "Categoria" : "Sottocategoria")}
-              >
-                {(step === 1 ? filteredCategories : filteredSubcategories).map((item) => {
-                  const selected = (step === 1 ? form.category : form.subcategory) === item._id;
-                  return (
-                    <button
-                      type="button"
-                      key={item._id}
-                      className="ui-pill entry-pill"
-                      aria-pressed={selected}
-                      onClick={() => {
-                        update(
-                          step === 1
-                            ? {
-                                category: item._id,
-                                subcategory: item._id === form.category ? form.subcategory : "",
-                              }
-                            : { subcategory: item._id },
-                        );
-                        move(step + 1);
-                      }}
-                    >
-                      <i
-                        style={{
-                          background:
-                            step === 1 ? (item as Category).color : selectedCategory?.color,
-                        }}
-                      />
-                      {item.name}
-                      {selected && <Check size={15} />}
-                    </button>
-                  );
-                })}
-              </div>
-              {!(step === 1 ? filteredCategories : filteredSubcategories).length && (
-                <p className="muted">{tr("Nessun risultato.")}</p>
-              )}
-              {!categories.length && (
-                <p className="form-error">
-                  {tr("Crea prima una categoria dalla pagina Management.")}
-                </p>
-              )}
-            </>
-          )}
-          {step === 3 && (
-            <>
-              <h3>{tr("Quanto e quando?")}</h3>
-              {currencyField}
-              <div className="entry-amount-layout">
-                <div>
-                  <InputNumber
-                    id="entry-amount"
-                    className="entry-amount-field"
-                    suffix={form.currency}
-                    autoFocus
-                    label={tr("Importo {{currency}}", { currency: form.currency })}
-                    value={form.amount}
-                    allowDecimal
-                    inputMode="decimal"
-                    placeholder={numberFormatter(locale(), {
-                      minimumFractionDigits: 2,
-                    }).format(0)}
-                    onChange={(amount) => update({ amount })}
-                  />
-                </div>
-                <div className="entry-date-summary">
-                  <DatePicker
-                    id="entry-date"
-                    label={tr("Data")}
-                    value={new Date(form.date + "T12:00:00")}
-                    disabled={busy}
-                    onChange={(date) =>
-                      update({
-                        date: date
-                          ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-                          : "",
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </fieldset>
-        {error && (
-          <p className="form-error" role="alert">
-            {tr(error)}
-          </p>
+
+        {step === 0 && (
+          <div className="ios-compose__group">
+            <p className="ios-compose__header">{tr("Che movimento vuoi registrare?")}</p>
+            {kindPicker(chosenKind ? form.kind : null, (kind) => {
+              update({ kind });
+              setChosenKind(true);
+              move(1);
+            })}
+          </div>
         )}
+        {step === 1 && (
+          <ChoiceList
+            title={tr("Scegli la categoria")}
+            advance
+            choices={categoryChoices}
+            value={form.category}
+            searchPlaceholder={tr("Cerca categoria…")}
+            emptyText={tr("Crea prima una categoria dalla pagina Management.")}
+            onChoose={(key) => {
+              update({ category: key, subcategory: key === form.category ? form.subcategory : "" });
+              move(2);
+            }}
+          />
+        )}
+        {step === 2 && (
+          <ChoiceList
+            title={tr("Scegli la sottocategoria")}
+            advance
+            choices={subcategoryChoices}
+            value={form.subcategory}
+            searchPlaceholder={tr("Cerca sottocategoria…")}
+            onChoose={(key) => {
+              update({ subcategory: key });
+              move(3);
+            }}
+          />
+        )}
+        {step === 3 &&
+          (view !== "form" ? (
+            choiceView
+          ) : (
+            <>
+              {amountField}
+              <p className="ios-compose__footnote">
+                {tr(form.kind === "expense" ? "Spesa" : "Entrata")} · {selectedCategory?.name}
+                {selectedSubcategory ? ` / ${selectedSubcategory.name}` : ""}
+              </p>
+              {detailsGroup}
+            </>
+          ))}
+        {errorNote}
       </form>
     </Modal>
   );

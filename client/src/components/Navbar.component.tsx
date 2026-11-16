@@ -1,46 +1,69 @@
-import { ChevronRight } from "lucide-react";
 import useSidebarScrollLock from "../hooks/useSidebarScrollLock.hook";
-import { type FC, useEffect, useMemo, useState } from "react";
-
+import { type FC, useEffect, useState } from "react";
+import { CalendarRange, ChartNoAxesCombined, ListOrdered, Settings, Shapes } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router";
-import { PROTECTED_ROUTES } from "../routes/routes.config";
-import type { User } from "../types";
-import { getLiquidGlassClass } from "../assets/constants";
-import "../styles/LiquidGlass.styles.css";
 import "../styles/Navbar.styles.css";
 import "../styles/NavbarGlass.styles.css";
-export type { Page } from "../routes/routes.config";
-type IRoute = (typeof PROTECTED_ROUTES)[number];
+import "../styles/v2/Sidebar.styles.css";
+
 // assets
-const logoImg = "/expenses-logo.png?v=2";
-const logoDarkImg = "/expenses-logo.png?v=2";
+import { getLiquidGlassClass } from "../assets/constants";
 
 // components
 import AccountMenu from "./AccountMenu.component";
 import LanguageSelector from "./LanguageSelector.component";
+import MobileTabBar from "./MobileTabBar.component";
 
 // hooks
 import { useTheme } from "../hooks";
 
+// i18n
+import { tr } from "../i18n";
+
 // routes
+import { ROUTE_PATHS } from "../routes/routes.config";
 
 // types
+import type { User } from "../types";
+import type { LucideIcon } from "lucide-react";
 
-const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) => {
+const LOGO_SRC = "/expenses-logo.png?v=2";
+
+interface INavbarProps {
+  user: User;
+  onLogout: () => void;
+  /** Settings: no top bar, only the mobile dock (tab bar). */
+  dockOnly?: boolean;
+}
+
+type TSidebarLink = { path: string; label: string; icon: LucideIcon };
+type TSidebarGroup = { title: string; links: TSidebarLink[] };
+
+/** Routes of the desktop sidebar, grouped like the iPadOS sidebar. */
+export const getSidebarGroups = (): TSidebarGroup[] => [
+  {
+    title: tr("Panoramica"),
+    links: [
+      { path: ROUTE_PATHS.dashboard, label: tr("Mensile"), icon: ChartNoAxesCombined },
+      { path: ROUTE_PATHS.annual, label: tr("Annuale"), icon: CalendarRange },
+      { path: ROUTE_PATHS.entries, label: tr("Movimenti"), icon: ListOrdered },
+    ],
+  },
+  {
+    title: tr("Gestione"),
+    links: [{ path: ROUTE_PATHS.management, label: tr("Categorie"), icon: Shapes }],
+  },
+];
+
+const Navbar: FC<INavbarProps> = ({ user, onLogout, dockOnly = false }) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const location = useLocation();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
-  const visibleRoutes: IRoute[] = useMemo(() => {
-    return PROTECTED_ROUTES.filter((route: IRoute): boolean => {
-      return !(route.is_hidden ?? false);
-    });
-  }, []);
-
-  const desktopPrimaryRoutes = visibleRoutes;
+  const sidebarGroups = getSidebarGroups();
 
   const handleToggleSidebar = (): void => {
     setIsSidebarOpen((previousValue: boolean): boolean => !previousValue);
@@ -57,184 +80,92 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
 
   useSidebarScrollLock(isSidebarOpen, handleCloseSidebar);
 
-  const desktopRoutes = (
-    <nav className="flex min-w-0 items-center justify-center gap-1">
-      {desktopPrimaryRoutes.map((protectedRoute: IRoute) => {
-        const isMainRoute: boolean = protectedRoute.path === "/";
-        const RouteIcon = protectedRoute.icon;
+  const desktopSidebar = (
+    <aside className="lg-sidebar" aria-label={t("navbar.menu")} data-glass-theme={theme}>
+      <NavLink
+        to={ROUTE_PATHS.dashboard}
+        end
+        aria-label={t("navbar.goToHomepage")}
+        className="lg-sidebar__brand"
+      >
+        <img src={LOGO_SRC} alt="" aria-hidden="true" />
+        <span className="lg-sidebar__brand-name">Expenses Traker</span>
+      </NavLink>
 
-        return (
+      <nav className="lg-sidebar__nav">
+        {sidebarGroups.map((group) => (
+          <section key={group.title} className="lg-sidebar__group" aria-label={group.title}>
+            <h2 className="lg-sidebar__heading">{group.title}</h2>
+            {group.links.map(({ path, label, icon: Icon }) => (
+              <NavLink
+                key={path}
+                to={path}
+                end={path === ROUTE_PATHS.dashboard}
+                title={`${group.title} · ${label}`}
+                className="lg-sidebar__item"
+              >
+                <Icon className="lg-sidebar__icon" aria-hidden="true" />
+                <span className="lg-sidebar__label">{label}</span>
+              </NavLink>
+            ))}
+          </section>
+        ))}
+      </nav>
+
+      <div className="lg-sidebar__footer">
+        <div className="lg-sidebar__tools">
+          <LanguageSelector
+            placement="top"
+            alignment="left"
+            className="lg-sidebar__tool lg-sidebar__language"
+          />
           <NavLink
-            key={protectedRoute.path}
-            to={protectedRoute.path}
-            end={isMainRoute}
-            title={t(`navbar.${protectedRoute.name}`)}
-            data-nav-theme={theme}
-            className={({ isActive }: { isActive: boolean }) =>
-              `nav-tab group relative flex shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-2xl border px-2.5 py-2 font-medium xl:px-3 xl:py-2.5 ${getLiquidGlassClass(theme)} ${isActive ? (theme === "light" ? "border-white/90 text-primary" : "border-white/12 text-primary") : theme === "light" ? "border-white/40 text-darkgray hover:border-white/80 hover:bg-white/45 hover:text-primary" : "border-white/6 text-gray hover:border-white/14 hover:bg-white/8 hover:text-primary"}`
-            }
+            to={ROUTE_PATHS.settings}
+            title={t("navbar.settings")}
+            aria-label={t("navbar.settings")}
+            className="lg-sidebar__settings"
           >
-            {({ isActive }: { isActive: boolean }) => (
-              <>
-                <RouteIcon
-                  size={16}
-                  strokeWidth={2}
-                  className={`nav-tab__icon relative z-10 shrink-0 ${isActive ? "text-primary" : ""}`}
-                />
-
-                <span
-                  className={`nav-tab__label relative z-10 whitespace-nowrap text-[12px] xl:text-[13px] 2xl:text-sm ${isActive ? "text-primary" : theme === "light" ? "text-black" : "text-white"}`}
-                >
-                  {t(`navbar.${protectedRoute.name}`)}
-                </span>
-
-                <span
-                  aria-hidden="true"
-                  className="nav-tab__indicator absolute bottom-1 left-1/2 z-10 h-0.75 -translate-x-1/2 rounded-full bg-primary/80"
-                />
-              </>
-            )}
+            <Settings aria-hidden="true" />
           </NavLink>
-        );
-      })}
-    </nav>
-  );
-
-  const mobileRoutes = (
-    <nav aria-label={t("navbar.menu")} className="grid grid-cols-2 gap-2">
-      {visibleRoutes.map((protectedRoute: IRoute) => {
-        const isMainRoute: boolean = protectedRoute.path === "/";
-        const RouteIcon = protectedRoute.icon;
-
-        return (
-          <NavLink
-            key={protectedRoute.path}
-            to={protectedRoute.path}
-            end={isMainRoute}
-            onClick={handleCloseSidebar}
-            data-nav-theme={theme}
-            className={({ isActive }: { isActive: boolean }) =>
-              `nav-tab-card group relative min-h-23 overflow-hidden rounded-[22px] border p-3 transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.96] opacity-100 ${isActive ? "border-primary/60 bg-primary text-white" : theme === "light" ? "border-white/80 bg-white/52 text-black shadow-[0_10px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5.5 text-white shadow-[0_14px_34px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.08)]"}`
-            }
-          >
-            {({ isActive }: { isActive: boolean }) => (
-              <>
-                <span className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-125" />
-
-                <div className="relative z-10 flex h-full flex-col justify-between gap-2.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <span
-                      className={`flex size-9 shrink-0 items-center justify-center rounded-[14px] border transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 group-hover:-translate-y-0.5 group-hover:scale-105 ${isActive ? "border-white/25 bg-white/18 text-white shadow-[0_8px_20px_rgba(0,0,0,0.12)]" : theme === "light" ? "border-white bg-white/80 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)]" : "border-white/12 bg-white/8 text-primary"}`}
-                    >
-                      <RouteIcon className="nav-tab__icon" size={18} strokeWidth={2} />
-                    </span>
-
-                    <span
-                      className={`flex size-6 items-center justify-center rounded-full border transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ${isActive ? "border-white/25 bg-white/18 text-white" : theme === "light" ? "border-black/5 bg-black/2.5 text-darkgray group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:text-primary" : "border-white/8 bg-white/5 text-gray group-hover:border-primary/25 group-hover:bg-primary/10 group-hover:text-primary"}`}
-                    >
-                      <ChevronRight
-                        size={13}
-                        strokeWidth={2.2}
-                        className="transition-transform duration-500 group-hover:translate-x-0.5"
-                      />
-                    </span>
-                  </div>
-
-                  <div className="min-w-0">
-                    <span className="block wrap-break-word text-[14px] font-semibold leading-[1.12]">
-                      {t(`navbar.${protectedRoute.name}`)}
-                    </span>
-                  </div>
-                </div>
-
-                {isActive && (
-                  <span className="absolute bottom-0 left-1/2 h-1 w-12 -translate-x-1/2 rounded-t-full bg-white/90 shadow-[0_0_16px_rgba(255,255,255,0.72)]" />
-                )}
-              </>
-            )}
-          </NavLink>
-        );
-      })}
-    </nav>
+        </div>
+        <AccountMenu
+          placement="top"
+          alignment="left"
+          className="lg-sidebar__account"
+          logoutOnly
+          username={user.name}
+          surname={user.surname}
+          email={user.email}
+          onLogout={onLogout}
+        />
+      </div>
+    </aside>
   );
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 w-full overflow-visible bg-transparent">
-        <div className="relative flex h-[calc(6rem+var(--app-safe-top))] w-full items-center justify-start overflow-visible px-5 pt-[var(--app-safe-top)] md:hidden">
-          <NavLink
-            to="/"
-            end
-            aria-label={t("navbar.goToHomepage")}
-            className="app-brand-logo group inline-flex absolute bottom-4 left-[max(1.25rem,env(safe-area-inset-left))] size-18 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            data-glass-theme={theme}
-          >
-            <img
-              src={theme === "light" ? logoImg : logoDarkImg}
-              alt="Expenses Traker"
-              className="relative z-10 h-full w-full object-contain transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.08] group-active:scale-90"
-            />
-          </NavLink>
-        </div>
-
-        <div className="relative hidden overflow-visible px-6 py-4 md:block lg:px-10 xl:px-14 2xl:px-20">
-          <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 xl:gap-6">
+      {!dockOnly && (
+        <header className="crm-navbar fixed inset-x-0 top-0 z-50 w-full overflow-visible bg-transparent md:hidden">
+          <div className="relative flex h-[calc(6rem+var(--app-safe-top))] w-full items-center justify-start overflow-visible px-5 pt-[var(--app-safe-top)] md:hidden">
             <NavLink
-              to="/"
+              to={ROUTE_PATHS.dashboard}
               end
               aria-label={t("navbar.goToHomepage")}
-              className="app-brand-logo group inline-flex relative size-18 shrink-0 xl:size-20 2xl:size-22 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-              data-glass-theme={theme}
+              className="app-brand-logo group inline-flex absolute bottom-4 left-[max(1.25rem,env(safe-area-inset-left))] size-18 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               <img
-                src={theme === "light" ? logoImg : logoDarkImg}
+                src={LOGO_SRC}
                 alt="Expenses Traker"
                 className="relative z-10 h-full w-full object-contain transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.08] group-active:scale-90"
               />
             </NavLink>
-
-            <div className="min-w-0">
-              <div
-                className={`mx-auto w-fit max-w-full rounded-3xl border px-1.5 py-1.5 xl:px-2 ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/55" : "border-white/10"}`}
-              >
-                {desktopRoutes}
-              </div>
-            </div>
-
-            <div className="relative z-60 flex shrink-0 items-center justify-end gap-2 overflow-visible xl:gap-3 2xl:gap-4">
-              <LanguageSelector />
-              <AccountMenu
-                username={user.name}
-                surname={user.surname}
-                email={user.email}
-                onLogout={onLogout}
-              />
-            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <button
-        type="button"
-        onClick={handleToggleSidebar}
-        aria-label={isSidebarOpen ? t("navbar.closeMenu") : t("navbar.menu")}
-        aria-expanded={isSidebarOpen}
-        aria-controls="mobile-sidebar"
-        data-glass-theme={theme}
-        className={`glass-surface group fixed right-[max(1.25rem,env(safe-area-inset-right))] top-[calc(var(--app-safe-top)+1.5rem)] z-100 flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border transition-transform duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:scale-[0.9] md:hidden ${isSidebarOpen ? "rotate-90" : "rotate-0"}`}
-      >
-        <span className="relative z-10 block h-7 w-8 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.08] group-active:scale-90">
-          <span
-            className={`absolute left-0 h-0.75 w-8 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${isSidebarOpen ? "top-3 rotate-45 bg-primary" : `top-0.5 rotate-0 ${theme === "light" ? "bg-black" : "bg-white"}`}`}
-          />
-          <span
-            className={`absolute left-0 top-3 h-0.75 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-300 ease-out ${isSidebarOpen ? "w-0 translate-x-4 opacity-0 bg-primary" : `w-6 translate-x-0 opacity-100 ${theme === "light" ? "bg-black" : "bg-white"}`}`}
-          />
-          <span
-            className={`absolute left-0 h-0.75 w-8 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${isSidebarOpen ? "top-3 -rotate-45 bg-primary" : `top-5.5 rotate-0 ${theme === "light" ? "bg-black" : "bg-white"}`}`}
-          />
-        </span>
-      </button>
+      {desktopSidebar}
+
+      <MobileTabBar isMoreOpen={isSidebarOpen} onToggleMore={handleToggleSidebar} />
 
       <button
         type="button"
@@ -245,8 +176,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
       />
 
       <div
-        inert={!isSidebarOpen}
-        className={`liquid-glass-sidebar-motion liquid-glass-sidebar-surface ${getLiquidGlassClass(theme)} fixed left-[max(0.75rem,env(safe-area-inset-left))] right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[max(0.75rem,var(--app-safe-top))] z-80 md:hidden ${isSidebarOpen ? "liquid-glass-sidebar-motion--open" : "liquid-glass-sidebar-motion--closed"}`}
+        className={`liquid-glass-sidebar-motion liquid-glass-sidebar-surface ${getLiquidGlassClass(theme)} lg-more-sheet fixed z-80 md:hidden ${isSidebarOpen ? "liquid-glass-sidebar-motion--open" : "liquid-glass-sidebar-motion--closed"}`}
       >
         <aside
           id="mobile-sidebar"
@@ -267,34 +197,7 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
           />
 
           <div
-            className={`relative z-10 mb-2 flex shrink-0 items-center justify-between gap-3 rounded-[22px] p-2.5 transition-[opacity,translate] duration-200 ease-out opacity-100`}
-          >
-            <NavLink
-              to="/"
-              end
-              aria-label={t("navbar.goToHomepage")}
-              onClick={handleCloseSidebar}
-              className="group flex min-w-0 items-center gap-3"
-            >
-              <span
-                data-glass-theme={theme}
-                className="app-brand-logo group inline-flex relative size-22 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-              >
-                <img
-                  src={theme === "light" ? logoImg : logoDarkImg}
-                  alt="Expenses Traker"
-                  className="relative z-10 h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
-                />
-              </span>
-            </NavLink>
-          </div>
-
-          <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-0.5 pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
-            {mobileRoutes}
-          </div>
-
-          <div
-            className={`relative z-20 mt-2 flex shrink-0 items-center justify-between overflow-visible rounded-[22px] border p-2.5 transition-[opacity,translate] duration-200 ease-out opacity-100 ${theme === "light" ? "border-white/85 bg-white/48 shadow-[0_12px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5 shadow-[0_14px_30px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
+            className={`relative z-20 grid grid-cols-[3rem_minmax(0,1fr)] gap-2 shrink-0 items-center overflow-visible rounded-[22px] border p-2.5 transition-[opacity,translate] duration-200 ease-out opacity-100 ${theme === "light" ? "border-white/85 bg-white/48 shadow-[0_12px_28px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/10 bg-white/5 shadow-[0_14px_30px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
           >
             <LanguageSelector
               className="[&>button]:size-12 [&>button]:justify-center [&>button]:gap-0 [&>button]:p-0 [&>button>svg]:hidden [&>button>span:nth-child(2)]:hidden"
@@ -302,12 +205,13 @@ const Navbar: FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) =>
               alignment="left"
             />
             <AccountMenu
+              className="min-w-0 [&>button]:w-full [&>button]:min-w-0 [&>button]:gap-2 [&>button]:px-2"
+              placement="top"
+              alignment="right"
               username={user.name}
               surname={user.surname}
               email={user.email}
               onLogout={onLogout}
-              placement="top"
-              alignment="right"
             />
           </div>
         </aside>

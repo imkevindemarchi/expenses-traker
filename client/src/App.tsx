@@ -1,62 +1,27 @@
-import PageSkeleton from "./components/PageSkeleton.component";
-import RouteSkeleton from "./components/RouteSkeleton.component";
+import { receiveGlassClarity } from "./utils/glass-clarity.util";
 import { lazyPage as lazy, useNavigationPreload } from "./utils/navigation-preload";
-import IconButton from "./components/IconButton.component";
-import AuthShell from "./components/AuthShell.component";
-
-import EntryModal from "./components/EntryModal.component";
-import { CurrencyContext, useMoney } from "./contexts/currency.context";
-import FilteredBalance from "./components/FilteredBalance.component";
-import Autocomplete from "./components/Autocomplete.component";
-import EntryFiltersModal from "./components/EntryFiltersModal.component";
-import SpendingBreakdown from "./components/SpendingBreakdown.component";
-import Pagination from "./components/Pagination.component";
-import EntriesTable from "./components/EntriesTable.component";
-import MonthPicker from "./components/MonthPicker.component";
-import { INCOME_COLOR, EXPENSE_COLOR } from "./assets/constants/transaction-colors";
+import { CurrencyContext } from "./contexts/currency.context";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
-import { ROUTE_PATHS, pageFromPath, safeReturnPath } from "./routes/routes.config";
+import { ROUTE_PATHS, pageFromPath, safeReturnPath, type Page } from "./routes/routes.config";
 import { usePageTitle } from "./hooks/use-page-title.hook";
-import MonthlyBudget from "./components/MonthlyBudget.component";
 import { useTranslation } from "react-i18next";
 import { tr } from "./i18n";
-import { Suspense, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Wallet,
-  Plus,
-  Pencil,
-  Trash2,
-  ListFilter,
-  RotateCcw,
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Mail,
-  LockKeyhole,
-  UserRound,
-  Shapes,
-  X,
-  TrendingUp,
-} from "lucide-react";
-import { ThemeContext, type ThemePreference } from "./contexts/theme.context";
-import { api, ApiError, money as formatMoney, today } from "./api";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Layers3 } from "lucide-react";
+import { api, ApiError, today } from "./api";
 import type { User, Category, Subcategory, Entry, Summary } from "./types";
-import Navbar, { type Page } from "./components/Navbar.component";
-import Glass from "./components/Glass.component";
-import Button from "./components/Button.component";
-import FloatingButton from "./components/FloatingButton.component";
-import Modal from "./components/Modal.component";
-import Input from "./components/Input.component";
+import Layout from "./components/Layout.component";
+import Popup from "./components/Popup.component";
+import EntryModal from "./components/EntryModal.component";
+import EntryFiltersModal from "./components/EntryFiltersModal.component";
+import ManageModal, { type ManageForm } from "./components/ManageModal.component";
+import DeleteConfirmModal from "./components/DeleteConfirmModal.component";
+import AuthPage from "./pages/Auth.page";
+import DashboardPage from "./pages/Dashboard.page";
+import EntriesPage from "./pages/Entries.page";
+import ManagementPage from "./pages/Management.page";
 const AnnualPage = lazy(() => import("./pages/Annual.page"), ["/annual"]);
 const SettingsPage = lazy(() => import("./pages/Settings.page"), ["/settings"]);
-
-import Header from "./components/Header.component";
-import Accordion from "./components/Accordion.component";
-import Popup from "./components/Popup.component";
-import BigButton from "./components/BigButton.component";
-import Shadowbox from "./components/Shadowbox.component";
 
 const emptySummary: Summary = {
   income: 0,
@@ -75,31 +40,12 @@ type EntryForm = {
   category: string;
   subcategory: string;
 };
-type ManageForm = {
-  mode: "category" | "subcategory";
-  id?: string;
-  name: string;
-  color: string;
-  category: string;
-};
-type DeleteAction = { endpoint: string; label: string };
+type DeleteAction = { endpoint: string; label: string; detail?: string; color?: string };
 
 export default function App() {
   useTranslation();
-  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
-    const saved = localStorage.getItem("expenses-theme");
-    return saved === "light" || saved === "dark" ? saved : "system";
-  });
-  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() =>
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
-  );
-  const theme = themePreference === "system" ? systemTheme : themePreference;
-  useEffect(() => {
-    localStorage.setItem("expenses-theme", themePreference);
-  }, [themePreference]);
   const [user, setUser] = useState<User | null>(null);
   useNavigationPreload(user ? ["/annual"] : []);
-  const money = (cents: number) => formatMoney(cents, user?.currency ?? "EUR");
   const [boot, setBoot] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
@@ -163,21 +109,13 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [notice]);
   useEffect(() => {
-    const query = window.matchMedia("(prefers-color-scheme: dark)");
-    const change = (event: MediaQueryListEvent) => setSystemTheme(event.matches ? "dark" : "light");
-    query.addEventListener("change", change);
-    return () => query.removeEventListener("change", change);
-  }, []);
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-  }, [theme]);
-  useEffect(() => {
     let active = true;
     const controller = new AbortController();
     api<{ user: User }>("/auth/me", { signal: controller.signal })
       .then((data) => {
-        if (active) setUser(data.user);
+        if (!active) return;
+        setUser(data.user);
+        receiveGlassClarity(data.user.glassClarity);
       })
       .catch((error) => {
         if (active && (!(error instanceof ApiError) || error.status !== 401))
@@ -426,994 +364,311 @@ export default function App() {
       setNotice(null);
     }
   };
+  const editingEntry = entries.find((entry) => entry._id === entryEdit?.id);
+
   return (
     <CurrencyContext.Provider value={user?.currency ?? "EUR"}>
-      <ThemeContext.Provider
-        value={{ theme, preference: themePreference, setPreference: setThemePreference }}
-      >
-        <>
-          {notice && (
-            <Popup
-              key={notice.message}
-              popup={{ type: notice.error ? "error" : "success", message: tr(notice.message) }}
-              isClosing={false}
-              onClose={() => setNotice(null)}
+      {notice && (
+        <Popup
+          key={notice.message}
+          popup={{ type: notice.error ? "error" : "success", message: tr(notice.message) }}
+          isClosing={false}
+          onClose={() => setNotice(null)}
+        />
+      )}
+      {boot ? null : !user ? (
+        <Routes>
+          {[ROUTE_PATHS.login, ROUTE_PATHS.register].map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <AuthPage
+                  onLogin={(account) => {
+                    setUser(account);
+                    receiveGlassClarity(account.glassClarity);
+                    setNotice(null);
+                    navigate(safeReturnPath(location.state?.from), { replace: true });
+                  }}
+                />
+              }
             />
-          )}
-          {boot ? null : !user ? (
+          ))}
+          <Route
+            path="*"
+            element={<Navigate to="/login" state={{ from: location.pathname }} replace />}
+          />
+        </Routes>
+      ) : location.pathname === ROUTE_PATHS.login || location.pathname === ROUTE_PATHS.register ? (
+        <Navigate to={safeReturnPath(location.state?.from)} replace />
+      ) : (
+        <>
+          <Layout user={user} onLogout={() => void logout()}>
             <Routes>
               <Route
-                path="/login"
+                path={ROUTE_PATHS.dashboard}
                 element={
-                  <Auth
-                    onLogin={(account) => {
-                      setUser(account);
-                      setNotice(null);
-                      navigate(safeReturnPath(location.state?.from), { replace: true });
-                    }}
-                  />
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <Auth
-                    onLogin={(account) => {
-                      setUser(account);
-                      setNotice(null);
-                      navigate(safeReturnPath(location.state?.from), { replace: true });
-                    }}
-                  />
-                }
-              />
-              <Route
-                path="*"
-                element={<Navigate to="/login" state={{ from: location.pathname }} replace />}
-              />
-            </Routes>
-          ) : location.pathname === ROUTE_PATHS.login ||
-            location.pathname === ROUTE_PATHS.register ? (
-            <Navigate to={safeReturnPath(location.state?.from)} replace />
-          ) : (
-            <>
-              {page !== "settings" && (
-                <Navbar
-                  user={user}
-                  onLogout={() => {
-                    void logout();
-                  }}
-                />
-              )}
-              <main
-                className={
-                  "app-main ui-refresh" + (page === "settings" ? " standalone-settings-page" : "")
-                }
-              >
-                <div className="page-top">
-                  <div>
-                    <Header
-                      title={
-                        page === "dashboard"
-                          ? tr("Riepilogo mensile")
-                          : page === "entries"
-                            ? tr("I tuoi movimenti")
-                            : page === "settings"
-                              ? tr("Impostazioni")
-                              : page === "annual"
-                                ? tr("Riepilogo annuale")
-                                : tr("Management")
-                      }
-                    />
-                  </div>
-                  {(page === "dashboard" || page === "entries") && (
-                    <div className="month-filter month-filter-left">
-                      <MonthPicker
-                        value={month}
-                        onChange={(value) => {
-                          setMonth(value);
-                          setListPage(1);
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-                <Suspense fallback={<RouteSkeleton />}>
-                  <Routes>
-                    <Route
-                      path={ROUTE_PATHS.dashboard}
-                      element={
-                        <>
-                          {summaryLoading || categoriesLoading ? (
-                            <PageSkeleton
-                              layout="overview"
-                              budget={
-                                month === today().slice(0, 7) && user.monthlyBudgetCents != null
-                              }
-                            />
-                          ) : (
-                            <>
-                              {" "}
-                              <div className="overview-grid">
-                                <Glass className="balance-card">
-                                  <div className="balance-heading">
-                                    <span className="eyebrow">{tr("BILANCIO DEL MESE")}</span>
-                                    <span className="round-icon">
-                                      <Wallet size={20} />
-                                    </span>
-                                  </div>
-                                  <p className="balance-value">{money(summary.balance)}</p>
-                                  <p className="muted">
-                                    {tr("Entrate meno spese del periodo selezionato.")}
-                                  </p>
-                                  <span className="ui-pill balance-chip">
-                                    <TrendingUp size={14} />{" "}
-                                    {tr("{{count}} movimenti registrati", { count: summary.count })}
-                                  </span>
-                                </Glass>
-                                <Glass className="stat-card income-card">
-                                  <span className="stat-icon income">
-                                    <ArrowDownLeft size={24} />
-                                  </span>
-                                  <p className="muted">{tr("Entrate")}</p>
-                                  <strong>{money(summary.income)}</strong>
-                                  <small>{tr("Quello che hai guadagnato")}</small>
-                                </Glass>
-                                <Glass className="stat-card expense-card">
-                                  <span className="stat-icon expense">
-                                    <ArrowUpRight size={24} />
-                                  </span>
-                                  <p className="muted">{tr("Spese")}</p>
-                                  <strong>{money(summary.expense)}</strong>
-                                  <small>{tr("Quello che hai speso")}</small>
-                                </Glass>
-                              </div>
-                              {month === today().slice(0, 7) &&
-                                user.monthlyBudgetCents != null &&
-                                !loading && (
-                                  <MonthlyBudget
-                                    limit={user.monthlyBudgetCents}
-                                    spent={summary.expense}
-                                  />
-                                )}
-                              <div className="charts-grid">
-                                <Glass className="panel">
-                                  <div className="section-heading">
-                                    <div>
-                                      <p className="eyebrow">{tr("COME SI MUOVE IL TUO DENARO")}</p>
-                                      <h2>{tr("Andamento del mese")}</h2>
-                                    </div>
-                                    <span className="legend">
-                                      <i /> {tr("Spese")} <i className="income-dot" />{" "}
-                                      {tr("Entrate")}
-                                    </span>
-                                  </div>
-                                  <Trend summary={summary} month={month} />
-                                </Glass>
-                                <Glass className="panel">
-                                  <p className="eyebrow">{tr("DOVE VA IL TUO DENARO")}</p>
-                                  <h2>{tr("Spese per categoria")}</h2>
-                                  <SpendingBreakdown summary={summary} categories={categoryById} />
-                                </Glass>
-                              </div>
-                            </>
-                          )}
-                          <Glass className="panel">
-                            <div className="section-heading">
-                              <h2>{tr("Ultimi movimenti")}</h2>
-                              <Button variant="secondary" onClick={() => changePage("entries")}>
-                                {tr("Vedi tutti")} <ArrowUpRight size={16} />
-                              </Button>
-                            </div>
-                            {loading || categoriesLoading ? (
-                              <PageSkeleton layout="entries" />
-                            ) : (
-                              <EntriesTable
-                                entries={entries.slice(0, 5)}
-                                categories={categoryById}
-                                subcategories={subcategoryById}
-                                onEdit={openEntry}
-                                onDelete={(item) =>
-                                  setDeleteAction({
-                                    endpoint: `/entries/${item._id}`,
-                                    label:
-                                      (item.subcategory
-                                        ? subcategoryById.get(item.subcategory)?.name
-                                        : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                                  })
-                                }
-                              />
-                            )}
-                          </Glass>
-                        </>
-                      }
-                    />
-                    <Route
-                      path={ROUTE_PATHS.entries}
-                      element={
-                        <>
-                          <Glass className="panel entries-register">
-                            <div className="section-heading">
-                              <div>
-                                <h2>{tr("Il tuo registro")}</h2>
-                                <p className="muted">
-                                  {tr("{{count}} movimenti · {{month}}", {
-                                    count: totalEntries,
-                                    month,
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="entries-search">
-                              <Input
-                                id="search"
-                                placeholder={tr("Cerca un movimento…")}
-                                value={search}
-                                onChange={(event) => {
-                                  setSearch(event.target.value);
-                                  setListPage(1);
-                                }}
-                              />
-                            </div>
-                            {(filterCategory || filterSubcategory || filterKind) && (
-                              <div
-                                className="entry-active-filters"
-                                aria-label={tr("Filtri attivi")}
-                              >
-                                {[
-                                  {
-                                    value: filterKind,
-                                    label: filterKind === "income" ? tr("Entrate") : tr("Spese"),
-                                    clear: () => setFilterKind(""),
-                                  },
-                                  {
-                                    value: filterCategory,
-                                    label: categoryById.get(filterCategory)?.name,
-                                    clear: () => setFilterCategory(""),
-                                  },
-                                  {
-                                    value: filterSubcategory,
-                                    label: subcategoryById.get(filterSubcategory)?.name,
-                                    clear: () => setFilterSubcategory(""),
-                                  },
-                                ]
-                                  .filter((item) => item.value)
-                                  .map((item, index) => (
-                                    <button
-                                      key={index}
-                                      type="button"
-                                      aria-label={tr("Rimuovi filtro: {{name}}", {
-                                        name: item.label,
-                                      })}
-                                      onClick={() => {
-                                        item.clear();
-                                        setListPage(1);
-                                      }}
-                                    >
-                                      <span>{item.label}</span>
-                                      <X size={14} aria-hidden="true" />
-                                    </button>
-                                  ))}
-                              </div>
-                            )}
-                            <FilteredBalance
-                              summary={summary}
-                              kind={filterKind}
-                              loading={summaryLoading}
-                            />
-                            {loading ? (
-                              <PageSkeleton layout="entries" rows={pageLimit} />
-                            ) : (
-                              <EntriesTable
-                                entries={entries}
-                                categories={categoryById}
-                                subcategories={subcategoryById}
-                                onEdit={openEntry}
-                                onDelete={(item) =>
-                                  setDeleteAction({
-                                    endpoint: `/entries/${item._id}`,
-                                    label:
-                                      (item.subcategory
-                                        ? subcategoryById.get(item.subcategory)?.name
-                                        : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                                  })
-                                }
-                              />
-                            )}
-                          </Glass>
-                          {loading ? (
-                            <PageSkeleton layout="pagination" />
-                          ) : (
-                            <div className="entries-pagination">
-                              <Pagination
-                                pagination={{
-                                  page: listPage,
-                                  limit: pageLimit,
-                                  total_items: totalEntries,
-                                  total_pages: Math.max(1, totalPages),
-                                  has_next_page: listPage < totalPages,
-                                  has_previous_page: listPage > 1,
-                                }}
-                                limitOptions={[10, 20, 50]}
-                                selectId="entries-pagination"
-                                flush
-                                compactDesktop
-                                onPageChange={setListPage}
-                                onLimitChange={(limit) => {
-                                  setPageLimit(limit);
-                                  setListPage(1);
-                                }}
-                              />
-                            </div>
-                          )}
-                        </>
-                      }
-                    />
-                    <Route
-                      path={ROUTE_PATHS.management}
-                      element={
-                        <>
-                          <Glass className="management-intro">
-                            <Shapes size={24} />
-                            <div>
-                              <h2>{tr("Le tue categorie, il tuo ordine.")}</h2>
-                              <p>
-                                {tr(
-                                  "Ogni sottocategoria appartiene a una categoria principale. Tutto quello che crei è visibile solo nel tuo account.",
-                                )}
-                              </p>
-                            </div>
-                          </Glass>
-                          {categoriesLoading ? (
-                            <PageSkeleton layout="categories" />
-                          ) : (
-                            <div className="category-grid">
-                              {categories.map((category) => (
-                                <Shadowbox
-                                  key={category._id}
-                                  className="category-card"
-                                  style={{ "--category-color": category.color } as CSSProperties}
-                                >
-                                  <div className="category-header">
-                                    <span
-                                      className="category-orb"
-                                      style={{
-                                        background: category.color + "20",
-                                        color: category.color,
-                                      }}
-                                    >
-                                      <Shapes size={22} />
-                                    </span>
-                                    <h2>{category.name}</h2>
-                                    <div className="category-actions">
-                                      <IconButton
-                                        className="quiet-icon"
-                                        aria-label={tr("Modifica {{name}}", {
-                                          name: category.name,
-                                        })}
-                                        onClick={() =>
-                                          setManageEdit({
-                                            mode: "category",
-                                            id: category._id,
-                                            name: category.name,
-                                            color: category.color,
-                                            category: "",
-                                          })
-                                        }
-                                      >
-                                        <Pencil size={16} />
-                                      </IconButton>
-                                      <IconButton
-                                        className="quiet-icon danger"
-                                        aria-label={tr("Elimina {{name}}", { name: category.name })}
-                                        onClick={() =>
-                                          setDeleteAction({
-                                            endpoint: `/categories/${category._id}`,
-                                            label: category.name,
-                                          })
-                                        }
-                                        variant="danger"
-                                      >
-                                        <Trash2 size={16} />
-                                      </IconButton>
-                                    </div>
-                                  </div>
-                                  <Accordion
-                                    ariaLabel={tr("Sottocategorie di {{name}}", {
-                                      name: category.name,
-                                    })}
-                                    header={
-                                      <span className="muted">
-                                        {tr("Sottocategorie")}{" "}
-                                        <span className="count">
-                                          {subcategoriesByCategory.get(category._id)?.length ?? 0}
-                                        </span>
-                                      </span>
-                                    }
-                                    contentClassName="subcategory-list"
-                                  >
-                                    {(subcategoriesByCategory.get(category._id) ?? []).map(
-                                      (item) => (
-                                        <div className="subcategory" key={item._id}>
-                                          <IconButton
-                                            className="quiet-icon"
-                                            aria-label={tr("Modifica {{name}}", {
-                                              name: item.name,
-                                            })}
-                                            onClick={() =>
-                                              setManageEdit({
-                                                mode: "subcategory",
-                                                id: item._id,
-                                                name: item.name,
-                                                color: category.color,
-                                                category: category._id,
-                                              })
-                                            }
-                                          >
-                                            <Pencil size={15} />
-                                          </IconButton>
-                                          <IconButton
-                                            className="quiet-icon danger"
-                                            aria-label={tr("Elimina {{name}}", { name: item.name })}
-                                            onClick={() =>
-                                              setDeleteAction({
-                                                endpoint: `/subcategories/${item._id}`,
-                                                label: item.name,
-                                              })
-                                            }
-                                            variant="danger"
-                                          >
-                                            <Trash2 size={15} />
-                                          </IconButton>
-
-                                          <span>
-                                            <i style={{ background: category.color }} />
-                                            {item.name}
-                                          </span>
-                                        </div>
-                                      ),
-                                    )}
-                                  </Accordion>
-                                  <Button
-                                    variant="secondary"
-                                    className="category-add-subcategory"
-                                    icon={
-                                      <span className="category-add-icon">
-                                        <Plus size={17} />
-                                      </span>
-                                    }
-                                    onClick={() =>
-                                      setManageEdit({
-                                        mode: "subcategory",
-                                        name: "",
-                                        color: category.color,
-                                        category: category._id,
-                                      })
-                                    }
-                                  >
-                                    {tr("Nuova sottocategoria")}
-                                  </Button>
-                                </Shadowbox>
-                              ))}
-                            </div>
-                          )}
-                          {!categoriesLoading && !categories.length && (
-                            <Empty text={tr("Crea la tua prima categoria per iniziare.")} />
-                          )}
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/annual"
-                      element={
-                        <AnnualPage
-                          refresh={refresh}
-                          categories={categoryById}
-                          subcategories={subcategoryById}
-                          onEdit={openEntry}
-                          onDelete={(item) =>
-                            setDeleteAction({
-                              endpoint: `/entries/${item._id}`,
-                              label:
-                                (item.subcategory
-                                  ? subcategoryById.get(item.subcategory)?.name
-                                  : categoryById.get(item.category)?.name) ?? tr("Categoria"),
-                            })
-                          }
-                        />
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <SettingsPage
-                          onDeleted={() => {
-                            setUser(null);
-                            setCategories([]);
-                            setSubcategories([]);
-                            setEntries([]);
-                            setSummary(emptySummary);
-                            setEntryEdit(null);
-                            setManageEdit(null);
-                            setDeleteAction(null);
-                            navigate(ROUTE_PATHS.login, { replace: true });
-                            setNotice({ error: false, message: "Account eliminato." });
-                          }}
-                          user={user}
-                          onImported={() => {
-                            setCategoryRevision((value) => value + 1);
-                            setRefresh((value) => value + 1);
-                          }}
-                          onSaved={setUser}
-                          onNotice={(error, message) => setNotice({ error, message })}
-                        />
-                      }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
-                <footer className="app-footer">
-                  <img
-                    src="/expenses-logo.png?v=2"
-                    width={14}
-                    height={14}
-                    alt=""
-                    aria-hidden="true"
-                  />{" "}
-                  expenses-traker <span>{tr("Uno spazio personale. Una visione chiara.")}</span>
-                </footer>
-              </main>
-              {page !== "settings" && (
-                <div className="mobile-floating-actions floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 max-[359px]:gap-2">
-                  {page === "entries" && (
-                    <>
-                      <FloatingButton
-                        ariaLabel={tr("Filtra movimenti")}
-                        title={tr("Filtra movimenti")}
-                        icon={<ListFilter size={27} />}
-                        className={filtersChanged ? "entry-filters-active" : ""}
-                        aria-haspopup="dialog"
-                        aria-expanded={filtersModalOpen}
-                        onClick={() => setFiltersModalOpen(true)}
-                      />
-                      {filtersChanged && (
-                        <FloatingButton
-                          ariaLabel={tr("Azzera filtri")}
-                          title={tr("Azzera filtri")}
-                          icon={<RotateCcw size={28} />}
-                          onClick={resetEntryFilters}
-                        />
-                      )}
-                    </>
-                  )}
-                  <FloatingButton
-                    alwaysVisibleOnMobile
-                    ariaLabel={
-                      page === "management" ? tr("Crea categoria") : tr("Registra movimento")
-                    }
-                    icon={<Plus size={28} />}
-                    onClick={() =>
-                      page === "management"
-                        ? setManageEdit({
-                            mode: "category",
-                            name: "",
-                            color: "#32cd32",
-                            category: "",
-                          })
-                        : openEntry()
-                    }
-                  />
-                </div>
-              )}
-              {filtersModalOpen && page === "entries" && (
-                <EntryFiltersModal
-                  initial={{
-                    category: filterCategory,
-                    subcategory: filterSubcategory,
-                    kind: filterKind,
-                  }}
-                  categories={categories}
-                  subcategories={subcategories}
-                  loading={categoriesLoading}
-                  onClose={() => setFiltersModalOpen(false)}
-                  onApply={(filters) => {
-                    setFilterCategory(filters.category);
-                    setFilterSubcategory(filters.subcategory);
-                    setFilterKind(filters.kind);
-                    setListPage(1);
-                    setFiltersModalOpen(false);
-                  }}
-                />
-              )}
-              {entryEdit && (
-                <EntryModal
-                  initial={entryEdit.form}
-                  originalConversion={
-                    entries.find((entry) => entry._id === entryEdit.id)?.conversion
-                  }
-                  editing={Boolean(entryEdit.id)}
-                  categories={categories}
-                  subcategories={subcategories}
-                  busy={busy}
-                  onClose={() => setEntryEdit(null)}
-                  onSave={async (form) => {
-                    if (
-                      await mutate(
-                        `/entries${entryEdit.id ? `/${entryEdit.id}` : ""}`,
-                        entryEdit.id ? "PATCH" : "POST",
-                        form,
-                      )
-                    ) {
-                      setEntryEdit(null);
+                  <DashboardPage
+                    user={user}
+                    month={month}
+                    onMonthChange={(value) => {
+                      setMonth(value);
                       setListPage(1);
+                    }}
+                    summary={summary}
+                    summaryLoading={summaryLoading}
+                    categoriesLoading={categoriesLoading}
+                    entries={entries}
+                    entriesLoading={loading || categoriesLoading}
+                    categories={categoryById}
+                    subcategories={subcategoryById}
+                    onOpenEntry={openEntry}
+                    onCreateEntry={() => openEntry()}
+                    onSeeAll={() => changePage("entries")}
+                  />
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.entries}
+                element={
+                  <EntriesPage
+                    month={month}
+                    onMonthChange={(value) => {
+                      setMonth(value);
+                      setListPage(1);
+                    }}
+                    search={search}
+                    onSearchChange={(value) => {
+                      setSearch(value);
+                      setListPage(1);
+                    }}
+                    kind={filterKind}
+                    onKindChange={(value) => {
+                      setFilterKind(value);
+                      setListPage(1);
+                    }}
+                    category={filterCategory}
+                    subcategory={filterSubcategory}
+                    onClearCategory={() => {
+                      setFilterCategory("");
+                      setFilterSubcategory("");
+                      setListPage(1);
+                    }}
+                    onClearSubcategory={() => {
+                      setFilterSubcategory("");
+                      setListPage(1);
+                    }}
+                    onOpenFilters={() => setFiltersModalOpen(true)}
+                    filtersOpen={filtersModalOpen}
+                    filtersChanged={filtersChanged}
+                    onResetFilters={resetEntryFilters}
+                    summary={summary}
+                    summaryLoading={summaryLoading}
+                    entries={entries}
+                    loading={loading || categoriesLoading}
+                    totalEntries={totalEntries}
+                    page={listPage}
+                    limit={pageLimit}
+                    totalPages={totalPages}
+                    onPageChange={setListPage}
+                    onLimitChange={(limit) => {
+                      setPageLimit(limit);
+                      setListPage(1);
+                    }}
+                    categories={categoryById}
+                    subcategories={subcategoryById}
+                    onOpenEntry={openEntry}
+                    onCreateEntry={() => openEntry()}
+                  />
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.management}
+                element={
+                  <ManagementPage
+                    categories={categories}
+                    subcategoriesByCategory={subcategoriesByCategory}
+                    loading={categoriesLoading}
+                    onCreateCategory={() =>
+                      setManageEdit({ mode: "category", name: "", color: "#32cd32", category: "" })
                     }
-                  }}
-                />
-              )}
-              <Modal
-                isOpen={Boolean(manageEdit)}
-                accentColor={
-                  manageEdit?.mode === "category"
-                    ? manageEdit.color
-                    : categoryById.get(manageEdit?.category ?? "")?.color
+                    onEditCategory={(category) =>
+                      setManageEdit({
+                        mode: "category",
+                        id: category._id,
+                        name: category.name,
+                        color: category.color,
+                        category: "",
+                      })
+                    }
+                    onCreateSubcategory={(category) =>
+                      setManageEdit({
+                        mode: "subcategory",
+                        name: "",
+                        color: category.color,
+                        category: category._id,
+                      })
+                    }
+                    onEditSubcategory={(item, category) =>
+                      setManageEdit({
+                        mode: "subcategory",
+                        id: item._id,
+                        name: item.name,
+                        color: category.color,
+                        category: category._id,
+                      })
+                    }
+                    onDeleteSubcategory={(item) =>
+                      setDeleteAction({
+                        endpoint: `/subcategories/${item._id}`,
+                        label: item.name,
+                        detail: categoryById.get(item.category)?.name,
+                        color: categoryById.get(item.category)?.color,
+                      })
+                    }
+                  />
                 }
-                title={tr(
-                  manageEdit?.mode === "category"
-                    ? manageEdit.id
-                      ? "Modifica categoria"
-                      : "Nuova categoria"
-                    : manageEdit?.id
-                      ? "Modifica sottocategoria"
-                      : "Nuova sottocategoria",
-                )}
-                isClosable={!busy}
-                onClose={() => setManageEdit(null)}
-                footer={
-                  <>
-                    <Button variant="secondary" disabled={busy} onClick={() => setManageEdit(null)}>
-                      {tr("Annulla")}
-                    </Button>
-                    <Button
-                      type="submit"
-                      form="manage-form"
-                      disabled={
-                        busy ||
-                        (manageEdit?.mode === "subcategory" &&
-                          !categoryById.has(manageEdit.category))
-                      }
-                    >
-                      {busy ? tr("Salvataggio…") : tr("Salva")}
-                    </Button>
-                  </>
+              />
+              <Route
+                path={ROUTE_PATHS.annual}
+                element={
+                  <AnnualPage
+                    refresh={refresh}
+                    categories={categoryById}
+                    subcategories={subcategoryById}
+                    onOpenEntry={openEntry}
+                    onCreateEntry={() => openEntry()}
+                  />
                 }
-              >
-                {manageEdit && (
-                  <form id="manage-form" onSubmit={saveManage} className="form-stack">
-                    <Input
-                      id="manage-name"
-                      autoFocus={!manageEdit.id}
-                      label={tr("Nome")}
-                      required
-                      maxLength={60}
-                      value={manageEdit.name}
-                      onChange={(event) =>
-                        setManageEdit({ ...manageEdit, name: event.target.value })
-                      }
-                    />
-                    {manageEdit.mode === "category" ? (
-                      <label className="color-picker">
-                        {tr("Colore della categoria")}
-                        <input
-                          type="color"
-                          value={manageEdit.color}
-                          onChange={(event) =>
-                            setManageEdit({ ...manageEdit, color: event.target.value })
-                          }
-                        />
-                      </label>
-                    ) : manageEdit.id ? (
-                      <>
-                        <Autocomplete
-                          id="manage-parent"
-                          label={tr("Categoria principale obbligatoria")}
-                          placeholder={tr("Seleziona")}
-                          searchPlaceholder={tr("Cerca categoria…")}
-                          value={categoryById.get(manageEdit.category) ?? null}
-                          options={categories}
-                          isLoading={categoriesLoading}
-                          disabled={busy}
-                          clearable={false}
-                          getOptionKey={(item) => item._id}
-                          getOptionLabel={(item) => item.name}
-                          getOptionIcon={(item) => (
-                            <span
-                              className="category-filter-dot"
-                              style={{ background: item.color }}
-                            />
-                          )}
-                          onChange={(item) =>
-                            setManageEdit({ ...manageEdit, category: item?._id ?? "" })
-                          }
-                        />
-                        <p className="muted">
-                          {tr(
-                            "Una sottocategoria già usata nei movimenti può essere rinominata, ma va riassegnata prima di cambiare categoria principale.",
-                          )}
-                        </p>
-                      </>
-                    ) : null}
-                  </form>
-                )}
-              </Modal>
-              <Modal
-                intent="danger"
-                isOpen={Boolean(deleteAction)}
-                title={tr("Conferma eliminazione")}
-                description={tr("Vuoi eliminare “{{name}}”?", { name: deleteAction?.label ?? "" })}
-                maxWidth="sm"
-                isClosable={!busy}
-                onClose={() => setDeleteAction(null)}
-                footer={
-                  <>
-                    <Button
-                      variant="secondary"
-                      disabled={busy}
-                      onClick={() => setDeleteAction(null)}
-                    >
-                      {tr("Annulla")}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      disabled={busy}
-                      onClick={async () => {
-                        if (deleteAction && (await mutate(deleteAction.endpoint, "DELETE"))) {
-                          setDeleteAction(null);
-                          setListPage(1);
-                        }
-                      }}
-                    >
-                      {busy ? tr("Eliminazione…") : tr("Elimina")}
-                    </Button>
-                  </>
+              />
+              <Route
+                path={ROUTE_PATHS.settings}
+                element={
+                  <SettingsPage
+                    onDeleted={() => {
+                      setUser(null);
+                      setCategories([]);
+                      setSubcategories([]);
+                      setEntries([]);
+                      setSummary(emptySummary);
+                      setEntryEdit(null);
+                      setManageEdit(null);
+                      setDeleteAction(null);
+                      navigate(ROUTE_PATHS.login, { replace: true });
+                      setNotice({ error: false, message: "Account eliminato." });
+                    }}
+                    user={user}
+                    onImported={() => {
+                      setCategoryRevision((value) => value + 1);
+                      setRefresh((value) => value + 1);
+                    }}
+                    onSaved={setUser}
+                    onNotice={(error, message) => setNotice({ error, message })}
+                  />
                 }
-              >
-                <p className="muted">
-                  {tr(
-                    "Le categorie collegate a sottocategorie o movimenti non vengono eliminate: riassegna prima i dati collegati.",
-                  )}
-                </p>
-              </Modal>
-            </>
-          )}
-        </>
-      </ThemeContext.Provider>
-    </CurrencyContext.Provider>
-  );
-}
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Layout>
 
-function Auth({ onLogin }: { onLogin: (user: User) => void }) {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const register = location.pathname === ROUTE_PATHS.register;
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<
-    Partial<Record<"name" | "email" | "password", string>>
-  >({});
-  const changeField = (field: "name" | "email" | "password", value: string) => {
-    setForm((previous) => ({ ...previous, [field]: value }));
-    setFieldErrors((previous) => ({ ...previous, [field]: undefined }));
-    setError("");
-  };
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (busy) return;
-    const errors: Partial<Record<"name" | "email" | "password", string>> = {};
-    if (register && !form.name.trim()) errors.name = "Inserisci il tuo nome.";
-    else if (register && form.name.trim().length > 60)
-      errors.name = "Il nome può contenere al massimo 60 caratteri.";
-    if (!form.email.trim()) errors.email = "Inserisci la tua email.";
-    else if (
-      form.email.trim().length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
-    )
-      errors.email = "Inserisci un indirizzo email valido.";
-    if (!form.password) errors.password = "Inserisci la password.";
-    else if (form.password.length < 10)
-      errors.password = "La password deve avere almeno 10 caratteri.";
-    else if (new TextEncoder().encode(form.password).length > 72)
-      errors.password = "La password è troppo lunga (massimo 72 byte).";
-    setFieldErrors(errors);
-    setError("");
-    if (Object.keys(errors).length) {
-      document.getElementById("auth-" + Object.keys(errors)[0])?.focus();
-      return;
-    }
-    setBusy(true);
-    try {
-      const result = await api<{ user: User }>(register ? "/auth/register" : "/auth/login", {
-        method: "POST",
-        body: form,
-      });
-      onLogin(result.user);
-    } catch (error) {
-      setError(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <AuthShell
-      brand="Expenses Traker"
-      logo={<img src="/expenses-logo.png?v=2" alt="" />}
-      title={register ? tr("Crea il tuo account") : tr("Accedi al tuo account")}
-      description={tr(register ? "Crea il tuo account per iniziare." : "Accedi per continuare.")}
-    >
-      <form onSubmit={submit} className="auth-form" noValidate aria-busy={busy}>
-        {register && (
-          <Input
-            id="auth-name"
-            label={tr("Il tuo nome")}
-            placeholder={tr("Inserisci il tuo nome")}
-            error={fieldErrors.name ? tr(fieldErrors.name!) : undefined}
-            icon={<UserRound size={17} />}
-            autoComplete="name"
-            required
-            disabled={busy}
-            maxLength={60}
-            value={form.name}
-            onChange={(event) => changeField("name", event.target.value)}
+          {filtersModalOpen && page === "entries" && (
+            <EntryFiltersModal
+              initial={{
+                category: filterCategory,
+                subcategory: filterSubcategory,
+                kind: filterKind,
+              }}
+              categories={categories}
+              subcategories={subcategories}
+              loading={categoriesLoading}
+              onClose={() => setFiltersModalOpen(false)}
+              onApply={(filters) => {
+                setFilterCategory(filters.category);
+                setFilterSubcategory(filters.subcategory);
+                setFilterKind(filters.kind);
+                setListPage(1);
+                setFiltersModalOpen(false);
+              }}
+            />
+          )}
+          {entryEdit && (
+            <EntryModal
+              initial={entryEdit.form}
+              originalConversion={editingEntry?.conversion}
+              editing={Boolean(entryEdit.id)}
+              categories={categories}
+              subcategories={subcategories}
+              busy={busy}
+              onClose={() => setEntryEdit(null)}
+              onDelete={
+                editingEntry
+                  ? async () => {
+                      if (await mutate(`/entries/${editingEntry._id}`, "DELETE")) {
+                        setEntryEdit(null);
+                        setListPage(1);
+                      }
+                    }
+                  : undefined
+              }
+              onSave={async (form) => {
+                if (
+                  await mutate(
+                    `/entries${entryEdit.id ? `/${entryEdit.id}` : ""}`,
+                    entryEdit.id ? "PATCH" : "POST",
+                    form,
+                  )
+                ) {
+                  setEntryEdit(null);
+                  setListPage(1);
+                }
+              }}
+            />
+          )}
+          <ManageModal
+            form={manageEdit}
+            categories={categories}
+            categoriesLoading={categoriesLoading}
+            busy={busy}
+            onChange={setManageEdit}
+            onClose={() => setManageEdit(null)}
+            onSubmit={saveManage}
+            onDelete={async () => {
+              if (!manageEdit?.id) return;
+              const route = manageEdit.mode === "category" ? "categories" : "subcategories";
+              if (await mutate(`/${route}/${manageEdit.id}`, "DELETE")) setManageEdit(null);
+            }}
           />
-        )}
-        <Input
-          id="auth-email"
-          label={tr("Email")}
-          error={fieldErrors.email ? tr(fieldErrors.email!) : undefined}
-          placeholder={tr("Inserisci la tua email")}
-          icon={<Mail size={17} />}
-          autoComplete="email"
-          type="email"
-          required
-          disabled={busy}
-          value={form.email}
-          onChange={(event) => changeField("email", event.target.value)}
-        />
-        <Input
-          id="auth-password"
-          label={tr("Password")}
-          error={fieldErrors.password ? tr(fieldErrors.password!) : undefined}
-          placeholder={tr("Inserisci la tua password")}
-          icon={<LockKeyhole size={17} />}
-          autoComplete={register ? "new-password" : "current-password"}
-          type={showPassword ? "text" : "password"}
-          endIcon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          endIconAriaLabel={showPassword ? tr("Nascondi password") : tr("Mostra password")}
-          onEndIconClick={() => setShowPassword((value) => !value)}
-          minLength={register ? 10 : undefined}
-          required
-          disabled={busy}
-          value={form.password}
-          onChange={(event) => changeField("password", event.target.value)}
-        />
-        {register && (
-          <small className="auth-hint">
-            {tr(
-              "Almeno 10 caratteri. Le tue categorie iniziali saranno Lavoro, Extra e Necessità.",
+          <DeleteConfirmModal
+            isOpen={Boolean(deleteAction)}
+            title={tr("Elimina sottocategoria")}
+            description={tr("Vuoi eliminare “{{name}}”?", { name: deleteAction?.label ?? "" })}
+            warning={tr(
+              "Le categorie collegate a sottocategorie o movimenti non vengono eliminate: riassegna prima i dati collegati.",
             )}
-          </small>
-        )}
-        {error && (
-          <p role="alert" className="auth-error">
-            {tr(error)}
-          </p>
-        )}
-        <BigButton
-          type="submit"
-          disabled={busy}
-          className="auth-submit"
-          endIcon={<ArrowRight size={18} />}
-        >
-          {register ? tr("Crea account") : tr("Accedi")}
-        </BigButton>
-      </form>
-      <p className="auth-switch">
-        {register ? tr("Hai già un account?") : tr("È la tua prima volta?")}{" "}
-        <button
-          disabled={busy}
-          onClick={() => {
-            navigate(register ? ROUTE_PATHS.login : ROUTE_PATHS.register, {
-              state: location.state,
-            });
-            setError("");
-            setFieldErrors({});
-          }}
-        >
-          {register ? tr("Accedi") : tr("Registrati")}
-        </button>
-      </p>
-    </AuthShell>
-  );
-}
-function Empty({ text }: { text: string }) {
-  return (
-    <div className="empty">
-      <span>
-        <Wallet size={28} />
-      </span>
-      <h3>{tr("Un nuovo inizio.")}</h3>
-      <p>{text}</p>
-    </div>
-  );
-}
-function Trend({ summary, month }: { summary: Summary; month: string }) {
-  const money = useMoney();
-  const [year, number] = month.split("-").map(Number);
-  const days = new Date(year, number, 0).getDate();
-  const values = Array.from({ length: days }, (_, index) => ({
-    day: index + 1,
-    expense: 0,
-    income: 0,
-  }));
-  for (const item of summary.daily) {
-    const day = Number(item._id.date.slice(-2));
-    if (values[day - 1]) values[day - 1][item._id.kind] += item.total;
-  }
-  const max = Math.max(100, ...values.flatMap((item) => [item.expense, item.income]));
-  const points = (kind: "expense" | "income") =>
-    values
-      .map(
-        (value, index) => `${18 + (index * 544) / (days - 1)},${160 - (value[kind] / max) * 130}`,
-      )
-      .join(" ");
-  return (
-    <div className="trend">
-      <svg
-        viewBox="0 0 580 190"
-        role="img"
-        aria-label={tr("Andamento giornaliero di entrate e spese")}
-      >
-        <defs>
-          <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={EXPENSE_COLOR} stopOpacity=".18" />
-            <stop offset="100%" stopColor="#32cd32" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {[30, 95, 160].map((y) => (
-          <line key={y} x1="18" x2="562" y1={y} y2={y} stroke="currentColor" opacity=".08" />
-        ))}
-        <polygon points={`18,160 ${points("expense")} 562,160`} fill="url(#chart-fill)" />
-        <polyline
-          points={points("expense")}
-          fill="none"
-          stroke={EXPENSE_COLOR}
-          strokeWidth="3"
-          strokeLinejoin="round"
-        />
-        <polyline
-          points={points("income")}
-          fill="none"
-          stroke={INCOME_COLOR}
-          strokeWidth="2"
-          strokeDasharray="5 4"
-        />
-        {[1, Math.round(days / 2), days].map((day) => (
-          <text
-            key={day}
-            x={18 + ((day - 1) * 544) / (days - 1)}
-            y="185"
-            textAnchor="middle"
-            fill="currentColor"
-            opacity=".5"
-            fontSize="11"
-          >
-            {day}
-          </text>
-        ))}
-      </svg>
-      <small className="muted">
-        {tr("Scala massima giornaliera:")} {money(max)}
-      </small>
-    </div>
+            preview={
+              deleteAction
+                ? {
+                    media: (
+                      <span style={{ color: deleteAction.color }}>
+                        <Layers3 size={20} strokeWidth={2} />
+                      </span>
+                    ),
+                    title: deleteAction.label,
+                    detail: deleteAction.detail,
+                  }
+                : undefined
+            }
+            isDeleting={busy}
+            onClose={() => !busy && setDeleteAction(null)}
+            onConfirm={async () => {
+              if (deleteAction && (await mutate(deleteAction.endpoint, "DELETE"))) {
+                setDeleteAction(null);
+                setListPage(1);
+              }
+            }}
+          />
+        </>
+      )}
+    </CurrencyContext.Provider>
   );
 }

@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Content layer: titles, fields, cards, pills
+   Glass is for floating controls; content sits on soft "inset grouped" cards.
+   ========================================================================== */
+
+/* Text inputs keep their own focus treatment, not the global ring. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+}
+
+/* ---------- Page title ---------- */
+.ui-page-heading:not([data-ui-compact="true"]) .ui-page-title {
+  font-family: var(--lg-font);
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+}
+@media (min-width: 640px) {
+  .ui-page-heading:not([data-ui-compact="true"]) .ui-page-title {
+    font-size: 36px;
+  }
+}
+
+/* ---------- Cards ---------- */
+/* Status stripe becomes a slim rounded accent inside the card edge. */
+/* Nested panels inside cards: grouped fills instead of dark boxes. */
+
+/* ---------- Pills ---------- */
+
+/* ---------- Primary buttons: tinted Liquid Glass capsules ---------- */
+button[data-ui-button].bg-primary {
+  border-color: transparent !important;
+  border-radius: var(--lg-radius-pill) !important;
+  background-color: var(--lg-tint) !important;
+  background-image:
+    radial-gradient(120% 90% at 50% -30%, rgb(255 255 255 / 38%), rgb(255 255 255 / 0%) 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--lg-tint) 70%, #e3fbe3), var(--lg-tint) 55%, var(--lg-tint-strong));
+  color: #fff !important;
+  text-shadow: 0 1px 1px rgb(15 70 15 / 25%);
+  box-shadow:
+    0 10px 26px -10px color-mix(in srgb, var(--lg-tint) 85%, transparent),
+    0 2px 6px -2px rgb(15 70 15 / 25%),
+    inset 0 1px 0.5px rgb(255 255 255 / 65%),
+    inset 0 -1.5px 1px rgb(20 95 20 / 22%),
+    inset 0 0 0 0.5px rgb(255 255 255 / 22%) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  button[data-ui-button].bg-primary:hover:not(:disabled) {
+    opacity: 1 !important;
+    filter: brightness(1.07) saturate(1.05);
+    transform: none !important;
+  }
+}
+button[data-ui-button].bg-primary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--lg-tint) 28%, transparent),
+    inset 0 1px 0.5px rgb(255 255 255 / 65%) !important;
+}
+button[data-ui-button]:not(.bg-primary) {
+  border-radius: var(--lg-radius-pill) !important;
+}
+/* Secondary / outline buttons: clear glass capsules. */
+button[data-ui-button]:not(.bg-primary):not(.bg-red-500):not([class*="bg-red"]):not([class*="border-transparent"]):is(.border, [class*="border-primary"]) {
+  border: 0 !important;
+  background-color: var(--lg-glass-fill) !important;
+  background-image: var(--lg-glass-specular);
+  -webkit-backdrop-filter: blur(calc(20px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%);
+  backdrop-filter: blur(calc(20px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%);
+  box-shadow:
+    0 6px 18px -10px rgb(0 0 0 / 30%),
+    inset 0 1px 0.5px var(--lg-glass-rim),
+    inset 0 -1px 0.5px var(--lg-glass-rim-low),
+    inset 0 0 0 0.5px var(--lg-glass-edge) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  button[data-ui-button]:not(.bg-primary):hover:not(:disabled) {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Card status stripe: status is already shown by the avatar and the expiry panel. */
+@media (max-width: 400px) {
+  .ui-page-heading:not([data-ui-compact="true"]) .ui-page-title {
+    font-size: 27px;
+  }
+}
+
+/* ---------- CRM switcher: floating glass capsule at the top ---------- */
+
+/* ---------- Analytics: inset grouped cards ---------- */
+
+/* ---------- Detail, editor and settings pages: grouped cards ---------- */
+/* Nested sections stay flat. */
+
+/* Section titles: label colour, iOS weight. */
+
+/* Settings-style side navigation becomes a glass segmented strip. */
+
+/* Headers portalled outside the workspace still clear the CRM capsule. */
+
+/* Record headers keep their status tint inside the glass. */
+
+/* ---------- Sheets / modals: floating glass with deep, concentric corners ---------- */
+.modal-backdrop {
+  background-color: rgb(0 0 0 / 28%) !important;
+}
+.modal-surface.glass-surface {
+  border-radius: var(--lg-radius-xl) !important;
+  background-color: var(--lg-glass-fill-strong) !important;
+  -webkit-backdrop-filter: blur(calc(40px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%) !important;
+  backdrop-filter: blur(calc(40px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%) !important;
+}
+.modal-surface .modal-footer {
+  background: transparent !important;
+  border-top: 0.5px solid var(--lg-separator) !important;
+}
+.modal-surface .modal-header {
+  border-bottom: 0 !important;
+}
+@media (max-width: 639px) {
+  .modal-surface.glass-surface {
+    border-radius: 38px !important;
+  }
+}
+/* Option tiles inside sheets. */
+.modal-surface button[aria-pressed],
+.modal-surface [role="radio"] {
+  border-radius: var(--lg-radius-md) !important;
+}
+

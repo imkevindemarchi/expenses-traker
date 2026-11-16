@@ -1,5 +1,8 @@
 {
-  "modalChoice": { "back": "Back", "clear": "Clear selection" },
+  "modalChoice": {
+    "back": "Back",
+    "clear": "Clear selection"
+  },
   "loader": {
     "loading": "Loading..."
   },
@@ -91,7 +94,9 @@
     "navigationLabel": "Page navigation",
     "goToPage": "Go to page {{page}}",
     "results": "{{first}}–{{last}} of {{total}}",
-    "perPage": "Per page"
+    "perPage": "Per page",
+    "jumpTo": "Go to page",
+    "pageOf": "Page {{page}} of {{total}}"
   },
   "autocomplete": {
     "placeholder": "Select",
@@ -104,5 +109,21 @@
   "datePicker": {
     "placeholder": "Select a date",
     "toggleCalendar": "Open or close the calendar"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting…"
+  },
+  "settings": {
+    "appearance": {
+      "title": "Appearance",
+      "description": "Adjust the interface glass, like on iPhone.",
+      "glass": "Liquid Glass",
+      "glassHint": "Frosted is easier to read; clear lets the content show through bars and menus.",
+      "frosted": "Frosted",
+      "clear": "Clear",
+      "preview": "Preview"
+    }
   }
 }

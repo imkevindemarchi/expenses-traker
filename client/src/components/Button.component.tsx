@@ -1,8 +1,5 @@
 import { type ButtonHTMLAttributes, type FC, type ReactNode } from "react";
 
-// hooks
-import { useTheme } from "../hooks";
-
 type TButtonVariant = "primary" | "secondary" | "danger" | "danger-outline";
 
 interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,6 +10,10 @@ interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   unstyled?: boolean;
 }
 
+/**
+ * iOS 27 system button: a filled capsule with a centred label. Primary uses the
+ * app tint, secondary the neutral fill; no glass (glass is for floating chrome).
+ */
 const Button: FC<IProps> = ({
   children,
   variant = "primary",
@@ -23,51 +24,14 @@ const Button: FC<IProps> = ({
   type = "button",
   ...props
 }) => {
-  const { theme } = useTheme();
-
-  const primaryClassName: string =
-    "bg-primary px-6 font-semibold text-white hover:opacity-70 disabled:opacity-60";
-
-  const secondaryClassName: string =
-    theme === "light"
-      ? "border border-black/10 px-5 font-medium text-darkgray hover:bg-black/5 hover:opacity-70 disabled:opacity-50"
-      : "border border-white/10 px-5 font-medium text-gray hover:bg-white/5 hover:opacity-70 disabled:opacity-50";
-
-  const dangerClassName: string =
-    "bg-red-500 px-6 font-semibold text-white hover:bg-red-600 disabled:opacity-60";
-
-  const dangerOutlineClassName =
-    theme === "light"
-      ? "border border-red-600/35 bg-red-500/5 px-5 font-semibold text-red-700 hover:border-red-600/60 hover:bg-red-500/10 disabled:opacity-50"
-      : "border border-red-400/45 bg-red-400/5 px-5 font-semibold text-red-300 hover:border-red-400/70 hover:bg-red-400/10 disabled:opacity-50";
-
-  const getVariantClassName = (): string => {
-    switch (variant) {
-      case "secondary":
-        return secondaryClassName;
-
-      case "danger-outline":
-        return dangerOutlineClassName;
-
-      case "danger":
-        return dangerClassName;
-
-      default:
-        return primaryClassName;
-    }
-  };
-
   return (
     <button
       {...props}
       data-ui-button
+      data-variant={unstyled ? undefined : variant}
       type={type}
       disabled={disabled}
-      className={`${
-        unstyled
-          ? ""
-          : `flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform,translate,scale,rotate] duration-300 disabled:pointer-events-none ${getVariantClassName()}`
-      } ${className}`.trim()}
+      className={`${unstyled ? "" : "ios-button"} ${className}`.trim()}
     >
       {icon}
 

@@ -1,0 +1,473 @@
+/* ==========================================================================
+   Page actions as an iOS toolbar (phones)
+   - actions grouped in one glass capsule at the top right
+   - "back" becomes a round glass button at the top left
+   - the capsule morphs in, buttons spring, hidden actions collapse inside it
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  :root {
+    /* One navigation row for every page: large title (or back) on the left,
+       actions on the right, just under the CRM capsule. */
+    --lg-toolbar-top: calc(
+      var(--crm-offset, 0px) + var(--app-safe-top, env(safe-area-inset-top, 0px)) + 10px
+    );
+    --lg-toolbar-size: 44px;
+  }
+
+  /* ---------- The capsule ----------
+     The container itself carries no transform, filter or backdrop-filter, so
+     the back button (position: fixed) can escape it to the top-left corner.
+     The glass is drawn by ::before. */
+  .mobile-floating-actions,
+  .floating-actions {
+    position: fixed !important;
+    top: var(--lg-toolbar-top) !important;
+    right: max(14px, env(safe-area-inset-right, 0px)) !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 95 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 0 !important;
+    width: max-content !important;
+    max-width: calc(100vw - 28px - var(--lg-toolbar-size) - 10px) !important;
+    padding: 4px !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+  /* Cancels Tailwind's -translate-x-1/2. It must be exactly "none" (any other
+     value makes the capsule the containing block of the fixed "back" button)
+     and it must live in its own rule: next to "transform" the production CSS
+     minifier (lightningcss) folds both into "transform: translate(0,0)" and
+     drops translate, which shifted the capsule left in production. */
+  .mobile-floating-actions[class],
+  .floating-actions[class] {
+    translate: none !important;
+  }
+  .mobile-floating-actions::before,
+  .floating-actions::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 0.5px solid rgb(255 255 255 / 55%);
+    border-radius: 999px;
+    background-color: var(--lg-glass-fill-clear);
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 30%) 0%,
+      rgb(255 255 255 / 0%) 40%,
+      rgb(255 255 255 / 0%) 70%,
+      rgb(255 255 255 / 12%) 100%
+    );
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04);
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04);
+    box-shadow:
+      0 8px 24px -6px rgb(0 0 0 / 22%),
+      inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+      inset 0 -1px 0.5px rgb(255 255 255 / 30%),
+      inset 0 0 0 0.5px rgb(0 0 0 / 8%);
+    transform-origin: 100% 50%;
+    transition: opacity 220ms var(--lg-ease, ease-out);
+    animation: lg-toolbar-in 420ms var(--lg-ease, ease-out) both;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .mobile-floating-actions::before,
+  [data-theme="dark"] .floating-actions::before {
+    border-color: rgb(255 255 255 / 12%);
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 12%) 0%,
+      rgb(255 255 255 / 0%) 40%,
+      rgb(255 255 255 / 0%) 70%,
+      rgb(255 255 255 / 5%) 100%
+    );
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9);
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9);
+    box-shadow:
+      0 10px 28px -6px rgb(0 0 0 / 60%),
+      inset 0 1px 0.5px rgb(255 255 255 / 28%),
+      inset 0 -1px 0.5px rgb(255 255 255 / 8%);
+  }
+  /* Nothing to show (e.g. the only action is "back"): no empty capsule. */
+  .mobile-floating-actions:not(:has(button:not([data-nav-back]):not([data-mobile-hidden])))::before,
+  .floating-actions:not(:has(button:not([data-nav-back]):not([data-mobile-hidden])))::before {
+    opacity: 0;
+    /* The entrance animation fills "both" and would otherwise force the
+       glass back to opacity 1, leaving an empty pill at the top right. */
+    animation: none;
+  }
+
+  /* ---------- Buttons inside: plain icons on the shared glass ---------- */
+  .mobile-floating-actions .floating-month-button,
+  .floating-actions .floating-month-button,
+  .mobile-floating-actions > div:has(> button[aria-haspopup="menu"]) {
+    width: var(--lg-toolbar-size) !important;
+    height: var(--lg-toolbar-size) !important;
+    margin: 0 !important;
+    /* Presses use "scale" (below); no legacy hover/press transforms. Kept out
+       of the rules that set scale, which the minifier would fold together. */
+    transform: none !important;
+  }
+  .mobile-floating-actions .floating-month-button.glass-surface,
+  .floating-actions .floating-month-button.glass-surface {
+    border-color: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    transition:
+      opacity 220ms ease,
+      scale 380ms var(--lg-spring),
+      background-color 200ms ease !important;
+  }
+  .mobile-floating-actions .floating-month-button svg,
+  .floating-actions .floating-month-button svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .mobile-floating-actions .floating-month-button__icon,
+  .floating-actions .floating-month-button__icon {
+    color: var(--lg-label) !important;
+    filter: none;
+  }
+  /* The press "lens": a lighter drop under the finger that springs back. */
+  .mobile-floating-actions .floating-month-button:active:not(:disabled),
+  .floating-actions .floating-month-button:active:not(:disabled) {
+    scale: 0.88 !important;
+    background-color: var(--lg-fill-strong) !important;
+  }
+  .mobile-floating-actions .floating-month-button[aria-expanded="true"],
+  .floating-actions .floating-month-button[aria-expanded="true"] {
+    background-color: var(--lg-fill-strong) !important;
+  }
+  /* Primary actions (submit/save) are tinted, like iOS "Done". */
+  .mobile-floating-actions .floating-month-button[type="submit"],
+  .floating-actions .floating-month-button[type="submit"] {
+    background-color: var(--lg-tint) !important;
+    box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 45%) !important;
+  }
+  .mobile-floating-actions .floating-month-button[type="submit"] .floating-month-button__icon,
+  .floating-actions .floating-month-button[type="submit"] .floating-month-button__icon {
+    color: #fff !important;
+  }
+
+  /* Buttons enter one after another. */
+  .mobile-floating-actions .floating-month-button:not([data-nav-back]),
+  .floating-actions .floating-month-button:not([data-nav-back]) {
+    animation: lg-toolbar-item-in 380ms var(--lg-ease, ease-out) both;
+  }
+  .mobile-floating-actions .floating-month-button:nth-of-type(2) {
+    animation-delay: 30ms;
+  }
+  .mobile-floating-actions .floating-month-button:nth-of-type(3) {
+    animation-delay: 60ms;
+  }
+  .mobile-floating-actions .floating-month-button:nth-of-type(4) {
+    animation-delay: 90ms;
+  }
+
+  /* Buttons wrapped in layout-only groups (pages keep a nested row for the
+     desktop layout) join the capsule as direct items, so every page gets the
+     same spacing and right alignment. Menu anchors (a wrapper whose direct
+     child opens a menu) keep their box: the menu is positioned from it. */
+  .mobile-floating-actions div:not(:has(> button[aria-haspopup])):has(button),
+  .floating-actions div:not(:has(> button[aria-haspopup])):has(button) {
+    display: contents !important;
+  }
+  .mobile-floating-actions div:has(> button[aria-haspopup="menu"]),
+  .floating-actions div:has(> button[aria-haspopup="menu"]) {
+    display: grid !important;
+    place-items: center;
+    flex-shrink: 0;
+    width: var(--lg-toolbar-size) !important;
+    height: var(--lg-toolbar-size) !important;
+    margin: 0 !important;
+  }
+
+  /* ---------- Back: its own round glass button, top left ---------- */
+  .mobile-floating-actions .floating-month-button[data-nav-back] {
+    position: fixed !important;
+    z-index: 95;
+    top: calc(var(--lg-toolbar-top) + 4px) !important;
+    left: max(14px, env(safe-area-inset-left, 0px)) !important;
+    width: var(--lg-toolbar-size) !important;
+    height: var(--lg-toolbar-size) !important;
+    border: 0.5px solid rgb(255 255 255 / 55%) !important;
+    background-color: var(--lg-glass-fill-clear) !important;
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 30%),
+      rgb(255 255 255 / 0%) 50%
+    ) !important;
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) !important;
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) !important;
+    box-shadow:
+      0 8px 24px -6px rgb(0 0 0 / 22%),
+      inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+      inset 0 0 0 0.5px rgb(0 0 0 / 8%) !important;
+    animation: lg-toolbar-back-in 380ms var(--lg-ease, ease-out) both;
+  }
+  [data-theme="dark"] .mobile-floating-actions .floating-month-button[data-nav-back] {
+    border-color: rgb(255 255 255 / 12%) !important;
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 12%),
+      rgb(255 255 255 / 0%) 50%
+    ) !important;
+    box-shadow:
+      0 10px 28px -6px rgb(0 0 0 / 60%),
+      inset 0 1px 0.5px rgb(255 255 255 / 28%) !important;
+  }
+  /* Back never hides on scroll. */
+  .mobile-floating-actions .floating-month-button[data-nav-back][data-mobile-hidden] {
+    width: var(--lg-toolbar-size) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  /* ---------- Pinned page title: centred in the toolbar row ----------
+     Like an iOS navigation bar: "back" on the left, actions on the right and
+     the title centred between them. --lg-toolbar-left / --lg-toolbar-right
+     are the measured widths on each side (useToolbarInsets); the title gets
+     the same margin on both sides, so it stays centred on screen and is
+     truncated instead of sliding under a button. */
+  :root {
+    /* Breathing room between the title and the buttons beside it. */
+    --lg-title-gap: 14px;
+    --lg-toolbar-side: calc(
+      max(14px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)) +
+        max(var(--lg-toolbar-left, 0px), var(--lg-toolbar-right, 0px)) + var(--lg-title-gap)
+    );
+  }
+  div.fixed:has(> .ui-page-heading[data-ui-compact="true"]),
+  div.fixed:has(> .contents > .ui-page-heading[data-ui-compact="true"]) {
+    top: var(--lg-toolbar-top) !important;
+    left: 50% !important;
+    right: auto !important;
+    height: calc(var(--lg-toolbar-size) + 8px) !important;
+    max-width: calc(100vw - 2 * var(--lg-toolbar-side)) !important;
+    justify-content: center !important;
+    --tw-translate-x: -50% !important;
+    --tw-translate-y: 0px !important;
+    transform: none !important;
+  }
+  .ui-page-heading[data-ui-compact="true"] {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--lg-toolbar-size);
+    margin-inline: auto !important;
+    padding-inline: 16px !important;
+  }
+  /* Leading-aligned pinned title: right after "back" (or at the page margin),
+     using the free space up to the actions (--lg-title-start, useToolbarInsets). */
+  html[data-lg-title="offset"] div.fixed:has(> .ui-page-heading[data-ui-compact="true"]),
+  html[data-lg-title="offset"]
+    div.fixed:has(> .contents > .ui-page-heading[data-ui-compact="true"]) {
+    left: max(var(--lg-title-start, 16px), env(safe-area-inset-left, 0px)) !important;
+    max-width: calc(
+      100vw - var(--lg-title-start, 16px) - max(14px, env(safe-area-inset-right, 0px)) -
+        var(--lg-toolbar-right, 0px) - var(--lg-title-gap)
+    ) !important;
+    justify-content: flex-start !important;
+    translate: none !important;
+  }
+  html[data-lg-title="offset"] .ui-page-heading[data-ui-compact="true"] {
+    margin-inline: 0 !important;
+    padding-inline: 12px !important;
+  }
+  .ui-page-heading[data-ui-compact="true"],
+  .ui-page-heading[data-ui-compact="true"] .ui-page-title {
+    min-width: 0;
+  }
+  .ui-page-heading[data-ui-compact="true"] .ui-page-title {
+    padding-block: 0 !important;
+    font-size: 15px !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.01em;
+  }
+
+  /* Detail pages: the pinned record card sits under the toolbar row. */
+  .record-header-slot > div.fixed:has(> .record-header-shell) {
+    top: calc(var(--lg-toolbar-top) + var(--lg-toolbar-size) + 18px) !important;
+  }
+  /* Pages no longer need room for actions at the bottom. */
+  .app-page-container {
+    padding-bottom: calc(var(--lg-tabbar-offset) + 32px) !important;
+  }
+  /* Detail/editor pages start right under the toolbar row. The CRM capsule's
+     room (--crm-offset) is already reserved by .crm-workspace, so it is not
+     counted again here. */
+  .immersive-page-container.app-page-container {
+    padding-top: calc(
+      var(--lg-toolbar-top) - var(--crm-offset, 0px) + var(--lg-toolbar-size) + 16px
+    ) !important;
+  }
+}
+
+/* Entrances: a short fade with a small scale, no overshoot, so nothing ever
+   pops outside the capsule while it is still growing. */
+@keyframes lg-toolbar-in {
+  0% {
+    opacity: 0;
+    scale: 0.92;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes lg-toolbar-item-in {
+  0% {
+    opacity: 0;
+    scale: 0.82;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes lg-toolbar-back-in {
+  0% {
+    opacity: 0;
+    scale: 0.82;
+    translate: -4px 0;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-floating-actions,
+  .floating-actions,
+  .mobile-floating-actions::before,
+  .floating-actions::before,
+  .mobile-floating-actions .floating-month-button,
+  .floating-actions .floating-month-button,
+  .mobile-floating-actions .floating-month-button[data-nav-back] {
+    animation: none !important;
+  }
+}
+@media (max-width: 767px) {
+  .mobile-floating-actions .floating-month-button[data-nav-back] .floating-month-button__icon {
+    color: var(--lg-label) !important;
+    filter: none;
+  }
+  .mobile-floating-actions .floating-month-button[data-nav-back] svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .mobile-floating-actions .floating-month-button[data-nav-back]:active:not(:disabled) {
+    scale: 0.88 !important;
+  }
+}
+
+/* ==========================================================================
+   Title crossfade (Header)
+   The large title never changes size or position in the layout: it fades
+   and lifts slightly as the page scrolls under the toolbar, while the inline
+   title, always mounted in the toolbar row, fades and settles in. Only
+   opacity and transform are animated, so the whole change runs on the
+   compositor with no layout or text re-rasterisation mid-animation.
+   ========================================================================== */
+.ui-page-heading.lg-title,
+.lg-title-fade {
+  transition:
+    opacity 260ms var(--lg-ease, cubic-bezier(0.25, 0.1, 0.25, 1)),
+    transform 420ms var(--lg-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+    visibility 0s linear 0s !important;
+  will-change: opacity, transform;
+}
+.ui-page-heading.lg-title:not([data-ui-compact="true"]) {
+  transform-origin: left center;
+}
+.ui-page-heading.lg-title:not([data-ui-compact="true"])[data-lg-hidden] {
+  opacity: 0;
+  transform: translate3d(0, -6px, 0) scale(0.97);
+}
+/* Inline title: hidden ⇒ also not rendered once faded, so its glass costs
+   nothing while the page sits at the top. */
+.ui-page-heading.lg-title[data-ui-compact="true"] {
+  pointer-events: auto;
+  transform-origin: center;
+}
+html[data-lg-title="offset"] .ui-page-heading.lg-title[data-ui-compact="true"] {
+  transform-origin: left center;
+}
+.ui-page-heading.lg-title[data-ui-compact="true"][data-lg-hidden],
+.lg-title-bar .lg-title-fade[data-lg-hidden] {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0) scale(0.92);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--lg-ease, cubic-bezier(0.25, 0.1, 0.25, 1)),
+    transform 260ms var(--lg-ease, cubic-bezier(0.25, 0.1, 0.25, 1)),
+    visibility 0s linear 260ms !important;
+}
+.lg-title-bar .lg-title-fade:not([data-lg-hidden]) {
+  pointer-events: auto;
+}
+/* Title morph (Header → morphTitle): the title that appears flies from the
+   other one's place, so the swap itself is quick — the text that appears is
+   visible at once, the text that leaves clears out of its way — and neither
+   adds a transform of its own (the flight starts from their real places). */
+.ui-page-heading.lg-title:not([data-lg-hidden]) {
+  transition:
+    opacity 90ms linear,
+    visibility 0s linear 0s !important;
+}
+.ui-page-heading.lg-title:not([data-ui-compact="true"])[data-lg-hidden],
+.ui-page-heading.lg-title[data-ui-compact="true"][data-lg-hidden] {
+  transform: none;
+}
+.ui-page-heading.lg-title:not([data-ui-compact="true"])[data-lg-hidden] {
+  transition:
+    opacity 140ms linear,
+    visibility 0s linear 0s !important;
+}
+.ui-page-heading.lg-title[data-ui-compact="true"][data-lg-hidden] {
+  transition:
+    opacity 140ms linear,
+    visibility 0s linear 140ms !important;
+}
+.record-header-action.lg-title-fade[data-lg-hidden] {
+  opacity: 0;
+}
+/* The record action (copy) flies with the title (morphTitle) exactly like it:
+   no transform of its own while hidden and a quick fade, otherwise the CSS
+   transition was still running when the flight ended and the icon snapped
+   into place once the name had pinned to the top. */
+.lg-title-bar .lg-title-fade[data-lg-hidden],
+.record-header-action.lg-title-fade[data-lg-hidden] {
+  transform: none;
+}
+.lg-title-bar .lg-title-fade:not([data-lg-hidden]),
+.record-header-action.lg-title-fade:not([data-lg-hidden]) {
+  transition:
+    opacity 90ms linear,
+    visibility 0s linear 0s !important;
+}
+.record-header-action.lg-title-fade[data-lg-hidden] {
+  transition:
+    opacity 140ms linear,
+    visibility 0s linear 0s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-page-heading.lg-title,
+  .lg-title-fade,
+  .ui-page-heading.lg-title[data-lg-hidden],
+  .lg-title-bar .lg-title-fade[data-lg-hidden] {
+    transform: none !important;
+    transition-property: opacity, visibility !important;
+    transition-duration: 160ms, 0s !important;
+  }
+}

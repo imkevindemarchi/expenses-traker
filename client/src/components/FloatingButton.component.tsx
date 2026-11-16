@@ -1,5 +1,6 @@
-import useMobileFloatingVisibility from "../hooks/useMobileFloatingVisibility.hook";
+import { ChevronLeft } from "lucide-react";
 import {
+  isValidElement,
   useImperativeHandle,
   useRef,
   type ButtonHTMLAttributes,
@@ -32,9 +33,11 @@ const FloatingButton: FC<IProps> = ({
   ...buttonProps
 }) => {
   const { theme } = useTheme();
+  // Page actions stay visible while scrolling on phones too.
   const persistent = alwaysVisibleOnMobile || type === "submit";
-  const visible = useMobileFloatingVisibility(persistent);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  // v2: a "back" action is shown on its own at the top left on phones, like iOS.
+  const isBack = isValidElement(icon) && icon.type === ChevronLeft;
   useImperativeHandle(ref, () => buttonRef.current!, []);
 
   return (
@@ -42,8 +45,7 @@ const FloatingButton: FC<IProps> = ({
       {...buttonProps}
       ref={buttonRef}
       data-mobile-persistent={persistent || undefined}
-      data-mobile-hidden={!visible || undefined}
-      inert={!visible || undefined}
+      data-nav-back={isBack || undefined}
       type={type}
       aria-label={ariaLabel}
       disabled={disabled}

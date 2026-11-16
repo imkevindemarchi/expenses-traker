@@ -1,0 +1,504 @@
+/* ==========================================================================
+   iOS 27 grouped forms (Settings, management pages): the same vocabulary as
+   Analytics — hero card, section titles on the canvas, inset grouped cards
+   with icon rows, footnotes under each group.
+   ========================================================================== */
+
+.ios-page {
+  display: grid;
+  gap: 28px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 8px auto 0;
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .ios-page--split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 28px 24px;
+  }
+  .ios-page--split > .ios-page__wide {
+    grid-column: 1 / -1;
+  }
+}
+.ios-settings {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+.settings-floating-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ios-page__column {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+/* Settings: the content starts 28px under the title, as on Analytics. */
+.ios-settings > .ios-page {
+  margin-top: 28px;
+}
+
+/* ---------- Hero ---------- */
+.ios-hero {
+  display: grid;
+  gap: 2px;
+  padding: 20px;
+  border-radius: 24px;
+  background: var(--lg-card);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  min-width: 0;
+}
+.ios-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--lg-label-2);
+  font-size: var(--ios-subhead, 15px);
+  line-height: 20px;
+  font-weight: 600;
+}
+.ios-hero__value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 2px 0;
+  color: var(--lg-label);
+  font-size: clamp(40px, 11vw, 56px);
+  line-height: 1.05;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.ios-hero__value small {
+  color: var(--lg-label-2);
+  font-size: var(--ios-title-3, 20px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.ios-hero__caption {
+  color: var(--lg-label-2);
+  font-size: var(--ios-footnote, 13px);
+  line-height: 18px;
+}
+.ios-hero__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.ios-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--lg-fill);
+  color: var(--lg-label);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ios-hero__pill[data-muted] {
+  color: var(--lg-label-3);
+}
+.ios-hero__pill > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pill-color, var(--lg-tint));
+}
+
+/* ---------- Group ---------- */
+.ios-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  scroll-margin-top: 120px;
+}
+.ios-group:focus {
+  outline: none;
+}
+.ios-group__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+}
+.ios-group__title {
+  margin: 0;
+  color: var(--lg-label);
+  font-size: var(--ios-title-3, 20px);
+  line-height: 25px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.ios-group__action {
+  border: 0;
+  background: none;
+  color: var(--lg-tint);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ios-group__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--lg-card);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+.ios-group__card--padded {
+  padding: 16px;
+}
+.ios-group__footer {
+  margin: 0;
+  padding: 0 16px;
+  color: var(--lg-label-2);
+  font-size: var(--ios-footnote, 13px);
+  line-height: 18px;
+}
+.ios-group__error {
+  margin: 0;
+  padding: 0 16px;
+  color: #ff453a;
+  font-size: var(--ios-footnote, 13px);
+  line-height: 18px;
+}
+
+/* ---------- Cell ---------- */
+.ios-cell {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 8px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--lg-label);
+  font: inherit;
+  text-align: left;
+}
+.ios-cell + .ios-cell::before,
+.ios-cell + .ios-cell-block::before,
+.ios-cell-block + .ios-cell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 58px;
+  border-top: 0.5px solid var(--lg-separator);
+}
+button.ios-cell {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease;
+}
+button.ios-cell:active:not(:disabled) {
+  background: var(--lg-fill);
+}
+@media (hover: hover) {
+  button.ios-cell:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--lg-fill) 60%, transparent);
+  }
+}
+button.ios-cell:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+button.ios-cell:focus-visible {
+  outline: 2px solid var(--lg-tint);
+  outline-offset: -2px;
+}
+.ios-cell__icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--cell-color, var(--lg-tint));
+  color: #fff;
+}
+.ios-cell__icon > svg {
+  width: 17px;
+  height: 17px;
+}
+.ios-cell__label {
+  display: grid;
+  min-width: 0;
+  font-size: var(--ios-body, 17px);
+  line-height: 22px;
+}
+.ios-cell__label small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--lg-label-2);
+  font-size: var(--ios-footnote, 13px);
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.ios-cell__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lg-label-2);
+  font-size: var(--ios-body, 17px);
+  font-variant-numeric: tabular-nums;
+}
+.ios-cell__chevron {
+  color: var(--lg-label-3);
+  transition: rotate 0.25s var(--lg-ease, ease);
+}
+[aria-expanded="true"] > .ios-cell__value > .ios-cell__chevron {
+  rotate: 90deg;
+}
+.ios-cell--action .ios-cell__label {
+  color: var(--lg-tint);
+  font-weight: 500;
+}
+.ios-cell--danger .ios-cell__label {
+  color: #ff453a;
+}
+
+/* Full-width text entry inside a card (passwords, names). */
+.ios-cell-block {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 8px 0 16px;
+}
+.ios-group .ios-cell-block input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--lg-label);
+  font: inherit;
+  font-size: 17px;
+}
+.ios-reveal > .ios-cell-block::before,
+.ios-cell-block + .ios-cell-block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 16px;
+  border-top: 0.5px solid var(--lg-separator);
+}
+.ios-cell-block input::placeholder {
+  color: var(--lg-label-3);
+}
+.ios-cell-block__button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--lg-label-2);
+  cursor: pointer;
+}
+.ios-cell-block__button:active {
+  background: var(--lg-fill);
+}
+
+/* Disclosure body that opens under a row. */
+.ios-reveal {
+  animation: ios-reveal-in 0.32s var(--lg-ease, ease) both;
+}
+@keyframes ios-reveal-in {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ios-reveal {
+    animation: none;
+  }
+}
+
+/* ---------- Delete confirmation sheet ---------- */
+.ios-delete {
+  display: grid;
+  gap: 14px;
+}
+.ios-delete__record {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--lg-fill);
+}
+.ios-delete__media {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--lg-tint) 14%, transparent);
+  color: var(--lg-tint);
+  font-weight: 700;
+}
+.ios-delete__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ios-delete__copy {
+  display: grid;
+  min-width: 0;
+}
+.ios-delete__copy strong {
+  overflow: hidden;
+  color: var(--lg-label);
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ios-delete__copy small {
+  overflow: hidden;
+  color: var(--lg-label-2);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ios-delete__warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  color: #ff453a;
+  font-size: 15px;
+  line-height: 21px;
+}
+.ios-delete__warning > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ---------- Empty state ---------- */
+.ios-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.ios-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--lg-tint) 12%, transparent);
+  color: var(--lg-tint);
+}
+.ios-empty__title {
+  margin: 0;
+  color: var(--lg-label);
+  font-size: 17px;
+  font-weight: 600;
+}
+.ios-empty__text {
+  max-width: 320px;
+  margin: 0;
+  color: var(--lg-label-2);
+  font-size: 15px;
+  line-height: 20px;
+}
+
+/* ---------- Segments: category tokens and match rule ---------- */
+
+/* Results header (segments, management lists). */
+
+/* ---------- Categories: inset grouped list with a trailing delete ---------- */
+@media (min-width: 1024px) {
+  .ios-category-list {
+    max-width: 760px;
+    margin-inline: auto;
+  }
+}
+.ios-category {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ios-category + .ios-category::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 58px;
+  z-index: 1;
+  border-top: 0.5px solid var(--lg-separator);
+}
+.ios-category__open {
+  flex: 1;
+  min-width: 0;
+}
+.ios-category__open .ios-cell__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ios-category__delete {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #ff453a;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.16s ease;
+}
+.ios-category__delete:active,
+.ios-category__delete:focus-visible {
+  background: color-mix(in srgb, #ff453a 14%, transparent);
+  outline: none;
+}
+@media (hover: hover) {
+  .ios-category__delete:hover {
+    background: color-mix(in srgb, #ff453a 12%, transparent);
+  }
+}
+
+/* Skeleton helpers for the editors. */
+
+/* ---------- Search fields outside the Home dock (e.g. modals) ----------
+   Exactly the Home search field: clear Liquid Glass capsule, no tint ring
+   on focus (only the glyph lights up, as on Home). */
+
+/* ---------- Notification review (last step of the composer) ---------- */
+/* The message as it will be sent: an outgoing chat bubble. */

@@ -33,6 +33,8 @@ interface IProps {
   className?: string;
   placement?: TMenuPlacement;
   alignment?: TMenuAlignment;
+  /** Desktop sidebar: settings has its own button there (the theme stays in this menu). */
+  logoutOnly?: boolean;
 }
 
 const MENU_GAP = 8;
@@ -47,6 +49,7 @@ const AccountMenu: FC<IProps> = ({
   className = "",
   placement = "bottom",
   alignment = "right",
+  logoutOnly = false,
 }) => {
   const navigate = useNavigate();
   const { theme, preference, setPreference } = useTheme();
@@ -329,7 +332,11 @@ const AccountMenu: FC<IProps> = ({
               <div className="grid grid-cols-3 gap-1">
                 {(
                   [
-                    { value: "system", label: t("accountMenu.themeOptions.system"), icon: Monitor },
+                    {
+                      value: "system",
+                      label: t("accountMenu.themeOptions.system"),
+                      icon: Monitor,
+                    },
                     { value: "dark", label: t("accountMenu.themeOptions.dark"), icon: Moon },
                     { value: "light", label: t("accountMenu.themeOptions.light"), icon: Sun },
                   ] as const
@@ -354,20 +361,24 @@ const AccountMenu: FC<IProps> = ({
                 ))}
               </div>
             </div>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setIsOpen(false);
-                navigate("/settings");
-              }}
-              className={`group flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left text-sm transition-all duration-300 ${theme === "light" ? "text-black hover:border-white/65 hover:bg-white/40" : "text-white hover:border-white/8 hover:bg-white/6"}`}
-            >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Settings size={17} strokeWidth={1.7} />
-              </span>
-              <span className="font-semibold">{t("accountMenu.settings")}</span>
-            </button>
+            {!logoutOnly && (
+              <>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/settings");
+                  }}
+                  className={`group flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left text-sm transition-[background-color,border-color,color] duration-300 ${theme === "light" ? "text-black hover:border-white/65 hover:bg-white/40" : "text-white hover:border-white/8 hover:bg-white/6"}`}
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Settings size={17} strokeWidth={1.7} />
+                  </span>
+                  <span className="font-semibold">{t("accountMenu.settings")}</span>
+                </button>
+              </>
+            )}
 
             <button
               type="button"

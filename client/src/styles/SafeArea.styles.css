@@ -9,13 +9,9 @@
 }
 @media (max-width: 767px), (max-height: 500px) and (pointer: coarse) {
   .app-page-container,
-  .app-main,
   .auth-shell {
     padding-left: max(20px, env(safe-area-inset-left, 0px));
     padding-right: max(20px, env(safe-area-inset-right, 0px));
-  }
-  .app-main.ui-refresh:not(.standalone-record-page):not(.standalone-settings-page) {
-    padding-top: calc(120px + var(--app-safe-top));
   }
   .auth-shell {
     padding-top: calc(104px + var(--app-safe-top));

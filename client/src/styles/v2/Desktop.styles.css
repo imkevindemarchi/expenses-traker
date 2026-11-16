@@ -1,0 +1,345 @@
+/* ==========================================================================
+   Desktop & tablet (≥ 768px) — the mobile design, adapted for large screens
+   Everything here sits inside min-width media queries: phones are untouched.
+
+   Layout:  [ glass sidebar ] [ content column, max 1280px, centred ]
+   Chrome:  the page actions live in the same glass capsule as on iPhone,
+            pinned at the top right; "back" is a round glass button at the
+            top left of the content column; pagination floats at the bottom
+            centre of the content column.
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  :root {
+    /* Horizontal room between the sidebar / window edge and the content. */
+    --desk-gutter: clamp(20px, 2.6vw, 48px);
+    --desk-max: 1280px;
+    /* Left edge of the content area (after the floating sidebar). */
+    --desk-content-left: calc(var(--lg-sidebar-w) + var(--lg-sidebar-inset));
+    /* Toolbar row (back + actions capsule). */
+    --desk-toolbar-top: 22px;
+    --desk-toolbar-size: 44px;
+    /* The CRM lives in the sidebar: no pinned capsule on top. */
+    --crm-offset: 0px;
+  }
+
+  /* ---------- Content column ---------- */
+  html .app-layout .app-page-container.app-page-container {
+    padding: 30px var(--desk-gutter) 120px
+      calc(var(--desk-content-left) + var(--desk-gutter)) !important;
+  }
+  /* Pages with "back" (details, editors, settings): room for the toolbar row. */
+  html:has(.floating-month-button[data-nav-back]) .app-layout .app-page-container.app-page-container {
+    padding-top: calc(var(--desk-toolbar-top) + var(--desk-toolbar-size) + 22px) !important;
+  }
+  .app-page-container > .lg-page {
+    width: 100%;
+    max-width: var(--desk-max);
+    margin-inline: auto;
+  }
+  /* Shared-catalogue note: a quiet caption above the title, leading-aligned. */
+
+  /* ---------- Actions capsule (same glass as iPhone), top right ---------- */
+  .mobile-floating-actions,
+  .floating-actions {
+    position: fixed !important;
+    top: var(--desk-toolbar-top) !important;
+    right: var(--desk-gutter) !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 65 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 2px !important;
+    width: max-content !important;
+    padding: 4px !important;
+    transform: none !important;
+    pointer-events: none;
+  }
+  .mobile-floating-actions[class],
+  .floating-actions[class] {
+    translate: none !important;
+  }
+  .mobile-floating-actions::before,
+  .floating-actions::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 0.5px solid var(--lg-glass-rim-low);
+    border-radius: 999px;
+    background-color: var(--lg-glass-fill-strong);
+    background-image: var(--lg-glass-specular);
+    -webkit-backdrop-filter: blur(calc(24px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%);
+    backdrop-filter: blur(calc(24px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%);
+    box-shadow:
+      var(--lg-glass-shadow),
+      inset 0 1px 0.5px var(--lg-glass-rim-low);
+    pointer-events: none;
+    animation: lg-toolbar-in 420ms var(--lg-ease) both;
+  }
+  .mobile-floating-actions:not(:has(button:not([data-nav-back])))::before,
+  .floating-actions:not(:has(button:not([data-nav-back])))::before {
+    opacity: 0;
+    /* The entrance animation fills "both" and would otherwise force the
+       glass back to opacity 1, leaving an empty pill at the top right. */
+    animation: none;
+  }
+  /* Layout-only wrappers join the capsule; menu anchors keep their box. */
+  .mobile-floating-actions div:not(:has(> button[aria-haspopup])):has(button),
+  .floating-actions div:not(:has(> button[aria-haspopup])):has(button) {
+    display: contents !important;
+  }
+  .mobile-floating-actions div:has(> button[aria-haspopup="menu"]),
+  .floating-actions div:has(> button[aria-haspopup="menu"]) {
+    display: grid !important;
+    place-items: center;
+    width: var(--desk-toolbar-size) !important;
+    height: var(--desk-toolbar-size) !important;
+    margin: 0 !important;
+  }
+  /* Buttons: plain icons on the shared glass, a soft fill on hover — no
+     glass, rim or shadow of their own (as on iPhone). The doubled class
+     outranks the themed glass rules of FloatingButton. */
+  html body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button:not([data-nav-back]),
+  html[data-theme] body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button:not([data-nav-back]),
+  html body [data-theme] :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button:not([data-nav-back]) {
+    border: 0 !important;
+    border-color: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+  html body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button:not([data-nav-back]):hover:not(:disabled),
+  html body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button:not([data-nav-back])[aria-expanded="true"] {
+    background-color: var(--lg-fill) !important;
+  }
+  html body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button[type="submit"] {
+    background-color: var(--lg-tint) !important;
+  }
+  .mobile-floating-actions .floating-month-button,
+  .floating-actions .floating-month-button {
+    width: var(--desk-toolbar-size) !important;
+    height: var(--desk-toolbar-size) !important;
+    margin: 0 !important;
+    border-color: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    pointer-events: auto;
+    transition:
+      background-color 180ms ease,
+      opacity 220ms ease,
+      scale 380ms var(--lg-spring) !important;
+    animation: lg-toolbar-item-in 380ms var(--lg-ease) both;
+  }
+  .mobile-floating-actions .floating-month-button svg,
+  .floating-actions .floating-month-button svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .mobile-floating-actions .floating-month-button__icon,
+  .floating-actions .floating-month-button__icon {
+    color: var(--lg-label) !important;
+    filter: none !important;
+  }
+  .mobile-floating-actions .floating-month-button:hover:not(:disabled),
+  .floating-actions .floating-month-button:hover:not(:disabled),
+  .mobile-floating-actions .floating-month-button[aria-expanded="true"],
+  .floating-actions .floating-month-button[aria-expanded="true"] {
+    background-color: var(--lg-fill) !important;
+  }
+  .mobile-floating-actions .floating-month-button:active:not(:disabled),
+  .floating-actions .floating-month-button:active:not(:disabled) {
+    scale: 0.9;
+    background-color: var(--lg-fill-strong) !important;
+  }
+  /* Primary actions (save) are tinted, like macOS "Done". */
+  .mobile-floating-actions .floating-month-button[type="submit"],
+  .floating-actions .floating-month-button[type="submit"] {
+    background-color: var(--lg-tint) !important;
+  }
+  .mobile-floating-actions .floating-month-button[type="submit"] .floating-month-button__icon,
+  .floating-actions .floating-month-button[type="submit"] .floating-month-button__icon {
+    color: #fff !important;
+  }
+  /* Hover-only legacy decorations of the round buttons. */
+  .mobile-floating-actions .floating-month-button::before,
+  .mobile-floating-actions .floating-month-button::after,
+  .floating-actions .floating-month-button::before,
+  .floating-actions .floating-month-button::after {
+    display: none !important;
+  }
+
+  /* "Back": its own round glass button at the top left of the content. */
+  .mobile-floating-actions .floating-month-button[data-nav-back],
+  .floating-actions .floating-month-button[data-nav-back] {
+    position: fixed !important;
+    top: var(--desk-toolbar-top) !important;
+    left: calc(var(--desk-content-left) + var(--desk-gutter)) !important;
+    border: 0.5px solid var(--lg-glass-rim-low) !important;
+    background-color: var(--lg-glass-fill-strong) !important;
+    background-image: var(--lg-glass-specular) !important;
+    -webkit-backdrop-filter: blur(calc(24px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%) !important;
+    backdrop-filter: blur(calc(24px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%) !important;
+    box-shadow:
+      var(--lg-glass-shadow),
+      inset 0 1px 0.5px var(--lg-glass-rim-low) !important;
+    animation: lg-toolbar-back-in 380ms var(--lg-ease) both;
+  }
+  .mobile-floating-actions .floating-month-button[data-nav-back]:hover,
+  .floating-actions .floating-month-button[data-nav-back]:hover {
+    background-color: var(--lg-glass-fill-strong) !important;
+    scale: 1.04;
+  }
+
+  /* ---------- Fields: no tint outline in any state ---------- */
+  .lg-field,
+  .ios-analytics__period,
+  [data-theme="dark"] .lg-field,
+  [data-theme="dark"] .ios-analytics__period {
+    --field-ring: var(--lg-separator);
+    --field-halo: transparent;
+  }
+  .lg-field__control:focus-within > .lg-field__icon:first-child {
+    color: var(--field-icon);
+  }
+  input:focus,
+  input:focus-visible,
+  textarea:focus,
+  textarea:focus-visible,
+  select:focus,
+  select:focus-visible {
+    outline: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  /* ---------- Page header: large title, then search + filters on one row ---------- */
+  .lg-header:not(.record-header) > .lg-header__inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 14px;
+  }
+  .lg-header:not(.record-header) > .lg-header__inner > :first-child {
+    flex: 0 0 100%;
+    /* Leave the actions capsule its room on the title row. */
+    padding-right: calc(var(--lg-toolbar-right, 0px) + 16px);
+  }
+  .lg-header:not(.record-header) > .lg-header__inner > .lg-search-dock,
+  .lg-header:not(.record-header) > .lg-header__inner > div.mt-3 {
+    flex: 0 1 340px;
+    width: auto !important;
+    min-width: 240px;
+    max-width: 340px;
+    margin-top: 14px !important;
+  }
+  .lg-header:not(.record-header) > .lg-header__inner > .lg-search-dock .w-full.sm\:w-96 {
+    width: 100% !important;
+  }
+  .lg-header:not(.record-header) > .lg-header__inner > .lg-filter-rail-slot {
+    /* Beside the search when the chips fit, on their own row otherwise. */
+    flex: 1 1 560px;
+    min-width: 0;
+    margin-top: 14px;
+  }
+  .lg-header .lg-filter-rail-slot .lg-filter-rail {
+    flex-wrap: nowrap !important;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .lg-header .lg-filter-rail-slot .lg-filter-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .lg-header:not(.record-header) > .lg-header__inner > .lg-filter-rail-slot:empty {
+    display: none;
+  }
+  /* The filter row starts right after the search field. */
+  .lg-header .lg-filter-rail-slot .lg-filter-rail,
+  .lg-header .lg-filter-rail-slot {
+    justify-content: flex-start !important;
+  }
+
+  /* ---------- Card grids: as many ~320px columns as fit ---------- */
+
+  /* ---------- Floating pagination: bottom centre of the content column ---------- */
+  .lg-page div.fixed:has(> .lg-pager) {
+    top: auto !important;
+    bottom: 22px !important;
+    left: calc(var(--desk-content-left) + (100vw - var(--desk-content-left)) / 2) !important;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Pages bring their own desktop gutters (md:px-10 lg:px-20 md:pt-10…):
+     the content column already has them, so every page lines up with the
+     title row and the toolbar. */
+  html .lg-page > main,
+  html .lg-page > div > main {
+    padding-top: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+  html .lg-page > main > div.mx-auto,
+  html .lg-page > div > main > div.mx-auto {
+    max-width: none !important;
+  }
+  /* Chips stay on one line: beside the search when they fit, below otherwise. */
+  .lg-header:not(.record-header) > .lg-header__inner > .lg-filter-rail-slot {
+    flex: 1 1 auto !important;
+  }
+  .lg-header .lg-filter-rail-slot .lg-filter-rail {
+    overflow: visible !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .lg-header .lg-filter-rail-slot .lg-filter-rail {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ---------- Detail pages: two columns on wide screens ----------
+   User: identity and summary across the top, then the grouped sections side
+   by side, charts paired, history across the bottom.
+   PPV: the artwork stays in view on the left while the facts scroll on the
+   right; trend and buyers across the bottom. */
+
+/* ---------- Editors: "On this page" only when there is room for it ----------
+   With the app sidebar on the left, the in-page index would squeeze the
+   form; it appears from 1440px as a slim sticky column. */
+
+@media (min-width: 768px) {
+  /* Single-card lists line up with the title instead of floating centred. */
+  html .ios-group__card.ios-category-list {
+    max-width: 760px;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+  html .categories-library-page {
+    max-width: none !important;
+  }
+}
+
+/* ==========================================================================
+   Skeletons on desktop: the same grid as the loaded page
+   ========================================================================== */
+
+/* ==========================================================================
+   Dialogs on desktop: centred panels, not sheets — no grab handle.
+   Period filter: the four quick ranges on one row as compact tiles (a soft
+   tint marks the chosen one, no outline), dates below, actions on the right.
+   ========================================================================== */
+@media (min-width: 768px) {
+  html .modal-surface .modal-header::before {
+    display: none !important;
+  }
+  /* Actions: compact, trailing, like a macOS sheet. */
+}

@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Base: typography, wallpaper, page canvas
+   ========================================================================== */
+
+html,
+body,
+#root {
+  font-family: var(--lg-font) !important;
+  color: var(--lg-label);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-theme],
+html[data-theme] body,
+html[data-theme] #root,
+html[data-theme] .app-layout {
+  background-color: var(--lg-bg) !important;
+}
+
+/* The wallpaper, as in Apple's own apps: the grouped system background,
+   with a soft wash of the brand green at the top of the page that scrolls
+   away with the content (like Fitness or Wallet). No decoration: glass is
+   reserved for bars and controls, content sits on opaque grouped cards. */
+.lg-wallpaper {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 0;
+  height: min(560px, 70vh);
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 100% at 50% 0%, var(--lg-wash-1) 0%, transparent 70%),
+    linear-gradient(180deg, var(--lg-wash-2) 0%, transparent 100%);
+}
+.lg-wallpaper__ring {
+  display: none;
+}
+
+/* The wallpaper sits behind everything inside an isolated stacking context. */
+.app-layout,
+.auth-shell {
+  isolation: isolate;
+}
+.lg-wallpaper {
+  z-index: -1;
+}
+
+/* Typography scale inspired by iOS Dynamic Type. */
+h1 {
+  letter-spacing: -0.022em;
+}
+h1 {
+  font-weight: 700;
+}
+h2,
+h3 {
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--lg-tint) 30%, transparent);
+}
+
+/* Native form controls pick up the tint. */
+input,
+textarea,
+select {
+  accent-color: var(--lg-tint);
+  caret-color: var(--lg-tint);
+}

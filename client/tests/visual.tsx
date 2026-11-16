@@ -4,7 +4,29 @@ import { createRoot } from "react-dom/client";
 import "../src/i18n";
 import App from "../src/App";
 import { today } from "../src/api";
-import "../src/index.css?revision=final";
+import { ThemeProvider } from "../src/providers/theme.provider";
+import { applyGlassClarity } from "../src/utils/glass-clarity.util";
+// The app's styles, in the same order as main.tsx.
+import "../src/styles/NavigationFeedback.styles.css";
+import "../src/styles/StandaloneSettings.styles.css";
+import "../src/styles/Scrollbars.styles.css";
+import "../src/styles/SharedPills.styles.css";
+import "../src/index.css";
+import "../src/styles/SharedTypography.styles.css";
+import "../src/styles/SafeArea.styles.css";
+import "../src/styles/v2/Tokens.styles.css";
+import "../src/styles/v2/Base.styles.css";
+import "../src/styles/v2/Glass.styles.css";
+import "../src/styles/v2/Content.styles.css";
+import "../src/styles/v2/Fields.styles.css";
+import "../src/styles/v2/Toolbar.styles.css";
+import "../src/styles/v2/System.styles.css";
+import "../src/styles/v2/Detail.styles.css";
+import "../src/styles/v2/IosDetail.styles.css";
+import "../src/styles/v2/IosForm.styles.css";
+import "../src/styles/v2/Buttons.styles.css";
+import "../src/styles/v2/Legacy.styles.css";
+import "../src/styles/v2/Desktop.styles.css";
 const previewTheme = new URLSearchParams(location.search).get("theme");
 if (previewTheme === "dark" || previewTheme === "light") {
   const deviceMatchMedia = window.matchMedia.bind(window);
@@ -41,7 +63,14 @@ let demoUser = {
   currency: "EUR",
   monthlyBudgetCents: 100000 as number | null,
 };
-let entries = [
+let entries: {
+  _id: string;
+  kind: string;
+  amountCents: number;
+  date: string;
+  category: string;
+  subcategory: string;
+}[] = [
   {
     _id: "1".repeat(24),
     kind: "income",
@@ -187,8 +216,11 @@ window.fetch = async (request, init) => {
     };
   return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
 };
+applyGlassClarity();
 createRoot(document.getElementById("root")!).render(
   <MemoryRouter initialEntries={[new URLSearchParams(location.search).get("route") || "/"]}>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </MemoryRouter>,
 );

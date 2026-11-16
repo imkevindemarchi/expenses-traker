@@ -1,0 +1,23 @@
+/* ==========================================================================
+   Brought back from the first Alice & Kevin (must stay last):
+   - the page background (plain warm canvas, no gold wash)
+   - the launch loader and the CRM chooser, exactly as they were
+   ========================================================================== */
+
+/* Background: the original canvas everywhere. */
+:root {
+  --ak-canvas-light: color-mix(in srgb, #32cd32 4%, white);
+  --ak-canvas-dark: #0c120e;
+  --color-canvas-light: var(--ak-canvas-light);
+  --color-canvas-dark: var(--ak-canvas-dark);
+  --lg-bg: var(--ak-canvas-light);
+}
+[data-theme="dark"] {
+  --lg-bg: var(--ak-canvas-dark);
+}
+.lg-wallpaper {
+  display: none !important;
+}
+
+/* Loader and CRM chooser: the original palette and type, untouched by the
+   iOS layer. */

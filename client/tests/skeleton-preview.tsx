@@ -1,111 +1,49 @@
-// Isolated responsive fixture. No authentication, database access or API writes.
+// Isolated responsive fixture of the loading states. No API requests.
 import { createRoot } from "react-dom/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MemoryRouter } from "react-router";
 import "../src/i18n";
 import "../src/index.css";
-import "../src/styles/SharedTypography.styles.css";
-import "../src/styles/StandaloneSettings.styles.css";
-import { ThemeContext } from "../src/contexts/theme.context";
-import "../src/styles/Settings.styles.css";
-import PageSkeleton from "../src/components/PageSkeleton.component";
-import EntriesTable from "../src/components/EntriesTable.component";
-const routes = [
-  "options",
-  "pagination",
-  "overview",
-  "budget",
-  "annual",
-  "entries",
-  "categories",
-  "settings",
-  "loaded-entries",
-];
-function Content({ route }: { route: string }) {
-  return (
-    <main
-      className={`app-main ui-refresh ${route === "settings" ? "standalone-settings-page" : ""}`}
-    >
-      {route === "loaded-entries" ? (
-        <EntriesTable
-          entries={[
-            { _id: "1", kind: "expense", amountCents: 1250, date: "2026-10-15", category: "demo" },
-          ]}
-          categories={new Map([["demo", { _id: "demo", name: "Alimentari", color: "#32cd32" }]])}
-          subcategories={new Map()}
-          onEdit={() => {}}
-          onDelete={() => {}}
-        />
-      ) : route === "options" ? (
-        <PageSkeleton layout="options" />
-      ) : route === "pagination" ? (
-        <PageSkeleton layout="pagination" />
-      ) : route === "entries" ? (
-        <>
-          <PageSkeleton layout="entries" />
-          <PageSkeleton layout="pagination" />
-        </>
-      ) : route === "settings" ? (
-        <div className="subscription-settings-page">
-          <div className="settings-layout">
-            <div className="loading-settings-navigation" aria-hidden="true" />
-            <div className="settings-sections settings-redesign">
-              <PageSkeleton layout="settings" />
-            </div>
-          </div>
-        </div>
-      ) : route === "categories" ? (
-        <PageSkeleton layout="categories" />
-      ) : (
-        <PageSkeleton
-          layout={route === "annual" ? "annual" : "overview"}
-          budget={route === "budget"}
-        />
-      )}
-    </main>
-  );
-}
+import "../src/styles/v2/Tokens.styles.css";
+import "../src/styles/v2/Base.styles.css";
+import "../src/styles/v2/Glass.styles.css";
+import "../src/styles/v2/Content.styles.css";
+import "../src/styles/v2/Fields.styles.css";
+import "../src/styles/v2/Toolbar.styles.css";
+import "../src/styles/v2/System.styles.css";
+import "../src/styles/v2/IosForm.styles.css";
+import "../src/styles/v2/Legacy.styles.css";
+import "../src/styles/v2/Desktop.styles.css";
+import "../src/styles/v2/Analytics.styles.css";
+import "../src/styles/v2/Expenses.styles.css";
+import RouteSkeleton from "../src/components/RouteSkeleton.component";
+import {
+  CategoriesSkeleton,
+  EntriesSkeleton,
+  OverviewSkeleton,
+} from "../src/components/Skeletons.component";
+const views = ["/annual", "/settings", "overview", "entries", "categories"];
 function Preview() {
-  const [route, setRoute] = useState(routes[0]);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+  const [view, setView] = useState(views[0]);
   return (
-    <ThemeContext.Provider value={{ theme, preference: theme, setPreference: () => {} }}>
-      <div
-        style={{
-          position: "relative",
-          zIndex: 10001,
-          padding: 8,
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 8,
-        }}
-      >
-        <select
-          style={{ maxWidth: "100%" }}
-          aria-label="Schermata"
-          value={route}
-          onChange={(e) => setRoute(e.target.value)}
-        >
-          {routes.map((path) => (
-            <option key={path}>{path}</option>
-          ))}
-        </select>
-        <select
-          aria-label="Tema"
-          value={theme}
-          onChange={(e) => setTheme(e.target.value as "light" | "dark")}
-        >
-          <option value="light">Chiaro</option>
-          <option value="dark">Scuro</option>
-        </select>
-      </div>
-      <MemoryRouter>
-        <Content route={route} />
-      </MemoryRouter>
-    </ThemeContext.Provider>
+    <div className="app-page-container px-5 pb-40 pt-8">
+      <select aria-label="Schermata" value={view} onChange={(e) => setView(e.target.value)}>
+        {views.map((item) => (
+          <option key={item}>{item}</option>
+        ))}
+      </select>
+      {view === "overview" ? (
+        <OverviewSkeleton budget />
+      ) : view === "entries" ? (
+        <EntriesSkeleton rows={8} />
+      ) : view === "categories" ? (
+        <CategoriesSkeleton />
+      ) : (
+        <MemoryRouter key={view} initialEntries={[view]}>
+          <RouteSkeleton />
+        </MemoryRouter>
+      )}
+    </div>
   );
 }
 createRoot(document.getElementById("root")!).render(<Preview />);

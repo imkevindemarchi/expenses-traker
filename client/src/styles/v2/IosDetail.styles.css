@@ -1,0 +1,159 @@
+/* ==========================================================================
+   User / PPV detail — iOS 27 native screens
+   Large hero, a summary card with stat columns, then inset grouped lists
+   (Settings / Health / Contacts): title on the canvas, rows in a card,
+   hairlines inset after the icon, footnote under the card.
+   ========================================================================== */
+
+/* ---------- Section ---------- */
+
+/* ---------- Row ---------- */
+
+/* Avatar rows (buyers). */
+
+/* ---------- Summary card ---------- */
+
+/* ---------- Chips, notes, empty ---------- */
+.ios-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 36px 20px;
+  color: var(--lg-label-2);
+  font-size: 13px;
+  text-align: center;
+}
+.ios-empty > svg {
+  color: var(--lg-label-3);
+}
+.ios-empty > strong {
+  color: var(--lg-label);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ---------- Segmented control (PPV versions) ---------- */
+
+/* ---------- PPV artwork ---------- */
+
+/* ---------- Existing chart / history sections, aligned to the lists ---------- */
+
+/* ---------- Charts: header on the canvas, one card, footnote ---------- */
+
+/* Segmented meter (Storage style) + legend rows. */
+
+/* ---------- Purchase history ---------- */
+
+/* One pagination everywhere (as in the user history): it sits on the canvas
+   under the list, with no glass slab around it. */
+html .pagination-surface,
+html .pagination-surface::before,
+html .pagination-surface::after {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Order on the user page: charts first, then the full history. */
+
+/* Info rows are not tappable: no highlight, no press dip. */
+
+/* Pinned record name (phones): one bubble only — the title's own Liquid
+   Glass, the same as the floating buttons — with the copy icon inside it,
+   kept clear of the back button by --lg-title-start. */
+@media (max-width: 767px) {
+  html div.fixed:has(> .contents > .lg-inline-action) {
+    gap: 0 !important;
+  }
+  html div.fixed:has(> .contents > .lg-inline-action) .ui-page-heading {
+    padding-right: 46px !important;
+  }
+  html .lg-inline-action {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+}
+
+/* ---------- End of page (phones) ----------
+   The last content stops ~18px above the bottom chrome: the tab bar, or the
+   search field / period pill floating over it. Inner page wrappers add no
+   extra room of their own. */
+@media (max-width: 767px) {
+  html body .app-layout--tabbar .app-page-container {
+    padding-bottom: calc(var(--lg-tabbar-offset) + 8px) !important;
+  }
+  html body .app-layout--tabbar .app-page-container:has(.lg-search-dock) {
+    padding-bottom: calc(var(--lg-tabbar-offset) + 68px) !important;
+  }
+  html body .app-layout--tabbar .app-page-container:has(.ios-analytics__period-dock) {
+    padding-bottom: calc(var(--lg-tabbar-offset) + 64px) !important;
+  }
+  html body .app-layout--tabbar .app-page-container > *,
+  html body .app-layout--tabbar .app-page-container .lg-page > main {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Record hero (phones): the name sits exactly on the centre axis with the
+   copy button hanging beside it; @username / code and the status chip are
+   centred on the same axis underneath. */
+
+/* ==========================================================================
+   Editors: grouped switch / action rows (UserManagement)
+   ========================================================================== */
+
+/* ==========================================================================
+   Pickers (categories, PPV): search, tokens, flat lists
+   ========================================================================== */
+/* Tokens: plain capsules; selected ones tinted with a checkmark. */
+
+/* PPV list: a flat inset list, square artwork, hairlines — no pills. */
+
+/* Editors (phones): the large title starts right under the toolbar row and
+   the first group follows closely, as in iOS settings screens. */
+
+/* ==========================================================================
+   Modals (renewal, extra purchase, period): one family of option cards,
+   the same as the period presets — filled tiles, tinted when selected,
+   step labels above each group, as in the notification composer.
+   ========================================================================== */
+
+/* Extra purchase: recipient row, type tiles, big amount, date. */
+
+/* Period presets: icon square, label, description, check top-right. */
+
+/* ==========================================================================
+   PPV editor: label on the canvas, each group in its own card
+   ========================================================================== */
+
+/* Recording device: Control Center toggles. */
+
+/* Duration: an iOS timer, large h : min : s digits. */
+
+/* Message textarea, plain card. */
+
+/* Price tiers: list rows, amount right-aligned in a small field. */
+
+/* Sheets (renewal, extra purchase): composer groups. */
+
+/* Period sheet: custom range on top, quick presets below. */
+
+/* Detail skeletons: same radii as the real content — 8px icon squares,
+   11px thumbnails, capsules for chips and status, a circle only for avatars. */
+/* Settings skeleton: "Your data" sits in the column the page puts it in. */
+
+/* Charts stay in reading order, like on the loaded page. */
+/* Phones: the heroes take the height of the real record headers, so the
+   summary and sections do not jump when the data arrives. */
+

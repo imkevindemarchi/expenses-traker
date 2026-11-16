@@ -1,34 +1,38 @@
-import PageSkeleton from "../components/PageSkeleton.component";
 import { annualYear } from "../utils/annual-year";
-import { useMoney } from "../contexts/currency.context";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Wallet, ArrowDownLeft, ArrowUpRight, TrendingUp } from "lucide-react";
+import { Plus, TriangleAlert } from "lucide-react";
 import { api, today } from "../api";
 import { tr, locale } from "../i18n";
 import type { AnnualSummary, Entry, Category, Subcategory } from "../types";
-import Glass from "../components/Glass.component";
-import YearPicker from "../components/YearPicker.component";
-import EntriesTable from "../components/EntriesTable.component";
-import SpendingBreakdown from "../components/SpendingBreakdown.component";
+import Header from "../components/Header.component";
+import FloatingButton from "../components/FloatingButton.component";
+import PeriodPicker from "../components/PeriodPicker.component";
+import EntryList from "../components/EntryList.component";
+import EmptyState from "../components/EmptyState.component";
+import { MonthlyBarsChart } from "../components/MoneyCharts.component";
+import { BalanceHero, CategorySpending } from "../components/MoneySummary.component";
+import { OverviewSkeleton } from "../components/Skeletons.component";
 import { dateFormatter } from "../utils/formatters.util";
 import { annualMonths } from "../utils/annual";
-import Histogram from "../components/Histogram.component";
+import "../styles/v2/Analytics.styles.css";
+import "../styles/v2/Expenses.styles.css";
+
+/** Annual summary, laid out like Alice & Kevin Analytics. */
 export default function AnnualPage({
   refresh,
   categories,
   subcategories,
-  onEdit,
-  onDelete,
+  onOpenEntry,
+  onCreateEntry,
 }: {
   refresh: number;
   categories: Map<string, Category>;
   subcategories: Map<string, Subcategory>;
-  onEdit: (entry: Entry) => void;
-  onDelete: (entry: Entry) => void;
+  onOpenEntry: (entry: Entry) => void;
+  onCreateEntry: () => void;
 }) {
-  const money = useMoney();
   useTranslation();
   const [params, setParams] = useSearchParams();
   const currentYear = Number(today().slice(0, 4));
@@ -52,93 +56,76 @@ export default function AnnualPage({
       controller.abort();
     };
   }, [year, refresh]);
-  return (
-    <>
-      <div className="annual-filter">
-        <YearPicker value={year} onChange={(value) => setParams({ year: value })} />
-      </div>
-      {error ? (
-        <p className="expense-text" role="alert">
-          {tr(error)}
-        </p>
-      ) : !summary ? (
-        <PageSkeleton layout="annual" />
-      ) : (
-        <>
-          <div className="overview-grid">
-            <Glass className="balance-card">
-              <div className="balance-heading">
-                <span className="eyebrow">{tr("BILANCIO DELL’ANNO")}</span>
-                <span className="round-icon">
-                  <Wallet size={20} />
-                </span>
-              </div>
-              <p className="balance-value">{money(summary.balance)}</p>
-              <p className="muted">{tr("Entrate meno spese del periodo selezionato.")}</p>
-              <span className="ui-pill balance-chip">
-                <TrendingUp size={14} />
-                {tr("{{count}} movimenti registrati", { count: summary.count })}
-              </span>
-            </Glass>
-            <Glass className="stat-card income-card">
-              <span className="stat-icon income">
-                <ArrowDownLeft size={24} />
-              </span>
-              <p className="muted">{tr("Entrate")}</p>
-              <strong>{money(summary.income)}</strong>
-              <small>{tr("Quello che hai guadagnato")}</small>
-            </Glass>
-            <Glass className="stat-card expense-card">
-              <span className="stat-icon expense">
-                <ArrowUpRight size={24} />
-              </span>
-              <p className="muted">{tr("Spese")}</p>
-              <strong>{money(summary.expense)}</strong>
-              <small>{tr("Quello che hai speso")}</small>
-            </Glass>
-          </div>
-          <div className="charts-grid">
-            <Glass className="panel">
-              <div className="section-heading">
-                <h2>{tr("Andamento dell’anno")}</h2>
-              </div>
-              <AnnualTrend summary={summary} year={year} />
-            </Glass>
-            <Glass className="panel">
-              <h2>{tr("Spese per categoria")}</h2>
-              <SpendingBreakdown summary={summary} categories={categories} />
-            </Glass>
-          </div>
-          <Glass className="panel">
-            <div className="section-heading">
-              <h2>{tr("Ultimi movimenti dell’anno")}</h2>
-            </div>
-            <EntriesTable
-              entries={summary.entries}
-              categories={categories}
-              subcategories={subcategories}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          </Glass>
-        </>
-      )}
-    </>
-  );
-}
-function AnnualTrend({ summary, year }: { summary: AnnualSummary; year: string }) {
-  const months = annualMonths(year, summary.monthly);
-  return (
-    <Histogram
-      label={tr("Andamento mensile di entrate e spese")}
-      labels={months.map((month) => {
+
+  const months = useMemo(() => {
+    if (!summary) return null;
+    const items = annualMonths(year, summary.monthly);
+    return {
+      labels: items.map((month) => {
         const label = dateFormatter(locale(), { month: "short" }).format(
           new Date(month.month + "-01T12:00:00Z"),
         );
         return label.charAt(0).toLocaleUpperCase(locale()) + label.slice(1);
-      })}
-      income={months.map((month) => month.income)}
-      expense={months.map((month) => month.expense)}
-    />
+      }),
+      income: items.map((month) => month.income),
+      expense: items.map((month) => month.expense),
+    };
+  }, [summary, year]);
+
+  return (
+    <main className="analytics-page ios-analytics w-full pb-8 md:py-10">
+      <div className="analytics-content mx-auto flex w-full flex-col">
+        <Header title={tr("Riepilogo annuale")} />
+
+        <PeriodPicker mode="year" value={year} onChange={(value) => setParams({ year: value })} />
+
+        {error ? (
+          <EmptyState icon={<TriangleAlert />} title={tr("Si è verificato un errore.")} text={tr(error)} />
+        ) : !summary || !months ? (
+          <OverviewSkeleton layout="year" />
+        ) : (
+          <div className="ios-analytics__grid">
+            <BalanceHero eyebrow={tr("Bilancio dell’anno")} summary={summary} />
+
+            <section className="ios-analytics__section ios-analytics__chart-section et-pair">
+              <h2 className="ios-analytics__section-title">{tr("Andamento dell’anno")}</h2>
+              <div className="ios-analytics__card ios-analytics__chart">
+                <p className="ios-analytics__caption">
+                  {tr("Entrate e spese di ogni mese dell’anno.")}
+                </p>
+                <div className="ios-analytics__chart-canvas">
+                  {summary.count > 0 ? (
+                    <MonthlyBarsChart {...months} />
+                  ) : (
+                    <p className="ios-analytics__empty">{tr("Nessun movimento nell’anno.")}</p>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            <CategorySpending className="et-pair" summary={summary} categories={categories} />
+
+            <section className="ios-analytics__section et-span-all">
+              <h2 className="ios-analytics__section-title">{tr("Ultimi movimenti dell’anno")}</h2>
+              <EntryList
+                entries={summary.entries}
+                categories={categories}
+                subcategories={subcategories}
+                onOpen={onOpenEntry}
+              />
+            </section>
+          </div>
+        )}
+      </div>
+
+      <div className="mobile-floating-actions fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 max-[359px]:gap-2">
+        <FloatingButton
+          alwaysVisibleOnMobile
+          ariaLabel={tr("Nuovo movimento")}
+          icon={<Plus size={28} />}
+          onClick={onCreateEntry}
+        />
+      </div>
+    </main>
   );
 }

@@ -1,0 +1,41 @@
+/* ==========================================================================
+   Record detail pages (user, PPV) — iOS 27 inset grouped layout
+   Section headers sit on the page canvas, their content in rounded cards,
+   icons are small filled squares as in Settings / Health.
+   ========================================================================== */
+
+/* Section header: filled icon square + title, on the canvas. */
+
+/* Grouped cards: every block under a header becomes an inset card. */
+
+/* Rows inside cards: hairline separators inset from the leading edge. */
+
+/* Space between sections like an iOS grouped table. */
+
+/* Category tags: plain capsules. */
+
+/* Headers wrapped in a toolbar row (history) also sit on the canvas. */
+/* The dates open the summary card: no rule above them. */
+
+/* ---------- PPV detail: artwork, then grouped sections ---------- */
+
+/* ==========================================================================
+   Editors (user / PPV management) — iOS 27 grouped forms
+   Header on the canvas, each group of fields in its own rounded card.
+   ========================================================================== */
+
+/* Rows inside a card: fills instead of outlined boxes. */
+
+/* Destructive group, as in iOS: red text on a plain card. */
+
+/* Fields in a row (hours · minutes · seconds) share the width instead of
+   pushing the page sideways. */
+.lg-field {
+  min-width: 0;
+}
+.lg-field__input {
+  width: 100%;
+}
+.flex > .lg-field {
+  flex: 1 1 0;
+}

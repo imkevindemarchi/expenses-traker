@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Errors — one look in every app (Alice & Kevin, Expenses Traker, Gym Traker),
+   the same as the sign-in screens (AuthShell.styles.css):
+   - a field with an error: its glyph turns into a red rounded square and a
+     red footnote appears right under it;
+   - a message about a whole form / page: a soft red notice with an icon.
+   Loaded last so it wins over the older per-component styles.
+   ========================================================================== */
+:root {
+  --ui-danger: #ff3b30;
+  --ui-error-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+[data-theme="dark"] {
+  --ui-danger: #ff453a;
+}
+
+/* ---------- Field footnote ---------- */
+.ui-field-error,
+.lg-field__error,
+.ios-picker__error,
+.ios-group__error,
+.ios-compose__error,
+.modal-choice-error {
+  display: block;
+  margin: 6px 0 0 !important;
+  padding: 0 16px !important;
+  color: var(--ui-danger) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 18px !important;
+  text-align: left;
+  animation: ui-error-in 260ms var(--ui-error-ease) both;
+}
+
+/* ---------- Field glyph (capsule fields of the v2 design) ---------- */
+.lg-field[data-invalid] .lg-field__control.lg-field__control {
+  box-shadow: var(--field-shadow, 0 8px 24px -6px rgb(0 0 0 / 14%)) !important;
+}
+.lg-field[data-invalid] .lg-field__control.lg-field__control:focus-within {
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--ui-danger) 14%, transparent),
+    var(--field-shadow, 0 8px 24px -6px rgb(0 0 0 / 14%)) !important;
+}
+.lg-field[data-invalid] .lg-field__control > .lg-field__icon:first-child {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--ui-danger);
+  color: #fff !important;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+.lg-field[data-invalid] .lg-field__control > .lg-field__icon:first-child > svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+/* Older underline fields (Gym Traker): the round glyph turns red too. */
+.ui-field[data-invalid] .ui-field-icon {
+  background: var(--ui-danger) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Notice (whole form / page) ---------- */
+.ui-notice,
+.form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ui-danger) 12%, transparent);
+  color: var(--ui-danger);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: left;
+  animation: ui-notice-in 380ms var(--ui-error-ease);
+}
+.ui-notice::before,
+.form-error::before {
+  content: "";
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' x2='12' y1='8' y2='12'/%3E%3Cline x1='12' x2='12.01' y1='16' y2='16'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' x2='12' y1='8' y2='12'/%3E%3Cline x1='12' x2='12.01' y1='16' y2='16'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+@keyframes ui-error-in {
+  from {
+    opacity: 0;
+    translate: 0 -3px;
+  }
+}
+@keyframes ui-notice-in {
+  0%,
+  100% {
+    translate: 0;
+  }
+  20% {
+    translate: -6px;
+  }
+  40% {
+    translate: 5px;
+  }
+  60% {
+    translate: -3px;
+  }
+  80% {
+    translate: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-field-error,
+  .lg-field__error,
+  .ios-picker__error,
+  .ios-group__error,
+  .ios-compose__error,
+  .modal-choice-error,
+  .ui-notice,
+  .form-error {
+    animation: none;
+  }
+}
+
+/* Underline fields without a card (Gym Traker): the footnote starts at the edge. */
+.ui-field:not(.lg-field) > .ui-field-error {
+  padding: 0 !important;
+}

@@ -63,51 +63,8 @@ button[data-ui-button] {
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.section-heading .section-heading-title {
-  font-size: var(--ui-font-section);
-  line-height: 1.35;
-  font-weight: 650;
-}
-.section-heading .section-heading-description {
-  font-size: var(--ui-font-label);
-  line-height: 1.6;
+.text-gray {
   color: var(--ui-text-muted);
-}
-.muted,
-.text-gray,
-.ui-refresh .muted {
-  color: var(--ui-text-muted);
-}
-:where(.entry-cards, .history-workout-cards, .user-list-cards, .ppv-list-cards) {
-  gap: var(--ui-space-card);
-}
-.ui-refresh .entry-card h3,
-.ui-refresh .history-workout-card h3,
-.user-list-card .user-list-card-link,
-.ppv-list-card .ppv-list-card-title {
-  font-size: var(--ui-font-card-title);
-  line-height: 24px;
-  font-weight: 600;
-}
-.entry-card-category,
-.entry-card-date,
-.history-card-metrics span,
-.history-card-context > span:first-child,
-.analytics-detail-row:not(.analytics-detail-row--sale)
-  :is(.analytics-detail-username, .analytics-detail-context, .analytics-detail-date),
-.user-list-card .user-list-card-expiration-label,
-.user-list-card .user-list-card-metric-label {
-  font-size: var(--ui-font-caption);
-  line-height: 18px;
-}
-.entry-card,
-.history-workout-card {
-  border-radius: 24px;
-}
-.settings-section-heading p,
-.settings-redesign .settings-data-note {
-  font-size: var(--ui-font-label);
-  line-height: 1.65;
 }
 @media (min-width: 640px) {
   .ui-page-heading:not([data-ui-compact="true"]) .ui-page-title {
@@ -115,8 +72,3 @@ button[data-ui-button] {
   }
 }
 
-.ui-user-card [class~="text-[11px]"],
-.ui-user-card [class~="text-[10px]"] {
-  font-size: var(--ui-font-caption);
-  line-height: 18px;
-}

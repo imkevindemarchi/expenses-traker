@@ -3,7 +3,7 @@ import {
   type FC,
   type TouchEvent,
   useEffect,
-  useMemo,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -29,71 +29,26 @@ interface IProps {
   onClose: () => void;
 }
 
-type TPopupStyle = {
-  icon: typeof CircleCheck;
-  accentClassName: string;
-  glowClassName: string;
-  lightIconClassName: string;
-  darkIconClassName: string;
-  lightBorderClassName: string;
-  darkBorderClassName: string;
-  lightTitleClassName: string;
-  darkTitleClassName: string;
-  titleTranslationKey: string;
-};
-
-const POPUP_STYLES: Record<TPopupType, TPopupStyle> = {
-  success: {
-    icon: CircleCheck,
-    accentClassName: "bg-success",
-    glowClassName: "bg-success/30",
-    lightIconClassName:
-      "border-success/20 bg-success/10 text-success shadow-[0_8px_24px_rgba(34,197,94,0.10)]",
-    darkIconClassName:
-      "border-success/25 bg-success/15 text-success shadow-[0_10px_28px_rgba(34,197,94,0.14)]",
-    lightBorderClassName: "border-success/20",
-    darkBorderClassName: "border-success/25",
-    lightTitleClassName: "text-success",
-    darkTitleClassName: "text-success",
-    titleTranslationKey: "popup.success",
-  },
-  warning: {
-    icon: TriangleAlert,
-    accentClassName: "bg-warning",
-    glowClassName: "bg-warning/30",
-    lightIconClassName:
-      "border-warning/20 bg-warning/10 text-warning shadow-[0_8px_24px_rgba(245,158,11,0.10)]",
-    darkIconClassName:
-      "border-warning/25 bg-warning/15 text-warning shadow-[0_10px_28px_rgba(245,158,11,0.14)]",
-    lightBorderClassName: "border-warning/20",
-    darkBorderClassName: "border-warning/25",
-    lightTitleClassName: "text-warning",
-    darkTitleClassName: "text-warning",
-    titleTranslationKey: "popup.warning",
-  },
-  error: {
-    icon: CircleX,
-    accentClassName: "bg-danger",
-    glowClassName: "bg-danger/30",
-    lightIconClassName:
-      "border-danger/20 bg-danger/10 text-danger shadow-[0_8px_24px_rgba(239,68,68,0.10)]",
-    darkIconClassName:
-      "border-danger/25 bg-danger/15 text-danger shadow-[0_10px_28px_rgba(239,68,68,0.14)]",
-    lightBorderClassName: "border-danger/20",
-    darkBorderClassName: "border-danger/25",
-    lightTitleClassName: "text-danger",
-    darkTitleClassName: "text-danger",
-    titleTranslationKey: "popup.error",
-  },
-};
+/** Each kind of message: its icon, its title and its colour (Popup.styles.css). */
+const POPUP_STYLES: Record<TPopupType, { icon: typeof CircleCheck; titleTranslationKey: string }> =
+  {
+    success: { icon: CircleCheck, titleTranslationKey: "popup.success" },
+    warning: { icon: TriangleAlert, titleTranslationKey: "popup.warning" },
+    error: { icon: CircleX, titleTranslationKey: "popup.error" },
+  };
 
 const SWIPE_CLOSE_THRESHOLD = 18;
+
+/** Phones show popups at the bottom, above the tab bar (see System.styles.css). */
+const isBottomPlacement = (): boolean => window.matchMedia("(max-width: 767px)").matches;
 
 const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => {
   const [locallyClosing, setLocallyClosing] = useState(false);
   const isClosing = externallyClosing || locallyClosing;
   const closeCallback = useRef(onClose);
-  closeCallback.current = onClose;
+  useLayoutEffect(() => {
+    closeCallback.current = onClose;
+  }, [onClose]);
   const requestClose = () => {
     if (isClosing) return;
     touchStartYRef.current = null;
@@ -114,9 +69,7 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
   const [translateY, setTranslateY] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const style: TPopupStyle = useMemo(() => {
-    return POPUP_STYLES[popup.type];
-  }, [popup.type]);
+  const style = POPUP_STYLES[popup.type];
 
   const Icon = style.icon;
 
@@ -124,22 +77,6 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
   const title: string = popup.title || defaultTitle;
 
   const role: "alert" | "status" = popup.type === "success" ? "status" : "alert";
-
-  const borderClassName: string =
-    theme === "light" ? style.lightBorderClassName : style.darkBorderClassName;
-
-  const iconClassName: string =
-    theme === "light" ? style.lightIconClassName : style.darkIconClassName;
-
-  const titleClassName: string =
-    theme === "light" ? style.lightTitleClassName : style.darkTitleClassName;
-
-  const messageClassName: string = theme === "light" ? "text-darkgray/90" : "text-white/88";
-
-  const closeButtonClassName: string =
-    theme === "light"
-      ? "border-black/8 bg-white/55 text-darkgray/70 hover:border-black/12 hover:bg-white/75 hover:text-darkgray"
-      : "border-white/12 bg-black/20 text-white/70 hover:border-white/18 hover:bg-black/30 hover:text-white";
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>): void => {
     if (isClosing) {
@@ -158,6 +95,12 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
     const currentY: number = event.touches[0].clientY;
     const difference: number = currentY - touchStartYRef.current;
 
+    // Phones: the popup sits above the tab bar, so it is swiped down to close.
+    if (isBottomPlacement()) {
+      setTranslateY(Math.max(0, difference));
+      return;
+    }
+
     // Il popup può essere trascinato solamente verso l'alto.
     setTranslateY(Math.min(0, difference));
   };
@@ -170,7 +113,7 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
     touchStartYRef.current = null;
     setIsDragging(false);
 
-    if (translateY <= -SWIPE_CLOSE_THRESHOLD) {
+    if (Math.abs(translateY) >= SWIPE_CLOSE_THRESHOLD) {
       requestClose();
       return;
     }
@@ -196,6 +139,7 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
         role={role}
         aria-live={popup.type === "success" ? "polite" : "assertive"}
         aria-atomic="true"
+        data-tone={popup.type}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -204,22 +148,16 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
         className={`popup-surface ${
           isClosing ? "animate-popup-exit" : translateY === 0 ? "animate-popup-enter" : ""
         } ${
-          isDragging && !isClosing ? "transition-none" : "transition-all duration-300 ease-out"
-        } ${getLiquidGlassClass(theme)} ${borderClassName} pointer-events-auto relative isolate flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 select-none sm:max-w-md`}
+          isDragging && !isClosing ? "transition-none" : "transition-[transform,opacity] duration-300 ease-out"
+        } ${getLiquidGlassClass(theme)} pointer-events-auto relative isolate flex w-full max-w-sm items-center gap-3 overflow-hidden border select-none sm:max-w-md`}
       >
-        <div
-          className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border ${iconClassName}`}
-        >
-          <span className="pointer-events-none absolute inset-px rounded-[13px] bg-linear-to-b from-white/35 via-white/8 to-transparent" />
-          <Icon className="relative z-10" size={20} strokeWidth={2.2} />
-        </div>
+        <span className="popup-surface__icon" aria-hidden="true">
+          <Icon size={19} strokeWidth={2.4} />
+        </span>
 
-        <div className="relative z-10 min-w-0 flex-1 pt-0.5">
-          <h3 className={`text-sm leading-5 font-bold ${titleClassName}`}>{title}</h3>
-
-          <p className={`mt-0.5 wrap-break-word text-[13px] leading-5 ${messageClassName}`}>
-            {popup.message}
-          </p>
+        <div className="popup-surface__copy">
+          <h3 className="popup-surface__title">{title}</h3>
+          <p className="popup-surface__message">{popup.message}</p>
         </div>
 
         <button
@@ -229,14 +167,9 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
           onTouchStart={(event) => event.stopPropagation()}
           onTouchEnd={(event) => event.stopPropagation()}
           onClick={requestClose}
-          className={`group relative z-10 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[11px] border transition-all duration-300 hover:rotate-90 active:scale-90 disabled:pointer-events-none ${closeButtonClassName}`}
+          className="popup-surface__close"
         >
-          <span className="pointer-events-none absolute inset-px rounded-[10px] bg-linear-to-b from-white/25 to-transparent opacity-70" />
-          <X
-            className="relative z-10 transition-transform duration-300 group-hover:scale-110"
-            size={16}
-            strokeWidth={2}
-          />
+          <X size={15} strokeWidth={2.4} />
         </button>
       </div>
     </div>,

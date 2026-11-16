@@ -1,5 +1,8 @@
 {
-  "modalChoice": { "back": "Indietro", "clear": "Azzera selezione" },
+  "modalChoice": {
+    "back": "Indietro",
+    "clear": "Azzera selezione"
+  },
   "loader": {
     "loading": "Caricamento..."
   },
@@ -91,7 +94,9 @@
     "navigationLabel": "Navigazione tra le pagine",
     "goToPage": "Vai alla pagina {{page}}",
     "results": "{{first}}–{{last}} di {{total}}",
-    "perPage": "Per pagina"
+    "perPage": "Per pagina",
+    "jumpTo": "Vai alla pagina",
+    "pageOf": "Pagina {{page}} di {{total}}"
   },
   "autocomplete": {
     "placeholder": "Seleziona",
@@ -104,5 +109,21 @@
   "datePicker": {
     "placeholder": "Seleziona una data",
     "toggleCalendar": "Apri o chiudi il calendario"
+  },
+  "common": {
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "deleting": "Eliminazione…"
+  },
+  "settings": {
+    "appearance": {
+      "title": "Aspetto",
+      "description": "Regola il vetro dell'interfaccia, come su iPhone.",
+      "glass": "Liquid Glass",
+      "glassHint": "Smerigliato è più leggibile; trasparente lascia intravedere il contenuto sotto barre e menu.",
+      "frosted": "Smerigliato",
+      "clear": "Trasparente",
+      "preview": "Anteprima"
+    }
   }
 }

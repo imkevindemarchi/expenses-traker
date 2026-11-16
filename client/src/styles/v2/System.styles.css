@@ -1,0 +1,1572 @@
+/* ==========================================================================
+   iOS 27 system layer — loaded last.
+   The app follows Apple's own system apps:
+   - grouped system background, opaque grouped cards for content
+   - Liquid Glass only for the navigation layer (bars, toolbars, menus, sheets)
+   - the brand green as the app tint, with legible (darker) text tint in light
+   - Dynamic Type scale, leading large titles, concentric radii
+   - adjustable glass clarity (iOS 27 Liquid Glass slider): --lg-glass-clarity
+   ========================================================================== */
+
+/* ---------- Tokens ---------- */
+:root {
+  /* Dynamic Type (iPhone, default size). */
+  --ios-large-title: 34px;
+  --ios-title-1: 28px;
+  --ios-title-2: 22px;
+  --ios-title-3: 20px;
+  --ios-headline: 17px;
+  --ios-body: 17px;
+  --ios-callout: 16px;
+  --ios-subhead: 15px;
+  --ios-footnote: 13px;
+  --ios-caption-1: 12px;
+  --ios-caption-2: 11px;
+
+  /* Layout rhythm. */
+  --ios-margin: 20px;
+  --ios-group-gap: 28px;
+  --ios-row-height: 52px;
+  --ios-card-radius: 26px;
+  --ios-control-height: 50px;
+
+  /* 0 = frosted (most legible) … 1 = clear (most glass). Set from Settings. */
+  --lg-glass-clarity: 0.5;
+  /* Every Liquid Glass surface follows the slider:
+     - 0%   frosted: each surface 1.5× its blur and tint, the most legible;
+     - 50%  (default) each surface exactly as designed;
+     - 100% clear: every surface takes the Home search field's material —
+            8px blur and its see-through tint (--lg-input-glass).
+     --lg-frost-t goes 1 → 0 over the first half, --lg-clear-t 0 → 1 over the
+     second; blurs are "X · --lg-blur-k + 8px · --lg-clear-t" and fixed tints
+     are mixed into --lg-input-glass by --lg-clear-t. */
+  --lg-frost-t: clamp(0, (0.5 - var(--lg-glass-clarity)) * 2, 1);
+  --lg-clear-t: clamp(0, (var(--lg-glass-clarity) - 0.5) * 2, 1);
+  --lg-blur-k: calc(1 + 0.5 * var(--lg-frost-t) - var(--lg-clear-t));
+  --lg-fill-scale: calc(1 + 0.5 * var(--lg-frost-t));
+  /* Floating chrome (dock, search, floating buttons): one material for the
+     whole app. 0% = frosted, 50% = default, 100% = the clear search field. */
+  --lg-chrome-blur: calc(14px * var(--lg-blur-k) + 8px * var(--lg-clear-t));
+}
+
+:root,
+[data-theme="light"] {
+  --lg-tint: #23a023;
+  --lg-tint-strong: #1c861c;
+  --lg-tint-fill: #2eb82e;
+  --lg-bg: #eff5ef;
+  --lg-bg-secondary: #ffffff;
+  --lg-bg-tertiary: #eff5ef;
+  --lg-label: #171c18;
+  --lg-label-2: rgb(48 58 48 / 70%);
+  --lg-label-3: rgb(48 58 48 / 42%);
+  --lg-separator: rgb(35 55 35 / 13%);
+  --lg-fill: rgb(95 115 95 / 11%);
+  --lg-fill-strong: rgb(95 115 95 / 19%);
+
+  --lg-card: #ffffff;
+  --lg-card-edge: rgb(0 0 0 / 0%);
+  --lg-card-shadow: 0 0.5px 0 rgb(20 50 20 / 6%), 0 1px 2px rgb(20 50 20 / 4%);
+
+  /* Frosted (0%) → designed (50%) → the search field's tint (100%). */
+  --lg-glass-fill: rgb(
+    249 255 249 / calc(55% + 23% * var(--lg-frost-t) - 23% * var(--lg-clear-t))
+  );
+  --lg-glass-fill-clear: rgb(249 255 249 / calc(46% + 32% * var(--lg-frost-t) - 14% * var(--lg-clear-t)));
+  --lg-glass-fill-strong: rgb(
+    249 255 249 / calc(73% + 17% * var(--lg-frost-t) - 41% * var(--lg-clear-t))
+  );
+  /* The Home search field's glass: what every surface becomes at 100%. */
+  --lg-input-glass: rgb(249 255 249 / 32%);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --lg-tint: #4cd94c;
+  --lg-tint-strong: #7be37b;
+  --lg-tint-fill: #32cd32;
+  --lg-bg: #000000;
+  --lg-bg-secondary: #171c18;
+  --lg-bg-tertiary: #242b25;
+  --lg-label: #eff5ef;
+  --lg-label-2: rgb(225 235 225 / 66%);
+  --lg-label-3: rgb(225 235 225 / 36%);
+  --lg-separator: rgb(225 255 225 / 12%);
+  --lg-fill: rgb(110 130 110 / 24%);
+  --lg-fill-strong: rgb(110 130 110 / 36%);
+
+  --lg-card: #171c18;
+  --lg-card-edge: rgb(255 255 255 / 0%);
+  --lg-card-shadow: none;
+
+  --lg-glass-fill: rgb(27 34 28 / calc(55% + 25% * var(--lg-frost-t) - 20% * var(--lg-clear-t)));
+  --lg-glass-fill-clear: rgb(25 30 26 / calc(48% + 32% * var(--lg-frost-t) - 13% * var(--lg-clear-t)));
+  --lg-glass-fill-strong: rgb(
+    33 40 34 / calc(74% + 18% * var(--lg-frost-t) - 39% * var(--lg-clear-t))
+  );
+  --lg-input-glass: rgb(25 30 26 / 35%);
+
+  color-scheme: dark;
+}
+
+/* Legacy palette follows the system tokens. */
+:root {
+  --color-primary: var(--lg-tint-fill);
+  --color-canvas-light: #eff5ef;
+  --color-canvas-dark: #000000;
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #171c18;
+}
+
+/* ---------- Page canvas ---------- */
+html[data-theme],
+html[data-theme] body,
+html[data-theme] #root,
+html[data-theme] .app-layout {
+  background-color: var(--lg-bg) !important;
+}
+html {
+  font-size: 16px;
+}
+body {
+  color: var(--lg-label);
+  letter-spacing: -0.008em;
+}
+
+/* ---------- Large title (navigation bar) ----------
+   Leading-aligned like iOS; collapses into the centred inline title (Toolbar). */
+.ui-page-heading:not([data-ui-compact="true"]) {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  padding-inline: 0 !important;
+  text-align: left !important;
+}
+.ui-page-heading:not([data-ui-compact="true"]) .ui-page-title {
+  padding-block: 4px 2px !important;
+  color: var(--lg-label) !important;
+  font-size: var(--ios-large-title) !important;
+  line-height: 41px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.028em !important;
+  text-align: left !important;
+  text-transform: none !important;
+}
+.ui-page-heading:not([data-ui-compact="true"]) .ui-page-title::first-letter {
+  text-transform: uppercase;
+}
+div:has(> .ui-page-heading:not([data-ui-compact="true"])),
+div:has(> .contents > .ui-page-heading:not([data-ui-compact="true"])) {
+  justify-content: flex-start !important;
+}
+.ui-page-heading[data-ui-compact="true"] .ui-page-title {
+  color: var(--lg-label) !important;
+  text-transform: none !important;
+}
+
+/* ---------- Section headers (grouped lists) ---------- */
+
+/* ---------- Grouped content cards: opaque, quiet, concentric ---------- */
+
+/* ---------- Pills / chips: tinted fills, no borders ---------- */
+
+/* ---------- Switch (UISwitch) ---------- */
+/* The thumb stretches while pressed, like UISwitch. */
+
+/* ---------- Icon buttons: round glass, 44pt ---------- */
+.icon-button {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 999px !important;
+}
+.icon-button:not([data-icon-size="compact"]) {
+  border: 0 !important;
+  background-color: var(--lg-fill) !important;
+  color: var(--lg-label) !important;
+  box-shadow: none !important;
+}
+.icon-button:not([data-icon-size="compact"]):hover:not(:disabled) {
+  background-color: var(--lg-fill-strong) !important;
+}
+.icon-button[data-icon-variant="danger"]:not([data-icon-size="compact"]) {
+  background-color: color-mix(in srgb, var(--color-danger) 12%, transparent) !important;
+  color: var(--color-danger) !important;
+}
+.icon-button[data-icon-variant="success"]:not([data-icon-size="compact"]) {
+  background-color: color-mix(in srgb, var(--color-success) 14%, transparent) !important;
+  color: var(--color-success) !important;
+}
+.icon-button:active:not(:disabled) {
+  scale: 0.9;
+  transition: scale 380ms var(--lg-spring);
+}
+
+/* ---------- Buttons: capsules, 50pt large / 44pt regular ---------- */
+button[data-ui-button]:not([class*="size-"]):not(.floating-month-button) {
+  min-height: 44px;
+  font-size: var(--ios-callout) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+button[data-ui-button].bg-primary {
+  background-color: var(--lg-tint-fill) !important;
+}
+
+/* ---------- Sheets ---------- */
+.modal-backdrop {
+  background-color: rgb(0 0 0 / 24%) !important;
+}
+.modal-surface .modal-title {
+  color: var(--lg-label);
+  font-size: var(--ios-headline) !important;
+  line-height: 22px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.02em;
+}
+.modal-surface .modal-description {
+  color: var(--lg-label-2) !important;
+  font-size: var(--ios-subhead) !important;
+  line-height: 20px !important;
+}
+@media (max-width: 639px) {
+  /* Grabber, as on iOS sheets. */
+  .modal-surface.glass-surface::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    z-index: 5;
+    width: 36px;
+    height: 5px;
+    margin-left: -18px;
+    border-radius: 999px;
+    background: var(--lg-label-3);
+    opacity: 0.6;
+  }
+  .modal-surface .modal-header {
+    padding-top: 22px !important;
+  }
+  /* One grabber only: the header's own bar would draw a second one. */
+  .modal-surface .modal-header::before {
+    display: none !important;
+  }
+}
+
+/* ---------- Grouped list rows (inset grouped) ----------
+   Utility used by pages: <div class="ios-list"><a class="ios-row">… */
+
+/* ---------- Text colours ---------- */
+.text-gray {
+  color: var(--lg-label-2) !important;
+}
+.text-darkgray {
+  color: var(--lg-label-2) !important;
+}
+[data-theme="light"] .text-black,
+[data-theme="dark"] .text-white {
+  color: var(--lg-label) !important;
+}
+.text-primary {
+  color: var(--lg-tint) !important;
+}
+.bg-primary {
+  background-color: var(--lg-tint-fill);
+}
+
+/* ---------- Mobile-first spacing ---------- */
+@media (max-width: 639px) {
+  .app-page-container {
+    padding-inline: 16px !important;
+  }
+}
+
+/* ---------- Slider (UISlider) ---------- */
+.lg-slider {
+  --lg-slider-value: 50%;
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.lg-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--lg-tint-fill) 0 var(--lg-slider-value),
+    var(--lg-fill-strong) var(--lg-slider-value) 100%
+  );
+}
+.lg-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--lg-fill-strong);
+}
+.lg-slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--lg-tint-fill);
+}
+.lg-slider::-webkit-slider-thumb {
+  width: 28px;
+  height: 28px;
+  margin-top: -11px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 18%),
+    0 0 0 0.5px rgb(0 0 0 / 6%);
+  transition: scale 300ms var(--lg-spring);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.lg-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 18%);
+}
+.lg-slider:active::-webkit-slider-thumb {
+  scale: 1.15;
+}
+.lg-slider:focus-visible {
+  outline: none;
+}
+.lg-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--lg-tint) 30%, transparent),
+    0 3px 8px rgb(0 0 0 / 18%);
+}
+
+/* ---------- Settings → Appearance ---------- */
+.lg-clarity {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lg-clarity__preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 112px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--lg-bg-tertiary);
+}
+.lg-clarity__stripes {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--lg-tint-fill) 70%, transparent) 0 14px,
+      transparent 14px 28px
+    ),
+    radial-gradient(60% 80% at 30% 40%, var(--lg-tint-fill), transparent 70%);
+  opacity: 0.85;
+}
+.lg-clarity__glass {
+  position: relative;
+  padding: 12px 22px;
+  border: 0.5px solid transparent;
+  border-radius: 999px;
+  color: var(--lg-label);
+  font-size: 15px;
+  font-weight: 600;
+}
+.lg-clarity__label {
+  color: var(--lg-label);
+  font-size: var(--ios-body);
+  font-weight: 600;
+}
+.lg-clarity__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lg-clarity__end {
+  flex-shrink: 0;
+  color: var(--lg-label-2);
+  font-size: var(--ios-footnote);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Record detail on phones — the contact-card pattern
+   - centred hero: large round avatar tinted by status, name, @username, status
+   - the hero scrolls away; only the inline title stays in the navigation bar
+   ========================================================================== */
+
+/* Inline title shown in the navigation bar once the record hero scrolls away. */
+@keyframes lg-inline-title-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ==========================================================================
+   Phones: search lives at the bottom, floating just above the tab bar, with
+   its "+" button beside it — as in iOS 26/27.
+   ========================================================================== */
+@media (max-width: 767px) {
+  .lg-search-dock {
+    position: fixed;
+    left: max(14px, env(safe-area-inset-left, 0px));
+    right: max(14px, env(safe-area-inset-right, 0px));
+    bottom: calc(var(--lg-tabbar-offset) - 2px);
+    z-index: 88;
+    width: auto !important;
+    margin: 0 !important;
+    /* No entrance of its own: an opacity animation here (or on any ancestor)
+       makes it a "backdrop root", so the glass below would render without
+       its blur until the animation ends and then snap to frosted. It stays
+       put like the tab bar, also across the skeleton → page hand-over. */
+    animation: none;
+  }
+  .lg-search-dock > div > div {
+    gap: 10px !important;
+    padding: 0 !important;
+  }
+  .lg-search-dock > div > div > div:has(.lg-field) {
+    flex: 1;
+    width: auto !important;
+    min-width: 0;
+  }
+  .lg-search-dock .lg-field[data-variant="search"] {
+    --field-height: 48px;
+  }
+
+  .lg-search-dock .icon-button {
+    flex-shrink: 0;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px;
+    min-height: 48px;
+    color: var(--lg-tint) !important;
+  }
+  /* Room for the search bar at the end of the page. */
+  .app-layout--tabbar .app-page-container:has(.lg-search-dock) {
+    padding-bottom: calc(var(--lg-tabbar-offset) + 48px + 48px) !important;
+  }
+}
+@keyframes lg-search-dock-in {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg-search-dock {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Phones: one navigation row, as in iOS (Photos, Music)
+   - no logo bar on top: the large title starts the page, leading-aligned
+   - the actions capsule sits on the same row, at the right of the title
+   - detail pages use the same row for back and actions
+   ========================================================================== */
+@media (max-width: 767px) {
+  .crm-navbar {
+    display: none !important;
+  }
+  .app-page-container:not(.immersive-page-container) {
+    padding-top: calc(var(--app-safe-top) + 10px) !important;
+  }
+  /* The large title shares its row with the actions capsule (52px high):
+     same height, vertically centred, and it never runs underneath it. */
+  .app-page-container:not(.immersive-page-container)
+    .ui-page-heading:not([data-ui-compact="true"]) {
+    display: flex !important;
+    align-items: center;
+    min-height: calc(var(--lg-toolbar-size) + 8px);
+    max-width: calc(100% - var(--lg-toolbar-right, 0px) - 12px) !important;
+  }
+  .app-page-container:not(.immersive-page-container)
+    .ui-page-heading:not([data-ui-compact="true"])
+    .ui-page-title {
+    padding-block: 0 !important;
+  }
+  .app-page-container:not(.immersive-page-container)
+    .relative.flex.min-h-14:has(> div > .contents > .ui-page-heading) {
+    min-height: calc(var(--lg-toolbar-size) + 8px) !important;
+  }
+}
+
+/* ==========================================================================
+   Record identity: avatar initials, @username pill (tap to copy)
+   ========================================================================== */
+/* Large titles never show a frame (a legacy rule coloured "border-t…" classes). */
+.ui-page-heading:not([data-ui-compact="true"]) {
+  border-color: transparent !important;
+  border-width: 0 !important;
+}
+.record-header-subtitle {
+  color: var(--lg-label-2) !important;
+}
+
+/* The name reads as a name: status colour lives on the avatar and the chip. */
+
+/* Copy username: a small round button right beside the name. */
+.record-header-shell .record-header-action {
+  align-self: center;
+}
+@media (min-width: 768px) {
+  /* Larger screens: avatar | name + copy | … , username and status underneath. */
+  .record-header-shell.has-record-avatar {
+    grid-template-columns: 56px auto 32px minmax(0, 1fr) !important;
+  }
+  .record-header-shell.has-record-avatar .ui-page-heading {
+    grid-column: 2 !important;
+  }
+  .record-header-shell.has-record-avatar .record-header-action {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+  .record-header-shell.has-record-avatar .record-header-subtitle {
+    grid-column: 2 / -1 !important;
+  }
+}
+
+/* Pinned record name (phones): the copy button rides along beside the pill. */
+div.fixed:has(> .contents > .lg-inline-action) {
+  gap: 6px;
+}
+.lg-inline-action {
+  flex-shrink: 0;
+  animation: lg-inline-title-in 380ms var(--lg-ease) both;
+}
+
+/* The page wash also covers the strip reserved for the CRM capsule at the top,
+   so the screen has no dark band above the content. */
+
+/* Search bar and "+" use exactly the tab bar's glass, so the bottom chrome
+   reads as one family. */
+@media (max-width: 767px) {
+  .lg-search-dock .lg-field[data-variant="search"] .lg-field__control,
+  .lg-search-dock .icon-button.icon-button {
+    border: 0.5px solid transparent !important;
+    background-color: var(--lg-glass-fill-clear) !important;
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 30%) 0%,
+      rgb(255 255 255 / 0%) 38%,
+      rgb(255 255 255 / 0%) 68%,
+      rgb(255 255 255 / 14%) 100%
+    ) !important;
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+    box-shadow:
+      0 8px 24px -6px rgb(0 0 0 / 22%),
+      0 1px 3px rgb(0 0 0 / 10%),
+      inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+      inset 1px 0 0.5px rgb(255 255 255 / 30%),
+      inset -1px 0 0.5px rgb(255 255 255 / 20%),
+      inset 0 -1px 0.5px rgb(255 255 255 / 35%),
+      inset 0 0 0 0.5px rgb(0 0 0 / 8%) !important;
+  }
+  [data-theme="dark"] .lg-search-dock .lg-field[data-variant="search"] .lg-field__control,
+  [data-theme="dark"] .lg-search-dock .icon-button.icon-button {
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 12%) 0%,
+      rgb(255 255 255 / 0%) 38%,
+      rgb(255 255 255 / 0%) 68%,
+      rgb(255 255 255 / 6%) 100%
+    ) !important;
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+    box-shadow:
+      0 10px 28px -6px rgb(0 0 0 / 60%),
+      inset 0 1px 0.5px rgb(255 255 255 / 30%),
+      inset 0 -1px 0.5px rgb(255 255 255 / 10%),
+      inset 0 0 0 0.5px rgb(255 255 255 / 8%) !important;
+  }
+}
+
+/* Search focused (phones): the field rides just above the keyboard and the tab
+   bar steps aside, as in iOS 26/27 (useSearchKeyboard). */
+@media (max-width: 767px) {
+  .lg-search-dock {
+    transition: bottom 320ms var(--lg-ease);
+  }
+  .lg-tabbar-dock {
+    transition:
+      opacity 220ms ease,
+      translate 420ms var(--lg-spring);
+  }
+  html[data-search-focused] .lg-search-dock {
+    bottom: calc(var(--lg-keyboard-inset, 0px) + 10px);
+  }
+  html[data-search-focused] .lg-tabbar-dock {
+    opacity: 0;
+    translate: 0 24px;
+    pointer-events: none;
+  }
+}
+
+/* Tab bar hidden while scrolling down (phones, useTabBarAutoHide): it slides
+   away and the bottom search settles into its place. */
+@media (max-width: 767px) {
+  .lg-search-dock {
+    transition: bottom 420ms var(--lg-spring);
+  }
+  html[data-tabbar-hidden] .lg-tabbar-dock {
+    opacity: 0;
+    translate: 0 calc(100% + 24px);
+    pointer-events: none;
+  }
+  html[data-tabbar-hidden]:not([data-search-focused]) .lg-search-dock {
+    bottom: max(14px, var(--lg-safe-bottom));
+  }
+}
+
+/* Scroll-edge effect (phones), as in iOS 26/27: content fades and softens as
+   it slides under the top chrome (once scrolled) and under the bottom bars. */
+@media (max-width: 767px) {
+  .app-layout::before,
+  .app-layout::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 55;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(calc(6px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0)));
+    backdrop-filter: blur(calc(6px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0)));
+    transition: opacity 260ms ease;
+  }
+  .app-layout::before {
+    top: 0;
+    height: calc(var(--lg-toolbar-top, 0px) + var(--lg-toolbar-size, 44px) + 30px);
+    background: linear-gradient(
+      180deg,
+      var(--lg-bg) 0%,
+      color-mix(in srgb, var(--lg-bg) 70%, transparent) 55%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+    opacity: 0;
+  }
+  html[data-scrolled] .app-layout::before {
+    opacity: 1;
+  }
+  .app-layout::after {
+    bottom: 0;
+    height: calc(var(--lg-tabbar-offset) + 40px);
+    background: linear-gradient(
+      0deg,
+      var(--lg-bg) 0%,
+      color-mix(in srgb, var(--lg-bg) 60%, transparent) 45%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(0deg, #000 40%, transparent 100%);
+    mask-image: linear-gradient(0deg, #000 40%, transparent 100%);
+  }
+}
+
+/* Filter button with an additional filter in effect: tinted, like an active
+   filter button in iOS. */
+
+/* Large titles break between words only, never inside one. */
+.ui-page-heading:not([data-ui-compact="true"]) .ui-page-title {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+/* Phones: when the actions leave too little room, the large title moves to the
+   row under them (useToolbarInsets → data-lg-large-title="below"). */
+@media (max-width: 767px) {
+  html[data-lg-large-title="below"]
+    .app-page-container:not(.immersive-page-container)
+    .ui-page-heading:not([data-ui-compact="true"]) {
+    max-width: 100% !important;
+    margin-top: calc(var(--lg-toolbar-size) + 8px) !important;
+  }
+}
+
+/* ==========================================================================
+   Every input across the app wears the Home search bar's glass — the same
+   clear Liquid Glass as the tab bar. Single-line controls are capsules,
+   multi-line ones keep generous concentric corners.
+   ========================================================================== */
+:is(
+  .lg-field__control,
+  .lg-select-trigger > button,
+  .lg-textarea,
+  .date-picker-control,
+  .modal-choice-trigger,
+  .modal-surface div:has(> textarea)
+) {
+  border: 0.5px solid transparent !important;
+  background-color: var(--lg-glass-fill-clear) !important;
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 30%) 0%,
+    rgb(255 255 255 / 0%) 38%,
+    rgb(255 255 255 / 0%) 68%,
+    rgb(255 255 255 / 14%) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+  backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+  box-shadow:
+    0 8px 24px -6px rgb(0 0 0 / 18%),
+    0 1px 3px rgb(0 0 0 / 8%),
+    inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+    inset 1px 0 0.5px rgb(255 255 255 / 30%),
+    inset -1px 0 0.5px rgb(255 255 255 / 20%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 35%),
+    inset 0 0 0 0.5px rgb(0 0 0 / 8%) !important;
+  transition:
+    background-color 220ms ease,
+    scale 420ms var(--lg-spring) !important;
+}
+[data-theme="dark"]
+  :is(
+    .lg-field__control,
+    .lg-select-trigger > button,
+    .lg-textarea,
+    .date-picker-control,
+    .modal-choice-trigger,
+    .modal-surface div:has(> textarea)
+  ) {
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 12%) 0%,
+    rgb(255 255 255 / 0%) 38%,
+    rgb(255 255 255 / 0%) 68%,
+    rgb(255 255 255 / 6%) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+  backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+  box-shadow:
+    0 10px 28px -6px rgb(0 0 0 / 55%),
+    inset 0 1px 0.5px rgb(255 255 255 / 30%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 10%),
+    inset 0 0 0 0.5px rgb(255 255 255 / 8%) !important;
+}
+
+/* Shape: capsules for one line, rounded sheets for text areas. */
+.lg-field__control,
+.date-picker-control {
+  min-height: 48px;
+  border-radius: 999px !important;
+}
+.lg-field:not([data-variant="search"]) {
+  --field-height: 48px;
+}
+.lg-field__control {
+  padding-inline: 16px 8px !important;
+}
+.modal-surface div:has(> textarea) {
+  border-radius: 22px !important;
+}
+
+/* Hover / focus: the glass brightens a touch — no rings. */
+:is(
+  .lg-field__control,
+  .lg-select-trigger > button,
+  .lg-textarea,
+  .date-picker-control,
+  .modal-choice-trigger,
+  .modal-surface div:has(> textarea)
+):is(:hover, :focus-within, [aria-expanded="true"]) {
+  background-color: var(--lg-glass-fill) !important;
+}
+
+/* Errors keep a red rim. */
+.lg-field[data-invalid] .lg-field__control.lg-field__control {
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--color-danger) 75%, transparent),
+    0 8px 24px -6px rgb(0 0 0 / 18%) !important;
+}
+
+/* Date picker: a capsule like the others (no underline). */
+.date-picker-control {
+  padding: 0 6px 0 4px;
+}
+.date-picker-control .date-picker-rule {
+  display: none !important;
+}
+.date-picker-control input {
+  padding-block: 12px !important;
+  font-size: 16px !important;
+}
+.date-picker-control > span:first-child {
+  width: 38px;
+  height: 38px;
+}
+/* …and identical to the text fields: label, insets, icon, open = focused. */
+.date-picker-field > label {
+  margin-bottom: 7px !important;
+  padding-left: 14px;
+  color: var(--lg-label-2) !important;
+  font-size: 13px !important;
+  line-height: 18px !important;
+  font-weight: 600 !important;
+}
+.date-picker-control.date-picker-control {
+  gap: 10px !important;
+  min-height: 48px;
+  padding: 0 8px 0 16px !important;
+}
+.date-picker-control > div:first-child:not(.date-picker-rule) {
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--field-icon, var(--lg-label-2)) !important;
+}
+.date-picker-control > div:first-child:not(.date-picker-rule) svg {
+  width: 18px;
+  height: 18px;
+}
+.date-picker-control:has(input[aria-expanded="true"]) > div:first-child:not(.date-picker-rule),
+.date-picker-control:focus-within > div:first-child:not(.date-picker-rule) {
+  color: var(--lg-tint) !important;
+}
+.date-picker-control input {
+  height: 46px;
+  padding-block: 0 !important;
+  color: var(--field-text, var(--lg-label)) !important;
+}
+.date-picker-control > button {
+  width: 36px !important;
+  height: 36px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--field-icon, var(--lg-label-2)) !important;
+}
+.date-picker-control:has(input[aria-expanded="true"]),
+.date-picker-control:focus-within {
+  background-color: var(--lg-glass-fill) !important;
+}
+/* No green ring around the field once a date is picked (focus comes back to
+   it when the calendar closes): the text fields have none either. */
+.date-picker-control:focus-within,
+.date-picker-control input:focus,
+.date-picker-control input:focus-visible {
+  outline: none !important;
+}
+
+/* Choice fields inside sheets. */
+
+/* ==========================================================================
+   Filter row
+   - sort / more-filters controls: a round glass button, icon only (no chevron)
+   - the row scrolls sideways, so it gets vertical room for the selected chip's
+     glow instead of clipping it into a rectangle
+   ========================================================================== */
+.lg-filter-rail {
+  padding-top: 10px !important;
+  padding-bottom: 14px !important;
+  margin-top: -6px;
+  margin-bottom: -8px;
+}
+.lg-chip.lg-chip--round {
+  flex-shrink: 0;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  border: 0.5px solid transparent !important;
+  border-radius: 999px;
+  color: var(--lg-label);
+  background-color: var(--lg-glass-fill-clear) !important;
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 30%) 0%,
+    rgb(255 255 255 / 0%) 38%,
+    rgb(255 255 255 / 0%) 68%,
+    rgb(255 255 255 / 14%) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+  backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+  box-shadow:
+    0 6px 18px -6px rgb(0 0 0 / 20%),
+    inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 35%),
+    inset 0 0 0 0.5px rgb(0 0 0 / 8%) !important;
+}
+[data-theme="dark"] .lg-chip.lg-chip--round {
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 12%) 0%,
+    rgb(255 255 255 / 0%) 38%,
+    rgb(255 255 255 / 0%) 68%,
+    rgb(255 255 255 / 6%) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+  backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+  box-shadow:
+    0 8px 20px -6px rgb(0 0 0 / 55%),
+    inset 0 1px 0.5px rgb(255 255 255 / 30%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 10%),
+    inset 0 0 0 0.5px rgb(255 255 255 / 8%) !important;
+}
+.lg-chip.lg-chip--round .lg-chip__icon,
+.lg-chip.lg-chip--round > svg {
+  width: 17px !important;
+  height: 17px !important;
+  margin: 0;
+}
+.lg-chip.lg-chip--round .lg-chip__icon > svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+/* Open menu or an additional filter in effect: tinted glass. */
+.lg-chip.lg-chip--round:is([data-open], [data-active]) {
+  background-color: var(--lg-tint-fill) !important;
+  color: #fff !important;
+}
+
+/* ==========================================================================
+   iOS 27 buttons: .glass for secondary actions, .glassProminent (solid tint)
+   for primary ones and selected chips. A faint inner specular edge, never a
+   coloured glow or gradient around them.
+   ========================================================================== */
+.lg-chip[data-selected] {
+  border-color: transparent !important;
+  background-color: var(--lg-tint-fill) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0.5px 0 rgb(255 255 255 / 30%) !important;
+  color: #fff !important;
+}
+
+button[data-ui-button].bg-primary,
+button[data-ui-button].bg-primary:hover,
+button[data-ui-button].bg-primary:focus {
+  background-color: var(--lg-tint-fill) !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: inset 0 0.5px 0 rgb(255 255 255 / 28%) !important;
+  transform: none !important;
+}
+/* Own rule: next to "transform" the production CSS minifier (lightningcss)
+   folds "translate" into it and drops it. */
+button[data-ui-button][class].bg-primary,
+button[data-ui-button][class].bg-primary:hover,
+button[data-ui-button][class].bg-primary:focus {
+  translate: none !important;
+}
+button[data-ui-button].bg-primary:focus-visible {
+  outline: 2px solid var(--lg-tint);
+  outline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  button[data-ui-button].bg-primary:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+}
+button[data-ui-button].bg-primary:active:not(:disabled) {
+  filter: brightness(0.92);
+}
+/* Destructive primary: solid system red, same treatment. */
+button[data-ui-button].bg-red-500 {
+  background-color: var(--color-danger) !important;
+  box-shadow: inset 0 0.5px 0 rgb(255 255 255 / 25%) !important;
+}
+
+/* Tinted glass surfaces: no coloured halo. */
+
+/* Avatars: flat tint, no glow (as in Contacts). */
+
+/* ==========================================================================
+   Popups (phones): at the bottom, just above the tab bar — in thumb reach and
+   clear of the navigation bar — following the search bar, the hidden tab bar
+   and the keyboard. Swiped down to dismiss (Popup.component). Larger screens
+   keep them at the top right, like macOS notifications.
+   ========================================================================== */
+@media (max-width: 767px) {
+  .popup-shell.popup-shell {
+    top: auto !important;
+    bottom: calc(var(--lg-tabbar-offset) + 10px);
+    left: max(14px, env(safe-area-inset-left, 0px)) !important;
+    right: max(14px, env(safe-area-inset-right, 0px)) !important;
+    align-items: flex-end;
+    transition: bottom 420ms var(--lg-spring);
+  }
+  html:has(.lg-search-dock) .popup-shell.popup-shell {
+    bottom: calc(var(--lg-tabbar-offset) + 48px + 18px);
+  }
+  html[data-tabbar-hidden] .popup-shell.popup-shell {
+    bottom: calc(max(14px, var(--lg-safe-bottom)) + 10px);
+  }
+  html[data-tabbar-hidden]:has(.lg-search-dock) .popup-shell.popup-shell {
+    bottom: calc(max(14px, var(--lg-safe-bottom)) + 48px + 18px);
+  }
+  html[data-search-focused] .popup-shell.popup-shell {
+    bottom: calc(var(--lg-keyboard-inset, 0px) + 48px + 22px);
+  }
+  .popup-shell .popup-surface {
+    max-width: none;
+    border-radius: 26px !important;
+  }
+  /* Rise from below instead of dropping from the top. */
+  .popup-shell .animate-popup-enter {
+    animation: lg-popup-rise 460ms var(--lg-spring) both !important;
+  }
+  .popup-shell .animate-popup-exit {
+    animation: lg-popup-sink 260ms var(--lg-ease) both !important;
+  }
+}
+@keyframes lg-popup-rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes lg-popup-sink {
+  from {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.96;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .popup-shell .animate-popup-enter,
+  .popup-shell .animate-popup-exit {
+    animation-duration: 1ms !important;
+  }
+}
+
+/* ==========================================================================
+   CRM switch on phones: no capsule pinned at the top (its 44px go back to the
+   page — titles, actions and filters move up). It lives at the top of the
+   dock's "…" sheet, and the "…" button wears the active CRM's logo.
+   Larger screens keep the top capsule.
+   ========================================================================== */
+
+/* Active CRM on the dock's "…" button. */
+.lg-tabbar-more {
+  position: relative;
+}
+
+/* ==========================================================================
+   Performance & native feel
+   ========================================================================== */
+
+/* Touch: no grey tap flash, no double-tap zoom delay, no text-size jumps, no
+   long-press callouts or text selection on app chrome — like a native app. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+label,
+summary {
+  touch-action: manipulation;
+}
+button,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+[role="menuitemradio"],
+.lg-chip,
+.lg-tabbar,
+.lg-tabbar-dock,
+.mobile-floating-actions,
+.floating-actions,
+.ui-page-heading {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+img {
+  -webkit-user-drag: none;
+}
+
+/* Closed menus, selects and sheets stop being rendered once their closing
+   transition is over: invisible glass still costs a backdrop blur per frame. */
+.liquid-glass-panel--closed,
+.liquid-glass-sidebar-motion--closed {
+  animation: lg-hide-after-close 0s linear 360ms forwards;
+}
+@keyframes lg-hide-after-close {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* Long lists: cards off screen are not laid out or painted until needed. */
+
+/* Phones: glass that scrolls with the page uses a translucent fill instead of
+   a live blur (re-sampled every scroll frame); fixed chrome keeps real glass. */
+@media (max-width: 767px) {
+  .lg-chip,
+  .lg-chip.lg-chip--round,
+  .pagination-surface {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .lg-chip:not([data-selected]),
+  .lg-chip.lg-chip--round:not([data-open]):not([data-active]) {
+    background-color: var(--lg-glass-fill) !important;
+  }
+  /* The bottom scroll edge is a plain fade: the bars above it are glass already. */
+  .app-layout::after {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ==========================================================================
+   Page transitions (Layout → .lg-page, keyed by route)
+   A new page fades in while its title, filters and cards rise a few points,
+   like a pushed screen in iOS. Only opacity is animated on the page itself:
+   a transform there would re-anchor its fixed bars mid-animation. Going back
+   is not animated (iOS draws its own swipe-back).
+   ========================================================================== */
+.lg-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.lg-page > main {
+  flex: 1;
+  min-height: 0;
+}
+.lg-page[data-enter] {
+  animation: lg-page-in 240ms var(--lg-ease) both;
+}
+.lg-page[data-enter]
+  :is(
+    .ui-page-heading:not([data-ui-compact="true"]),
+    .lg-filter-rail-slot,
+    .record-header-shell,
+    .ui-user-card,
+    .ppv-list-card,
+    .user-list-card,
+    .detail-section,
+    .editor-section,
+    .settings-section,
+    .analytics-overview
+  ) {
+  /* backwards: nothing is held after the rise, so the title's own morph and
+     the cards' press feedback stay in control. */
+  animation: lg-content-rise 420ms var(--lg-spring) backwards;
+}
+@keyframes lg-page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lg-content-rise {
+  from {
+    translate: 0 10px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg-page[data-enter],
+  .lg-page[data-enter]
+    :is(
+      .ui-page-heading,
+      .lg-filter-rail-slot,
+      .record-header-shell,
+      .ui-user-card,
+      .ppv-list-card,
+      .user-list-card,
+      .detail-section,
+      .editor-section,
+      .settings-section,
+      .analytics-overview
+    ) {
+    animation: none !important;
+  }
+}
+
+/* ===================== Motion: one vocabulary for open / close ===================== */
+:root {
+  --lg-sheet-curve: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* The page fade must not leave an opacity layer behind once it is done. */
+.lg-page[data-enter] {
+  animation-fill-mode: backwards;
+}
+
+/* Dialogs and sheets: backdrop fades, surface moves; both also animate out. */
+.modal-backdrop::before {
+  animation: lg-fade-in 300ms var(--lg-ease) both;
+}
+.modal-backdrop[data-closing]::before {
+  animation: lg-fade-out 260ms var(--lg-ease) both;
+}
+.modal-backdrop[data-closing] {
+  pointer-events: none;
+}
+.modal-surface.glass-surface {
+  animation: lg-dialog-in 340ms var(--lg-ease) both;
+}
+.modal-backdrop[data-closing] .modal-surface.glass-surface {
+  animation: lg-dialog-out 200ms var(--lg-ease) both;
+}
+@media (max-width: 639px) {
+  .modal-surface.glass-surface:not(.modal-choice-surface) {
+    animation: lg-sheet-in 520ms var(--lg-sheet-curve) both;
+    transition: translate 420ms var(--lg-sheet-curve);
+  }
+  .modal-surface.glass-surface:not(.modal-choice-surface)[data-dragging] {
+    transition: none;
+  }
+  .modal-backdrop[data-closing] .modal-surface.glass-surface:not(.modal-choice-surface) {
+    animation: lg-sheet-out 300ms var(--lg-sheet-curve) both;
+  }
+  /* The header doubles as the grabber: vertical drags belong to the sheet. */
+  .modal-header {
+    touch-action: none;
+  }
+}
+@keyframes lg-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes lg-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lg-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+@keyframes lg-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes lg-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes lg-sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Menus, selects and popovers grow from their anchor with a short settle,
+   and shrink back into it when dismissed. */
+.liquid-glass-panel--open {
+  animation-name: lg-menu-in;
+  animation-duration: 360ms;
+  animation-timing-function: var(--lg-ease);
+}
+.liquid-glass-panel {
+  transition:
+    opacity 200ms var(--lg-ease),
+    scale 220ms var(--lg-ease);
+}
+.liquid-glass-panel--closed {
+  scale: 0.9;
+}
+@keyframes lg-menu-in {
+  0% {
+    opacity: 0;
+    scale: 0.72 0.6;
+  }
+  55% {
+    opacity: 1;
+  }
+  70% {
+    scale: 1.012 1.008;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* Sort / filter buttons beside the bottom search field (phones), as in iOS 27:
+   same size and glass as the field, tinted when a filter is applied. They are
+   fixed chrome, so they keep the real Liquid Glass (and its clarity setting):
+   the flat fill used for chips that scroll with the page must not reach them. */
+.lg-search-accessories {
+  display: none;
+}
+@media (max-width: 767px) {
+  .lg-search-accessories {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .lg-search-accessories:empty {
+    display: none;
+  }
+  /* Filter first, sort at the trailing edge. */
+  .lg-search-accessories > .lg-sort[data-kind="filter"] {
+    order: 1;
+  }
+  .lg-search-accessories > .lg-sort[data-kind="sort"] {
+    order: 2;
+  }
+  .lg-search-accessories .lg-chip--round.lg-chip--round {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    color: var(--lg-tint) !important;
+    border: 0.5px solid transparent !important;
+    background-color: var(--lg-glass-fill-clear) !important;
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 30%) 0%,
+      rgb(255 255 255 / 0%) 38%,
+      rgb(255 255 255 / 0%) 68%,
+      rgb(255 255 255 / 14%) 100%
+    ) !important;
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+    box-shadow:
+      0 8px 24px -6px rgb(0 0 0 / 22%),
+      0 1px 3px rgb(0 0 0 / 10%),
+      inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+      inset 0 -1px 0.5px rgb(255 255 255 / 35%),
+      inset 0 0 0 0.5px rgb(0 0 0 / 8%) !important;
+  }
+  [data-theme="dark"] .lg-search-accessories .lg-chip--round.lg-chip--round {
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 12%) 0%,
+      rgb(255 255 255 / 0%) 38%,
+      rgb(255 255 255 / 0%) 68%,
+      rgb(255 255 255 / 6%) 100%
+    ) !important;
+    -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+    backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+    box-shadow:
+      0 10px 28px -6px rgb(0 0 0 / 60%),
+      inset 0 1px 0.5px rgb(255 255 255 / 30%),
+      inset 0 -1px 0.5px rgb(255 255 255 / 10%),
+      inset 0 0 0 0.5px rgb(255 255 255 / 8%) !important;
+  }
+  .lg-search-accessories .lg-chip--round.lg-chip--round[data-open] {
+    color: #fff !important;
+    background-color: var(--lg-tint-fill) !important;
+  }
+  .lg-search-accessories .lg-chip--round.lg-chip--round[data-active] {
+    color: #fff !important;
+    background-color: var(--lg-tint) !important;
+    background-image: none !important;
+  }
+  .lg-search-accessories .lg-chip--round .lg-chip__icon,
+  .lg-search-accessories .lg-chip--round .lg-chip__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  /* Nothing left in the filter row under the title: drop its space. */
+  .lg-filter-rail-slot:empty {
+    display: none;
+  }
+  /* "Shared catalogue" note: a quiet footnote at the end of the page, as in iOS
+     section footers, instead of a line squeezed under the top toolbar. */
+  /* A toolbar whose buttons all moved beside the search field: no empty capsule. */
+  .mobile-floating-actions:not(:has(button)),
+  .floating-actions:not(:has(button)) {
+    display: none !important;
+  }
+}
+
+/* One Liquid Glass everywhere: menus, selects, popovers, the "…" sheet and
+   popups use exactly the dock / search-field glass (same clarity). */
+html
+  :is(.liquid-glass-panel, .liquid-glass-sidebar-surface, .popup-surface, [data-floating-menu]):is(
+    .liquid-glass-panel,
+    .liquid-glass-sidebar-surface,
+    .popup-surface,
+    [data-floating-menu]
+  ) {
+  --lg-glass-fill: var(--lg-glass-fill-clear);
+  --lg-glass-fill-strong: var(--lg-glass-fill-clear);
+  border-color: transparent !important;
+  background-color: var(--lg-glass-fill-clear) !important;
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 30%) 0%,
+    rgb(255 255 255 / 0%) 38%,
+    rgb(255 255 255 / 0%) 68%,
+    rgb(255 255 255 / 14%) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+  backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(200%) brightness(1.04) !important;
+  box-shadow:
+    0 8px 24px -6px rgb(0 0 0 / 22%),
+    0 1px 3px rgb(0 0 0 / 10%),
+    inset 0 1.5px 0.5px rgb(255 255 255 / 75%),
+    inset 1px 0 0.5px rgb(255 255 255 / 30%),
+    inset -1px 0 0.5px rgb(255 255 255 / 20%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 35%),
+    inset 0 0 0 0.5px rgb(0 0 0 / 8%) !important;
+}
+[data-theme="dark"]
+  :is(.liquid-glass-panel, .liquid-glass-sidebar-surface, .popup-surface, [data-floating-menu]):is(
+    .liquid-glass-panel,
+    .liquid-glass-sidebar-surface,
+    .popup-surface,
+    [data-floating-menu]
+  ) {
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 12%) 0%,
+    rgb(255 255 255 / 0%) 38%,
+    rgb(255 255 255 / 0%) 68%,
+    rgb(255 255 255 / 6%) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+  backdrop-filter: blur(var(--lg-chrome-blur, 14px)) saturate(180%) brightness(0.9) !important;
+  box-shadow:
+    0 10px 28px -6px rgb(0 0 0 / 60%),
+    inset 0 1px 0.5px rgb(255 255 255 / 30%),
+    inset 0 -1px 0.5px rgb(255 255 255 / 10%),
+    inset 0 0 0 0.5px rgb(255 255 255 / 8%) !important;
+}
+
+/* CRM switch (inside a workspace): the app's Modal holds an inset grouped list. */
+
+/* The "…" sheet rises from the tab bar with the same curve as other sheets. */
+.liquid-glass-sidebar-motion {
+  transition: opacity 260ms var(--lg-ease);
+}
+.liquid-glass-sidebar-content {
+  transform: translate3d(0, 28px, 0) scale(0.97);
+  transform-origin: 50% 100%;
+  transition: transform 460ms var(--lg-sheet-curve);
+}
+.liquid-glass-sidebar-motion--open .liquid-glass-sidebar-content {
+  transform: none;
+}
+
+/* Press feedback: interactive surfaces dip slightly, like native controls. */
+@media (pointer: coarse) {
+  :is(.lg-chip, .lg-tabbar__item, .ios-row):active {
+    scale: 0.97;
+    transition: scale 120ms var(--lg-ease);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop::before,
+  .modal-backdrop[data-closing]::before,
+  .modal-surface.glass-surface,
+  .modal-backdrop[data-closing] .modal-surface.glass-surface,
+  .liquid-glass-panel--open {
+    animation-duration: 1ms !important;
+  }
+  .modal-surface.glass-surface {
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Bottom chrome motion (phones): the search field, the period pill and the
+   toasts follow the tab bar with a transform, never by animating "bottom"
+   (a layout property: re-laid out every frame, it stutters mid-scroll).
+   Entrance animations use "backwards" so they release translate afterwards.
+   ========================================================================== */
+@media (max-width: 767px) {
+  :root {
+    /* How far the bottom chrome drops when the tab bar steps aside. */
+    --lg-tabbar-drop: calc(var(--lg-tabbar-offset) - 2px - max(14px, var(--lg-safe-bottom)));
+  }
+  .lg-search-dock,
+  .ios-analytics__period-dock {
+    transition:
+      translate 380ms var(--lg-ease),
+      bottom 320ms var(--lg-ease) !important;
+    will-change: translate;
+  }
+  html[data-tabbar-hidden]:not([data-search-focused]) .lg-search-dock,
+  html[data-tabbar-hidden] .ios-analytics__period-dock {
+    bottom: calc(var(--lg-tabbar-offset) - 2px) !important;
+    translate: 0 var(--lg-tabbar-drop);
+  }
+  .popup-shell.popup-shell {
+    transition:
+      translate 380ms var(--lg-ease),
+      bottom 320ms var(--lg-ease);
+  }
+  html[data-tabbar-hidden]:not([data-search-focused]) .popup-shell.popup-shell {
+    bottom: calc(var(--lg-tabbar-offset) + 10px);
+    translate: 0 calc(var(--lg-tabbar-drop) + 2px);
+  }
+  html[data-tabbar-hidden]:not([data-search-focused]):has(.lg-search-dock)
+    .popup-shell.popup-shell {
+    bottom: calc(var(--lg-tabbar-offset) + 48px + 18px);
+  }
+  /* Only "translate": "will-change: opacity" would make the dock a backdrop
+     root, and the tab bar's glass would blur an empty layer instead of the
+     page (fully see-through on Safari). */
+  .lg-tabbar-dock {
+    will-change: translate;
+  }
+}
+
+/* Phones: pages with bottom glass bars (search, period) skip the arrival
+   fade. Opacity < 1 on the page would isolate their backdrop-filter and the
+   frosted glass would appear only once the fade ends, with a jump; the
+   content still rises into place (lg-content-rise). */
+@media (max-width: 767px) {
+  .lg-page[data-enter]:has(.lg-search-dock, .ios-analytics__period-dock) {
+    animation: none;
+  }
+}
+
+/* A search field disabled while its page loads (route skeletons) keeps its
+   glass at full strength: dimming the whole control made the bar look
+   unfrosted and then jump when the page took over. Only its content dims. */
+.lg-field[data-variant="search"][data-disabled] .lg-field__control {
+  opacity: 1;
+}
+.lg-field[data-variant="search"][data-disabled] .lg-field__control > * {
+  opacity: 0.55;
+}

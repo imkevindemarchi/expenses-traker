@@ -16,6 +16,7 @@ import {
 } from "react";
 import { ChevronDown } from "lucide-react";
 import Calendar from "./DeferredCalendar.component";
+import Modal from "./Modal.component";
 
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -27,6 +28,8 @@ import "react-calendar/dist/Calendar.css";
 
 // hooks
 import { useTheme } from "../hooks";
+
+const SHEET_QUERY = "(max-width: 639px)";
 
 type TDatePickerValue = Date | string | null | undefined;
 
@@ -149,6 +152,17 @@ const DatePicker: FC<IProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
 
+  // Phones: the calendar opens as a bottom sheet (the app's Modal), like every other picker.
+  const [isPhone, setIsPhone] = useState<boolean>(
+    () => typeof window !== "undefined" && window.matchMedia(SHEET_QUERY).matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia(SHEET_QUERY);
+    const sync = (): void => setIsPhone(query.matches);
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
   const [isOpen, setIsOpen] = useState<boolean>(() => {
     return autoFocus && !disabled;
   });
@@ -265,7 +279,7 @@ const DatePicker: FC<IProps> = ({
   };
 
   useLayoutEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || isPhone) {
       return;
     }
 
@@ -285,10 +299,10 @@ const DatePicker: FC<IProps> = ({
       observer.disconnect();
       window.removeEventListener("scroll", updateCalendarPosition, true);
     };
-  }, [isOpen]);
+  }, [isOpen, isPhone]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isPhone) return;
     const handleClickOutside = (event: globalThis.MouseEvent): void => {
       const target: EventTarget | null = event.target;
 
@@ -318,7 +332,7 @@ const DatePicker: FC<IProps> = ({
       document.removeEventListener("mousedown", handleClickOutside, true);
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [isOpen]);
+  }, [isOpen, isPhone]);
 
   useEffect(() => {
     if (!autoFocus || disabled) {
@@ -348,7 +362,7 @@ const DatePicker: FC<IProps> = ({
       >
         {icon && (
           <div
-            className={`flex size-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isOpen ? `${colorClasses.iconActive} shadow-md ${colorClasses.shadow}` : `${colorClasses.iconInactive} group-focus-within:shadow-md ${colorClasses.shadow}`}`}
+            className={`flex size-10 shrink-0 items-center justify-center rounded-full transition-[background-color,color,box-shadow] duration-300 ${isOpen ? `${colorClasses.iconActive} shadow-md ${colorClasses.shadow}` : `${colorClasses.iconInactive} group-focus-within:shadow-md ${colorClasses.shadow}`}`}
           >
             {icon}
           </div>
@@ -368,7 +382,7 @@ const DatePicker: FC<IProps> = ({
           aria-describedby={error ? `${inputId}-error` : undefined}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          onFocus={handleOpenCalendar}
+          onFocus={isPhone ? undefined : handleOpenCalendar}
           onKeyDown={handleInputKeyDown}
           className={`w-full cursor-pointer bg-transparent py-5 text-base outline-none disabled:cursor-not-allowed sm:text-sm ${theme === "light" ? "text-black placeholder:text-gray-400" : "text-white placeholder:text-gray-500"}`}
         />
@@ -378,7 +392,7 @@ const DatePicker: FC<IProps> = ({
           disabled={disabled}
           onClick={handleEndIconClick}
           aria-label={t("datePicker.toggleCalendar")}
-          className={`relative z-10 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-300 focus:outline-none disabled:cursor-not-allowed ${colorClasses.endIconHover} ${isOpen ? colorClasses.endIconActive : theme === "light" ? "text-gray-500" : "text-gray-400"}`}
+          className={`relative z-10 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-300 focus:outline-none disabled:cursor-not-allowed ${colorClasses.endIconHover} ${isOpen ? colorClasses.endIconActive : theme === "light" ? "text-gray-500" : "text-gray-400"}`}
         >
           <span className={`flex transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>
             {endIcon || <ChevronDown size={18} strokeWidth={2} />}
@@ -391,18 +405,40 @@ const DatePicker: FC<IProps> = ({
 
         {!error && (
           <div
-            className={`date-picker-rule absolute bottom-0 left-1/2 h-0.5 -translate-x-1/2 transition-all duration-300 ease-out ${colorClasses.underline} ${isOpen ? "w-full" : "w-0 group-focus-within:w-full"}`}
+            className={`date-picker-rule absolute bottom-0 left-1/2 h-0.5 w-full -translate-x-1/2 transition-transform duration-300 ease-out ${colorClasses.underline} ${isOpen ? "scale-x-100" : "scale-x-0 group-focus-within:scale-x-100"}`}
           />
         )}
       </div>
 
       {error && (
-        <p id={`${inputId}-error`} className="mt-2 text-xs text-red-500">
+        <p id={`${inputId}-error`} className="ui-field-error">
           {tr(error)}
         </p>
       )}
 
+      {isPhone && (
+        <Modal isOpen={isOpen} title={label} maxWidth="sm" onClose={() => setIsOpen(false)}>
+          <div
+            className="date-picker-static date-picker-sheet"
+            style={{ "--calendar-primary": colorClasses.calendarColor } as CSSProperties}
+          >
+            <Calendar
+              value={normalizedValue}
+              locale={i18n.language}
+              minDate={minDate}
+              maxDate={effectiveMaxDate}
+              defaultActiveStartDate={normalizedValue || new Date()}
+              onChange={handleCalendarChange}
+              prev2Label={null}
+              next2Label={null}
+              className={`custom-calendar ${theme === "light" ? "ak-calendar ak-calendar-light" : "ak-calendar ak-calendar-dark"}`}
+            />
+          </div>
+        </Modal>
+      )}
+
       {isOpen &&
+        !isPhone &&
         createPortal(
           <div
             ref={calendarRef}

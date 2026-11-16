@@ -1,0 +1,263 @@
+/* ==========================================================================
+   Text fields — v2, iOS 26 style
+   form   : label above, filled glass field (no hard border), hairline rim,
+            tint ring on focus
+   search : unlabelled field shown as a clear-glass capsule (iOS search bar)
+   The same look is shared by Select triggers (.lg-select-trigger) and
+   textareas (.lg-textarea) so every control in a form matches.
+   ========================================================================== */
+
+.lg-field,
+.ios-analytics__period {
+  --field-height: 50px;
+  --field-radius: 16px;
+  --field-bg: rgb(255 255 255 / 58%);
+  --field-bg-hover: rgb(255 255 255 / 70%);
+  --field-bg-focus: rgb(255 255 255 / 92%);
+  --field-rim: rgb(255 255 255 / 95%);
+  --field-edge: rgb(20 50 20 / 11%);
+  --field-shadow: 0 1px 2px rgb(12 34 12 / 5%), 0 4px 14px -8px rgb(12 34 12 / 14%);
+  --field-text: var(--lg-label);
+  --field-placeholder: rgb(60 60 67 / 40%);
+  --field-icon: rgb(60 60 67 / 46%);
+  --field-ring: color-mix(in srgb, var(--lg-tint) 85%, transparent);
+  --field-halo: color-mix(in srgb, var(--lg-tint) 16%, transparent);
+}
+[data-theme="dark"] .lg-field,
+[data-theme="dark"] .ios-analytics__period {
+  --field-bg: rgb(255 255 255 / 6.5%);
+  --field-bg-hover: rgb(255 255 255 / 9%);
+  --field-bg-focus: rgb(255 255 255 / 11%);
+  --field-rim: rgb(255 255 255 / 14%);
+  --field-edge: rgb(255 255 255 / 7%);
+  --field-shadow: 0 1px 0 rgb(0 0 0 / 30%), 0 6px 18px -10px rgb(0 0 0 / 70%);
+  --field-placeholder: rgb(235 235 245 / 34%);
+  --field-icon: rgb(235 235 245 / 46%);
+  --field-halo: color-mix(in srgb, var(--lg-tint) 22%, transparent);
+}
+
+.lg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lg-field__label {
+  padding-left: 14px;
+  color: var(--lg-label-2);
+  font-size: 13px !important;
+  line-height: 18px !important;
+  font-weight: 600;
+  letter-spacing: -0.003em;
+}
+
+/* The field itself: a filled, slightly frosted rounded rect. */
+.lg-field__control {
+  border: 0 !important;
+  border-radius: var(--field-radius) !important;
+  background-color: var(--field-bg) !important;
+  -webkit-backdrop-filter: blur(calc(20px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(170%);
+  backdrop-filter: blur(calc(20px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(170%);
+  box-shadow:
+    inset 0 0 0 0.5px var(--field-edge),
+    inset 0 1px 0 var(--field-rim),
+    var(--field-shadow) !important;
+  transition:
+    background-color 220ms ease,
+    box-shadow 260ms var(--lg-ease),
+    scale 420ms var(--lg-spring) !important;
+}
+.lg-field__control:hover {
+  background-color: var(--field-bg-hover) !important;
+}
+.lg-field__control:focus-within {
+  background-color: var(--field-bg-focus) !important;
+  box-shadow:
+    inset 0 0 0 1.5px var(--field-ring),
+    0 0 0 4px var(--field-halo),
+    var(--field-shadow) !important;
+}
+
+.lg-field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--field-height);
+  padding-inline: 14px 7px;
+  cursor: text;
+}
+
+.lg-field__input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--field-height) - 2px);
+  padding: 0 !important;
+  border: 0;
+  background: transparent;
+  color: var(--field-text);
+  /* 16px stops iOS Safari from zooming in on focus. */
+  font-size: 16px !important;
+  line-height: 22px !important;
+  font-weight: 450;
+  letter-spacing: -0.011em;
+  outline: none;
+}
+.lg-field__input::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+
+/* Browser autofill must not paint its own box inside the glass field. */
+.lg-field .lg-field__input:-webkit-autofill,
+.lg-field .lg-field__input:-webkit-autofill:hover,
+.lg-field .lg-field__input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--field-text);
+  caret-color: var(--lg-tint);
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  box-shadow: 0 0 0 1000px transparent inset;
+  transition: background-color 600000s 0s;
+}
+
+.lg-field__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--field-icon);
+  transition: color 180ms ease;
+}
+.lg-field__icon > svg {
+  width: 18px;
+  height: 18px;
+}
+.lg-field__control:focus-within > .lg-field__icon:first-child {
+  color: var(--lg-tint);
+}
+
+/* Trailing round button (show password, clear, …). */
+.lg-field__action {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--field-icon);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    scale 380ms var(--lg-spring);
+}
+.lg-field__action:hover {
+  background: var(--lg-fill);
+  color: var(--lg-label);
+}
+.lg-field__action:active {
+  scale: 0.86;
+}
+.lg-field__action:focus-visible {
+  outline: 2px solid var(--lg-tint);
+  outline-offset: 1px;
+}
+.lg-field__action > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lg-field__suffix {
+  flex-shrink: 0;
+  padding-right: 8px;
+  color: var(--field-icon);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Error: red rim and halo, message with the same inset as the label. */
+.lg-field__error {
+  padding-left: 14px;
+  color: var(--color-danger);
+  font-size: 12.5px;
+  line-height: 16px;
+  font-weight: 500;
+}
+.lg-field[data-invalid] .lg-field__control {
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--color-danger) 70%, transparent),
+    var(--field-shadow) !important;
+}
+.lg-field[data-invalid] .lg-field__control:focus-within {
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-danger),
+    0 0 0 4px color-mix(in srgb, var(--color-danger) 16%, transparent),
+    var(--field-shadow) !important;
+}
+.lg-field[data-invalid] .lg-field__control > .lg-field__icon:first-child {
+  color: var(--color-danger);
+}
+.lg-field[data-disabled] .lg-field__control {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Compact numeric cells (price grids). */
+.lg-field[data-compact] {
+  --field-height: 42px;
+  --field-radius: 13px;
+  gap: 4px;
+}
+.lg-field[data-compact] .lg-field__control {
+  padding-inline: 10px;
+}
+.lg-field[data-compact] .lg-field__input {
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.lg-field[data-compact] .lg-field__label {
+  padding-left: 4px;
+  font-size: 12px !important;
+}
+
+/* ---------- Search capsule (iOS search bar on glass) ---------- */
+.lg-field[data-variant="search"] {
+  --field-height: 46px;
+  --field-radius: 999px;
+}
+.lg-field[data-variant="search"] .lg-field__control {
+  padding-inline: 16px 6px;
+  background-color: var(--lg-glass-fill) !important;
+  background-image: var(--lg-glass-specular);
+  -webkit-backdrop-filter: blur(calc(22px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%);
+  backdrop-filter: blur(calc(22px * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(180%);
+  box-shadow:
+    var(--lg-glass-shadow),
+    inset 0 1px 0.5px var(--lg-glass-rim),
+    inset 0 -1px 0.5px var(--lg-glass-rim-low),
+    inset 0 0 0 0.5px var(--lg-glass-edge) !important;
+}
+.lg-field[data-variant="search"] .lg-field__control:focus-within {
+  background-color: var(--lg-glass-fill-strong) !important;
+  box-shadow:
+    inset 0 0 0 1.5px var(--field-ring),
+    0 0 0 4px var(--field-halo),
+    var(--lg-glass-shadow) !important;
+}
+.lg-field[data-variant="search"] .lg-field__icon > svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---------- Select trigger: same field, with a chevron ---------- */
+
+/* ---------- Textarea ---------- */
+
+@media (prefers-reduced-transparency: reduce) {
+  .lg-field__control {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--field-bg-focus) !important;
+  }
+}

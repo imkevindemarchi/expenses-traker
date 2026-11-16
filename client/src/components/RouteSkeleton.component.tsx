@@ -1,43 +1,46 @@
-import RouteLoadingNavigation from "./RouteLoadingNavigation.component";
 import { useLocation } from "react-router";
-import PageSkeleton from "./PageSkeleton.component";
-import { Shape } from "./LoadingShapes.component";
-import YearPicker from "./YearPicker.component";
+import { useTranslation } from "react-i18next";
+import RouteLoadingNavigation from "./RouteLoadingNavigation.component";
+import Header from "./Header.component";
+import { OverviewSkeleton, SettingsSkeleton } from "./Skeletons.component";
 import { annualYear } from "../utils/annual-year";
 import { today } from "../api";
-import "../styles/Settings.styles.css";
-import "../styles/SectionNavigation.styles.css";
+import { tr } from "../i18n";
+import { ROUTE_PATHS } from "../routes/routes.config";
+import { CalendarRange, ChevronDown } from "lucide-react";
+import "../styles/v2/Analytics.styles.css";
+import "../styles/v2/Expenses.styles.css";
 
+/** The lazy pages (annual summary, settings) while their code loads. */
 function RouteSkeletonContent() {
+  useTranslation();
   const { pathname, search } = useLocation();
-  if (pathname === "/annual")
+  if (pathname === ROUTE_PATHS.annual)
     return (
-      <>
-        <div className="annual-filter">
-          <YearPicker
-            value={annualYear(new URLSearchParams(search).get("year"), Number(today().slice(0, 4)))}
-            onChange={() => {}}
-          />
+      <main className="analytics-page ios-analytics w-full pb-8 md:py-10">
+        <div className="analytics-content mx-auto flex w-full flex-col">
+          <Header title={tr("Riepilogo annuale")} />
+          <div className="ios-analytics__period-dock" aria-hidden="true">
+            <span className="ios-analytics__period">
+              <CalendarRange size={18} strokeWidth={2} />
+              <span className="ios-analytics__period-label">
+                {annualYear(new URLSearchParams(search).get("year"), Number(today().slice(0, 4)))}
+              </span>
+              <ChevronDown size={16} strokeWidth={2.4} />
+            </span>
+          </div>
+          <OverviewSkeleton layout="year" />
         </div>
-        <PageSkeleton layout="annual" />
-      </>
+      </main>
     );
-  if (pathname === "/settings")
+  if (pathname === ROUTE_PATHS.settings)
     return (
-      <div className="subscription-settings-page">
-        <div className="settings-layout">
-          <div className="loading-settings-navigation" aria-hidden="true">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Shape key={i} height={48} />
-            ))}
-          </div>
-          <div className="settings-sections settings-redesign">
-            <PageSkeleton layout="settings" />
-          </div>
-        </div>
-      </div>
+      <main className="subscription-settings-page ios-settings w-full pb-8 md:py-10">
+        <Header title={tr("Impostazioni")} />
+        <SettingsSkeleton />
+      </main>
     );
-  return <PageSkeleton />;
+  return null;
 }
 
 export default function RouteSkeleton() {

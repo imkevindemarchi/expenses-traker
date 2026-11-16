@@ -1,56 +1,63 @@
-import "../styles/DeleteConfirmation.styles.css";
-import { type FC, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  type CSSProperties,
+  type FC,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { pageLimit, pageLimitOptions, paginationState } from "../utils/pagination.util";
+import "../styles/v2/Pagination.styles.css";
 
-// assets
-import { getLiquidGlassClass } from "../assets/constants";
-
-// components
-import Select from "./Select.component";
-
-// hooks
-import { useTheme } from "../hooks";
-
-// types
 import type { TPagination } from "../types";
 
 interface IProps {
   pagination: TPagination;
   limitOptions?: number[];
-  justSelect?: boolean;
-  mobileJustSelect?: boolean;
   flush?: boolean;
+  /** Kept for compatibility with existing call sites. */
   compactDesktop?: boolean;
   selectId?: string;
   className?: string;
+  /** Kept for compatibility with existing call sites. */
   selectContainerClassName?: string;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
 }
 
-type TPaginationItem = number | "ellipsis-start" | "ellipsis-end";
+/** Horizontal travel (px) that turns a drag on the capsule into a page change. */
+const SWIPE_DISTANCE = 44;
 
+/**
+ * Pagination (iOS 27): one Liquid Glass capsule — previous, "Page 2 of 4"
+ * with the visible range, next — and a hairline progress along its edge.
+ * Tapping the middle opens a glass panel to jump to any page or change the
+ * page size; a horizontal swipe on the capsule turns the page.
+ */
 const Pagination: FC<IProps> = ({
   pagination: inputPagination,
   limitOptions = [10, 20, 50],
-  justSelect = false,
-  mobileJustSelect = false,
-  flush = false,
-  compactDesktop = false,
-  selectId = "pagination-limit",
+  flush = true,
+  selectId = "pagination",
   className = "",
-  selectContainerClassName = "",
   onPageChange,
   onLimitChange,
 }) => {
-  const { theme } = useTheme();
   const { t } = useTranslation();
+  const panelId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const pagination = paginationState(inputPagination);
-  const safeLimitOptions = pageLimitOptions(limitOptions, pagination.limit);
+  const sizes = pageLimitOptions(limitOptions, pagination.limit);
+  const totalPages = Math.max(1, pagination.total_pages);
+  const page = Math.min(Math.max(1, pagination.page), totalPages);
+
   useEffect(() => {
     if (inputPagination.limit !== pagination.limit) onLimitChange(pagination.limit);
     else if (inputPagination.page !== pagination.page) onPageChange(pagination.page);
@@ -62,241 +69,143 @@ const Pagination: FC<IProps> = ({
     onLimitChange,
     onPageChange,
   ]);
-  const paginationItems: TPaginationItem[] = (() => {
-    const totalPages: number = pagination.total_pages;
-    const currentPage: number = pagination.page;
 
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_: unknown, index: number): number => index + 1);
-    }
+  // The panel closes on a tap elsewhere, on Escape, and when the page changes.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointerDown = (event: PointerEvent): void => {
+      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen]);
 
-    if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, "ellipsis-end", totalPages];
-    }
-
-    if (currentPage >= totalPages - 3) {
-      return [
-        1,
-        "ellipsis-start",
-        totalPages - 4,
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-    }
-
-    return [
-      1,
-      "ellipsis-start",
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      "ellipsis-end",
-      totalPages,
-    ];
-  })();
-
-  const firstVisibleItem: number =
-    pagination.total_items === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
-
-  const lastVisibleItem: number = Math.min(
-    pagination.page * pagination.limit,
-    pagination.total_items,
-  );
-
-  const handlePreviousPage = (): void => {
-    if (!pagination.has_previous_page || pagination.page <= 1) {
-      return;
-    }
-
-    onPageChange(pagination.page - 1);
+  const goTo = (target: number): void => {
+    if (!Number.isInteger(target) || target < 1 || target > totalPages || target === page) return;
+    setIsOpen(false);
+    onPageChange(target);
   };
 
-  const handleNextPage = (): void => {
-    if (!pagination.has_next_page || pagination.page >= pagination.total_pages) {
-      return;
-    }
+  const first = pagination.total_items === 0 ? 0 : (page - 1) * pagination.limit + 1;
+  const last = Math.min(page * pagination.limit, pagination.total_items);
+  const canGoBack = pagination.has_previous_page && page > 1;
+  const canGoForward = pagination.has_next_page && page < totalPages;
 
-    onPageChange(pagination.page + 1);
+  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
+    if (event.pointerType === "mouse") return;
+    swipe.current = { x: event.clientX, y: event.clientY };
   };
-
-  const handlePageClick = (page: number): void => {
-    if (
-      !Number.isInteger(page) ||
-      page < 1 ||
-      page > pagination.total_pages ||
-      page === pagination.page
-    ) {
-      return;
-    }
-
-    onPageChange(page);
+  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>): void => {
+    const start = swipe.current;
+    swipe.current = null;
+    if (!start) return;
+    const dx = event.clientX - start.x;
+    if (Math.abs(dx) < SWIPE_DISTANCE || Math.abs(dx) < Math.abs(event.clientY - start.y)) return;
+    if (dx < 0 && canGoForward) goTo(page + 1);
+    if (dx > 0 && canGoBack) goTo(page - 1);
   };
-
-  const handleLimitChange = (limit: number): void => {
-    if (limit === pagination.limit) {
-      return;
-    }
-
-    onLimitChange(pageLimit(limit));
-  };
-
-  const renderLimitSelect = (id: string) => (
-    <Select
-      id={id}
-      name={id}
-      value={pagination.limit.toString()}
-      options={safeLimitOptions.map((option: number) => ({
-        value: option.toString(),
-        label: option.toString(),
-      }))}
-      openUpwardOnMobile
-      onChange={(value: string): void => handleLimitChange(Number(value))}
-    />
-  );
-
-  const renderLiquidGlassSelect = (id: string, responsiveClassName = "") => (
-    <div className={`mx-auto w-fit ${responsiveClassName}`}>
-      <div className={`flex items-center justify-center overflow-visible rounded-[22px] p-2`}>
-        <div className={`w-24 ${selectContainerClassName}`}>{renderLimitSelect(id)}</div>
-      </div>
-    </div>
-  );
-
-  if (justSelect) {
-    return renderLiquidGlassSelect(selectId);
-  }
 
   return (
-    <>
-      {mobileJustSelect && renderLiquidGlassSelect(`${selectId}-mobile`, "sm:hidden")}
-
-      <div
-        className={`${mobileJustSelect ? "hidden sm:block" : "block"} ${flush ? "mt-0 pt-0" : "mt-0 pt-0 sm:mt-5 sm:pt-5"} ${className}`}
-      >
-        <div
-          className={`pagination-surface relative min-w-0 max-w-full overflow-visible rounded-[26px] p-2 ${`${getLiquidGlassClass(theme)} border`}`}
+    <div
+      className={`pagination-surface lg-pager ${flush ? "" : "sm:mt-5"} ${className}`}
+      data-open={isOpen || undefined}
+    >
+      <div ref={rootRef} className="lg-pager__anchor">
+        <nav
+          aria-label={t("pagination.navigationLabel")}
+          className="lg-pager__capsule"
+          style={{ "--pager-progress": `${(page / totalPages) * 100}%` } as CSSProperties}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => (swipe.current = null)}
         >
-          <div className="pagination-mobile-layout flex w-full min-w-0 items-center justify-between gap-3 sm:hidden">
-            <button
-              type="button"
-              disabled={!pagination.has_previous_page}
-              onClick={handlePreviousPage}
-              aria-label={t("pagination.previous")}
-              className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[13px] border transition-[background-color,border-color,color,transform,box-shadow] duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 ${theme === "light" ? "border-black/6 bg-white/45 text-darkgray hover:border-primary/20 hover:bg-primary/8 hover:text-primary hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]" : "border-white/[0.07] bg-white/[0.035] text-gray hover:border-primary/25 hover:bg-primary/10 hover:text-primary hover:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"}`}
-            >
-              <ChevronLeft size={16} strokeWidth={2.1} />
-            </button>
+          <button
+            type="button"
+            className="lg-pager__arrow"
+            disabled={!canGoBack}
+            aria-label={t("pagination.previous")}
+            onClick={() => goTo(page - 1)}
+          >
+            <ChevronLeft size={21} strokeWidth={2.5} aria-hidden="true" />
+          </button>
 
-            <div className={`w-24 shrink-0 ${selectContainerClassName}`}>
-              {renderLimitSelect(`${selectId}-mobile`)}
-            </div>
+          <button
+            type="button"
+            className="lg-pager__center"
+            aria-haspopup="dialog"
+            aria-expanded={isOpen}
+            aria-controls={panelId}
+            onClick={() => setIsOpen((open) => !open)}
+          >
+            <span className="lg-pager__page" aria-live="polite">
+              {t("pagination.pageOf", { page, total: totalPages })}
+            </span>
+            <span className="lg-pager__range">
+              {t("pagination.results", { first, last, total: pagination.total_items })}
+            </span>
+          </button>
 
-            <button
-              type="button"
-              disabled={!pagination.has_next_page}
-              onClick={handleNextPage}
-              aria-label={t("pagination.next")}
-              className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[13px] border transition-[background-color,border-color,color,transform,box-shadow] duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 ${theme === "light" ? "border-black/6 bg-white/45 text-darkgray hover:border-primary/20 hover:bg-primary/8 hover:text-primary hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]" : "border-white/[0.07] bg-white/[0.035] text-gray hover:border-primary/25 hover:bg-primary/10 hover:text-primary hover:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"}`}
-            >
-              <ChevronRight size={16} strokeWidth={2.1} />
-            </button>
-          </div>
+          <button
+            type="button"
+            className="lg-pager__arrow"
+            disabled={!canGoForward}
+            aria-label={t("pagination.next")}
+            onClick={() => goTo(page + 1)}
+          >
+            <ChevronRight size={21} strokeWidth={2.5} aria-hidden="true" />
+          </button>
+        </nav>
 
-          <div className="pagination-desktop-layout hidden w-full min-w-0 items-center justify-between gap-2 sm:flex">
-            <div
-              className={`${compactDesktop ? "hidden xl:flex" : "hidden lg:flex"} min-w-0 items-center rounded-[18px] px-3 py-2.5`}
-            >
-              <div className="min-w-0">
-                <p
-                  className={`text-[11px] uppercase ${theme === "light" ? "text-darkgray/70" : "text-gray/70"}`}
-                >
-                  {t("pagination.results", {
-                    first: firstVisibleItem,
-                    last: lastVisibleItem,
-                    total: pagination.total_items,
-                  })}
-                </p>
-                <p
-                  className={`mt-0.5 text-sm font-semibold ${theme === "light" ? "text-black" : "text-white"}`}
-                >
-                  {pagination.page} / {Math.max(1, pagination.total_pages)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 xl:gap-2">
-              <nav
-                aria-label={t("pagination.navigationLabel")}
-                className={`flex min-w-0 items-center justify-center gap-0.5 rounded-[18px] border p-1 ${theme === "light" ? "border-white/70 bg-white/38 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]" : "border-white/8 bg-white/4 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]"}`}
-              >
+        {isOpen && (
+          <div id={panelId} role="dialog" aria-label={t("pagination.jumpTo")} className="lg-pager__panel">
+            <p className="lg-pager__label">{t("pagination.jumpTo")}</p>
+            <div className="lg-pager__pages">
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map((item) => (
                 <button
+                  key={item}
                   type="button"
-                  disabled={!pagination.has_previous_page}
-                  onClick={handlePreviousPage}
-                  aria-label={t("pagination.previous")}
-                  className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[13px] border transition-[background-color,border-color,color,transform,box-shadow] duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 ${theme === "light" ? "border-black/6 bg-white/45 text-darkgray hover:border-primary/20 hover:bg-primary/8 hover:text-primary hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]" : "border-white/[0.07] bg-white/[0.035] text-gray hover:border-primary/25 hover:bg-primary/10 hover:text-primary hover:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"}`}
+                  className="lg-pager__number"
+                  aria-current={item === page ? "page" : undefined}
+                  aria-label={t("pagination.goToPage", { page: item })}
+                  onClick={() => goTo(item)}
                 >
-                  <ChevronLeft size={16} strokeWidth={2.1} />
+                  {item}
                 </button>
-
-                {paginationItems.map((item: TPaginationItem, index: number) => {
-                  if (item === "ellipsis-start" || item === "ellipsis-end") {
-                    return (
-                      <span
-                        key={`${item}-${index}`}
-                        aria-hidden="true"
-                        className={`flex h-9 w-5 shrink-0 items-center justify-center text-xs font-semibold ${theme === "light" ? "text-darkgray/60" : "text-gray/60"}`}
-                      >
-                        …
-                      </span>
-                    );
-                  }
-
-                  const isActive: boolean = item === pagination.page;
-
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      aria-current={isActive ? "page" : undefined}
-                      aria-label={t("pagination.goToPage", { page: item })}
-                      onClick={(): void => handlePageClick(item)}
-                      className={`flex h-9 min-w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl border px-2 text-xs font-semibold transition-[background-color,border-color,color,transform,box-shadow] duration-200 active:scale-95 disabled:cursor-not-allowed ${isActive ? "border-primary bg-primary text-white shadow-[0_8px_22px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.24)]" : theme === "light" ? "border-transparent text-darkgray hover:border-primary/15 hover:bg-primary/7 hover:text-primary" : "border-transparent text-gray hover:border-primary/20 hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-
-                <button
-                  type="button"
-                  disabled={!pagination.has_next_page}
-                  onClick={handleNextPage}
-                  aria-label={t("pagination.next")}
-                  className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[13px] border transition-[background-color,border-color,color,transform,box-shadow] duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 ${theme === "light" ? "border-black/6 bg-white/45 text-darkgray hover:border-primary/20 hover:bg-primary/8 hover:text-primary hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]" : "border-white/[0.07] bg-white/[0.035] text-gray hover:border-primary/25 hover:bg-primary/10 hover:text-primary hover:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"}`}
-                >
-                  <ChevronRight size={16} strokeWidth={2.1} />
-                </button>
-              </nav>
+              ))}
             </div>
 
-            <div className={`flex shrink-0 items-center gap-2 rounded-[18px] p-1 pl-2`}>
-              <span
-                className={`hidden text-sm font-medium xl:inline ${theme === "light" ? "text-darkgray" : "text-gray"}`}
-              >
-                {t("pagination.perPage")}
-              </span>
-
-              <div className={`w-24 shrink-0 ${selectContainerClassName}`}>
-                {renderLimitSelect(`${selectId}-desktop`)}
-              </div>
+            <p className="lg-pager__label" id={`${selectId}-size`}>
+              {t("pagination.perPage")}
+            </p>
+            <div className="lg-pager__sizes" role="group" aria-labelledby={`${selectId}-size`}>
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  aria-pressed={size === pagination.limit}
+                  onClick={() => {
+                    setIsOpen(false);
+                    if (size !== pagination.limit) onLimitChange(pageLimit(size));
+                  }}
+                >
+                  {size === pagination.limit && (
+                    <Check size={14} strokeWidth={2.8} aria-hidden="true" />
+                  )}
+                  {size}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

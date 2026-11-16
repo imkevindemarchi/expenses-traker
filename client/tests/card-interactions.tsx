@@ -3,30 +3,29 @@ import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import "../src/i18n";
 import "../src/index.css";
-import EntriesTable from "../src/components/EntriesTable.component";
+import "../src/styles/v2/Tokens.styles.css";
+import "../src/styles/v2/Base.styles.css";
+import "../src/styles/v2/System.styles.css";
+import EntryList from "../src/components/EntryList.component";
 function Preview() {
-  const [edits, setEdits] = useState(0);
-  const [deletes, setDeletes] = useState(0);
+  const [opened, setOpened] = useState(0);
   return (
-    <main className="app-main ui-refresh">
-      <output>
-        Edits: {edits}; Deletes: {deletes}
-      </output>
-      <EntriesTable
+    <main className="ios-analytics">
+      <output>Opened: {opened}</output>
+      <EntryList
         entries={[
           {
             _id: "demo",
             kind: "expense",
             amountCents: 1250,
-            date: "2026-10-28",
-            category: "food",
-            subcategory: null,
+            date: "2026-11-10",
+            category: "c",
+            subcategory: "s",
           },
         ]}
-        categories={new Map([["food", { _id: "food", name: "Alimentari", color: "#528463" }]])}
-        subcategories={new Map()}
-        onEdit={() => setEdits((n) => n + 1)}
-        onDelete={() => setDeletes((n) => n + 1)}
+        categories={new Map([["c", { _id: "c", name: "Necessità", color: "#38bdf8" }]])}
+        subcategories={new Map([["s", { _id: "s", name: "Spesa", category: "c" }]])}
+        onOpen={() => setOpened((value) => value + 1)}
       />
     </main>
   );

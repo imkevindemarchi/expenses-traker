@@ -21,8 +21,8 @@
   z-index: -1;
   pointer-events: none;
   background: var(--modal-backdrop-fill);
-  -webkit-backdrop-filter: blur(var(--overlay-glass-blur)) saturate(var(--overlay-glass-saturation));
-  backdrop-filter: blur(var(--overlay-glass-blur)) saturate(var(--overlay-glass-saturation));
+  -webkit-backdrop-filter: blur(calc(var(--overlay-glass-blur) * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(var(--overlay-glass-saturation));
+  backdrop-filter: blur(calc(var(--overlay-glass-blur) * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(var(--overlay-glass-saturation));
   animation: modal-backdrop-enter 240ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
 }
 .modal-surface.glass-surface {
@@ -60,9 +60,9 @@
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .modal-surface.glass-surface {
-    background: var(--modal-canvas);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    background: var(--modal-glass-fill);
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(var(--glass-saturation));
+    backdrop-filter: blur(calc(var(--glass-blur) * var(--lg-blur-k, 1) + 8px * var(--lg-clear-t, 0))) saturate(var(--glass-saturation));
   }
 }
 .modal-header {
@@ -107,21 +107,6 @@
   text-wrap: pretty;
   font-size: 13px;
 }
-.modal-close {
-  color: var(--modal-muted);
-  min-width: 44px;
-  min-height: 44px;
-  background: color-mix(in srgb, var(--modal-ink) 4%, var(--modal-canvas));
-  border: 1px solid var(--modal-line);
-}
-.modal-close:hover:not(:disabled) {
-  color: var(--modal-ink);
-  background: var(--modal-hover);
-  transform: scale(1.08);
-}
-.modal-close:active:not(:disabled) {
-  transform: scale(0.96);
-}
 .modal-content {
   padding-top: 8px;
   background: transparent;
@@ -133,23 +118,6 @@
   border-top: 1px solid var(--modal-line);
   background: color-mix(in srgb, var(--modal-highlight) 12%, transparent);
   box-shadow: inset 0 1px 0 var(--modal-highlight);
-}
-.modal-info,
-.modal-period-preview {
-  border: 1px solid var(--modal-line);
-  border-radius: 18px;
-  background: var(--modal-soft);
-}
-.modal-info {
-  padding: 16px;
-}
-.modal-search {
-  border-color: var(--modal-line);
-  background: var(--modal-soft);
-}
-.modal-search:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 .modal-content button:focus-visible,
 .modal-content a:focus-visible {
@@ -181,10 +149,6 @@
   .modal-header::before {
     margin-bottom: 14px;
   }
-  .modal-close {
-    min-width: 44px;
-    min-height: 44px;
-  }
 }
 @media (prefers-reduced-transparency: reduce) {
   .modal-backdrop {
@@ -208,41 +172,9 @@
   .modal-surface.glass-surface {
     animation: none;
   }
-  .modal-close {
-    transition: none;
-  }
-  .modal-close:hover:not(:disabled),
-  .modal-close:active:not(:disabled) {
-    transform: none;
-  }
 }
 
 /* Keep discarding visually distinct from the primary save action. */
-.workout-finish-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-}
-.workout-finish-actions > button {
-  min-height: 48px;
-  height: auto;
-  padding-block: 12px;
-  line-height: 1.4;
-}
-.workout-finish-actions > button > svg {
-  flex-shrink: 0;
-}
-@media (max-width: 639px) {
-  .workout-finish-actions {
-    flex-direction: column-reverse;
-    gap: 12px;
-  }
-  .workout-finish-actions > button {
-    width: 100%;
-  }
-}
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .modal-backdrop {
@@ -261,10 +193,10 @@
   --modal-preferred-width: 24rem;
 }
 .modal-surface[data-modal-size="lg"] {
-  --modal-preferred-width: 34rem;
+  --modal-preferred-width: 42rem;
 }
 .modal-surface[data-modal-size="xl"] {
-  --modal-preferred-width: 48rem;
+  --modal-preferred-width: 56rem;
 }
 .modal-surface.glass-surface {
   width: 100%;
@@ -356,65 +288,6 @@
   }
 }
 
-.modal-surface.modal-choice-surface {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  overflow: visible;
-}
-.modal-choice-surface::before,
-.modal-choice-surface::after {
-  display: none;
-}
-.modal-choice-surface .modal-header {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-}
-.modal-choice-surface .modal-content {
-  padding: 8px;
-  overflow: visible;
-}
-.modal-choice-surface .entry-create-kind {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-.modal-choice-surface .entry-create-kind .entry-kind-option {
-  width: 100%;
-  min-width: 0;
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 18px;
-  padding: 24px 12px;
-  border: 1px solid color-mix(in srgb, var(--kind-color) 25%, transparent);
-  border-radius: 28px;
-  background: rgb(255 255 255 / 85%);
-  backdrop-filter: blur(24px);
-  box-shadow: 0 16px 50px rgb(0 0 0 / 16%);
-}
-[data-modal-theme="dark"] .modal-choice-surface .entry-create-kind .entry-kind-option {
-  background: rgb(25 28 32 / 85%);
-}
-.modal-choice-surface .entry-create-kind .entry-kind-label {
-  font-size: 22px;
-  color: var(--kind-color);
-}
-.modal-choice-surface .entry-create-kind .entry-kind-icon {
-  width: 68px;
-  height: 68px;
-}
-.modal-choice-surface .entry-create-kind .entry-kind-icon svg {
-  width: 32px;
-  height: 32px;
-}
-
 /* Mobile action layout and keyboard-aware visible viewport. */
 @media (max-width: 639px) {
   .modal-backdrop {
@@ -433,9 +306,6 @@
   .modal-surface.glass-surface:not(.modal-choice-surface) {
     max-height: var(--modal-height-limit);
   }
-  .modal-choice-surface.glass-surface {
-    max-height: var(--modal-height-limit);
-  }
   .modal-surface:has(> .modal-footer) .modal-content {
     padding-bottom: 20px;
   }
@@ -449,8 +319,7 @@
     gap: 10px;
     align-items: stretch;
   }
-  .modal-actions > button,
-  .modal-entry-surface .modal-actions > .entry-save {
+  .modal-actions > button {
     flex: 1 1 calc(50% - 5px);
     margin: 0;
     padding-inline: 14px;
@@ -468,8 +337,7 @@
   }
 }
 @media (max-width: 379px) {
-  .modal-actions > button,
-  .modal-entry-surface .modal-actions > .entry-save {
+  .modal-actions > button {
     flex-basis: 100%;
   }
 }
@@ -514,12 +382,6 @@
   .modal-surface .modal-footer button[data-ui-button] > svg {
     flex-shrink: 0;
   }
-  .modal-surface .modal-footer .workout-finish-actions {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .modal-surface .modal-footer .workout-finish-actions > button:first-child {
-    order: 2;
-  }
 }
 @media (max-width: 379px) {
   .modal-surface .modal-footer div:has(> button[data-ui-button]) {
@@ -559,4 +421,44 @@
 }
 .modal-backdrop[data-modal-keyboard="true"] .modal-header::before {
   display: none;
+}
+
+/* Field pinned to the bottom of a modal (e.g. the search of the category
+   lists). Its parent reserves the same space below it, so the field rests in
+   the same spot whether it is stuck while scrolling or at the end of the list. */
+.modal-bottom-search {
+  --modal-bottom-search-offset: max(4px, env(safe-area-inset-bottom, 0px));
+  position: sticky;
+  bottom: var(--modal-bottom-search-offset);
+  z-index: 5;
+}
+.modal-content :has(> .modal-bottom-search) {
+  padding-bottom: 4px;
+}
+
+/* Phones: it sits where the search of the pages settles while scrolling
+   (Home with the tab bar hidden: max(14px, safe area)), instead of floating
+   above the sheet's own bottom padding. */
+@media (max-width: 639px) {
+  .modal-content:has(.modal-bottom-search) {
+    padding-bottom: 0;
+  }
+  .modal-bottom-search {
+    --modal-bottom-search-offset: max(14px, var(--modal-safe-bottom, 0px));
+  }
+  .modal-content :has(> .modal-bottom-search) {
+    padding-bottom: max(14px, var(--modal-safe-bottom, 0px));
+  }
+}
+
+/* Inside a sheet everything sits on its Liquid Glass: page surfaces (opaque
+   cards, surface backgrounds) become the translucent fill of the compose
+   lists, so every modal reads like the movement / notification composers. */
+.modal-surface :is(.bg-surface-light, .bg-surface-dark) {
+  border-color: transparent !important;
+  background-color: var(--lg-fill) !important;
+}
+.modal-surface :is(.ios-group__card, .ios-analytics__card) {
+  background: var(--lg-fill);
+  box-shadow: none;
 }
