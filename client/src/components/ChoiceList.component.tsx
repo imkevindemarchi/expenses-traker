@@ -1,6 +1,6 @@
 import { useId, useState, type CSSProperties, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, ChevronRight, Search } from "lucide-react";
+import { Check, ChevronRight, Play, Search } from "lucide-react";
 import { tr } from "../i18n";
 import Input from "./Input.component";
 import "../styles/v2/Compose.styles.css";
@@ -11,6 +11,12 @@ export type TChoice = {
   description?: string;
   color?: string;
   icon?: ReactNode;
+  /** Tiles: a short label above the name (e.g. "Suggested"). */
+  badge?: string;
+  /** Tiles: the choice spans the row, filled with its colour. */
+  featured?: boolean;
+  /** Tiles: the label of the action of a featured choice (e.g. "Start"). */
+  action?: string;
 };
 
 /**
@@ -29,6 +35,7 @@ export default function ChoiceList({
   disabled = false,
   advance = false,
   searchPosition = "top",
+  layout = "list",
   onChoose,
 }: {
   title: string;
@@ -43,6 +50,8 @@ export default function ChoiceList({
   /** "top": a glass field above the list (filters, like the recipient search
    *  of Alice & Kevin); "bottom": pinned to the bottom of the sheet. */
   searchPosition?: "top" | "bottom";
+  /** "tiles": large tinted buttons in a grid, for the first choice of a sheet. */
+  layout?: "list" | "tiles";
   onChoose: (key: string) => void;
 }) {
   useTranslation();
@@ -71,7 +80,47 @@ export default function ChoiceList({
         />
       )}
       <p className="ios-compose__header">{title}</p>
-      {visible.length ? (
+      {visible.length && layout === "tiles" ? (
+        <div className="ios-choice-tiles" role="listbox" aria-label={title}>
+          {visible.map((choice) => {
+            const selected = choice.key === value;
+            return (
+              <button
+                key={choice.key}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                className="ios-choice-tile"
+                data-featured={choice.featured || undefined}
+                style={{ "--row-color": choice.color } as CSSProperties}
+                disabled={disabled}
+                onClick={() => onChoose(choice.key)}
+              >
+                <span className="ios-choice-tile__icon" aria-hidden="true">
+                  {choice.icon}
+                </span>
+                <span className="ios-choice-tile__go" aria-hidden="true">
+                  {choice.featured && choice.action ? (
+                    <>
+                      <Play size={14} strokeWidth={2.6} fill="currentColor" />
+                      {choice.action}
+                    </>
+                  ) : selected ? (
+                    <Check size={16} strokeWidth={2.8} />
+                  ) : (
+                    <ChevronRight size={16} strokeWidth={2.6} />
+                  )}
+                </span>
+                <span className="ios-choice-tile__copy">
+                  {choice.badge && <span className="ios-choice-tile__badge">{choice.badge}</span>}
+                  <strong>{choice.label}</strong>
+                  {choice.description && <span>{choice.description}</span>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : visible.length ? (
         <div className="ios-compose__list" role="listbox" aria-label={title}>
           {visible.map((choice) => {
             const selected = choice.key === value;

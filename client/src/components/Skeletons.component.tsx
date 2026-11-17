@@ -233,26 +233,41 @@ function GroupSkeleton({
 export function CategoriesSkeleton() {
   return (
     <div className="et-categories ios-skeleton" aria-hidden="true">
-      {[3, 2, 4, 2, 3, 1].map((rows, i) => (
-        <section key={i} className="ios-group et-category-card">
+      {[2, 1, 2, 1, 2].map((rows, i) => (
+        <section
+          key={i}
+          className="ios-group et-category-card"
+          style={{ "--category-color": "var(--lg-fill-strong)" } as CSSProperties}
+        >
+          {/* The real head: the badge (a dot on phones), the name, the count, "Edit". */}
           <div className="ios-group__head et-category-card__head">
-            <span className="et-category-card__badge">
-              <Shape width={44} height={44} />
+            <span className="et-category-card__badge" />
+            <span className="ios-group__title">
+              <TextLine line={25} width={90 + (i % 3) * 30} height={18} />
             </span>
-            <TextLine line={25} width={110 + (i % 3) * 30} height={18} />
             <span className="et-category-card__count">
               <TextLine line={18} width={90} height={11} />
             </span>
             <TextLine line={22} width={64} height={14} />
           </div>
           <div className="ios-group__card ios-category-list">
-            {Array.from({ length: rows + 1 }, (_, row) => (
-              <div className="ios-cell" key={row}>
-                <Shape width={30} height={30} />
-                <TextLine line={22} width={`${40 + ((row * 19) % 36)}%`} height={15} />
-                <Shape width={9} height={14} />
+            {Array.from({ length: rows }, (_, row) => (
+              <div className="ios-category" key={row}>
+                <div className="ios-cell ios-category__open">
+                  <Shape width={30} height={30} />
+                  <TextLine line={22} width={`${40 + ((row * 19 + i * 7) % 36)}%`} height={15} />
+                  <Shape width={9} height={14} />
+                </div>
+                <span className="ios-category__delete">
+                  <Shape width={17} height={17} />
+                </span>
               </div>
             ))}
+            {/* "New subcategory" */}
+            <div className="ios-cell ios-cell--action">
+              <Shape width={30} height={30} />
+              <TextLine line={22} width="52%" height={15} />
+            </div>
           </div>
           <div className="ios-group__footer et-category-card__footer">
             <TextLine line={18} width={110} height={11} />

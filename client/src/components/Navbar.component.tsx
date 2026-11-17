@@ -3,8 +3,6 @@ import { type FC, useEffect, useState } from "react";
 import { CalendarRange, ChartNoAxesCombined, ListOrdered, Settings, Shapes } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router";
-import "../styles/Navbar.styles.css";
-import "../styles/NavbarGlass.styles.css";
 import "../styles/v2/Sidebar.styles.css";
 
 // assets

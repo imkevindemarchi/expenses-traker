@@ -343,3 +343,20 @@
   }
   /* Actions: compact, trailing, like a macOS sheet. */
 }
+
+/* ---------- Primary toolbar action (save / confirm) ----------
+   Tinted with the app colour on desktop too: the plain-icon rules above are
+   scoped with html[data-theme] and used to outrank the submit tint. */
+@media (min-width: 768px) {
+  html[data-theme] body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button[data-primary]:not([data-nav-back]),
+  html body [data-theme] :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button[data-primary]:not([data-nav-back]),
+  html body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button[data-primary]:not([data-nav-back]) {
+    background-color: var(--lg-tint) !important;
+  }
+  html[data-theme] body :is(.mobile-floating-actions, .floating-actions) .floating-month-button.floating-month-button[data-primary]:not([data-nav-back]):hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--lg-tint) 88%, #000) !important;
+  }
+  html body :is(.mobile-floating-actions, .floating-actions) .floating-month-button[data-primary] .floating-month-button__icon.floating-month-button__icon {
+    color: #fff !important;
+  }
+}

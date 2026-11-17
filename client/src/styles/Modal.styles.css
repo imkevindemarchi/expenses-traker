@@ -462,3 +462,21 @@
   background: var(--lg-fill);
   box-shadow: none;
 }
+
+/* Phones: the sheet never moves with the finger except from its grabber.
+   Scrolling happens only inside the sheet's own content (or footer); a swipe
+   that reaches the end of it, or starts on a part that does not scroll, no
+   longer scrolls the page/visual viewport behind, which used to push the
+   whole sheet up the screen. */
+@media (max-width: 639px) {
+  .modal-backdrop {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+  .modal-backdrop .modal-content,
+  .modal-backdrop .modal-footer {
+    touch-action: pan-x pan-y;
+    overscroll-behavior: contain;
+  }
+}

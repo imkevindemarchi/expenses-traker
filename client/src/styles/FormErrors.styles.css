@@ -17,10 +17,8 @@
 /* ---------- Field footnote ---------- */
 .ui-field-error,
 .lg-field__error,
-.ios-picker__error,
 .ios-group__error,
-.ios-compose__error,
-.modal-choice-error {
+.ios-compose__error {
   display: block;
   margin: 6px 0 0 !important;
   padding: 0 16px !important;
@@ -57,43 +55,8 @@
   stroke-width: 2.2;
 }
 /* Older underline fields (Gym Traker): the round glyph turns red too. */
-.ui-field[data-invalid] .ui-field-icon {
-  background: var(--ui-danger) !important;
-  color: #fff !important;
-  box-shadow: none !important;
-}
 
 /* ---------- Notice (whole form / page) ---------- */
-.ui-notice,
-.form-error {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 0;
-  padding: 12px 14px;
-  border: 0;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--ui-danger) 12%, transparent);
-  color: var(--ui-danger);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 20px;
-  text-align: left;
-  animation: ui-notice-in 380ms var(--ui-error-ease);
-}
-.ui-notice::before,
-.form-error::before {
-  content: "";
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin-top: 1px;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' x2='12' y1='8' y2='12'/%3E%3Cline x1='12' x2='12.01' y1='16' y2='16'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' x2='12' y1='8' y2='12'/%3E%3Cline x1='12' x2='12.01' y1='16' y2='16'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-}
 
 @keyframes ui-error-in {
   from {
@@ -122,12 +85,8 @@
 @media (prefers-reduced-motion: reduce) {
   .ui-field-error,
   .lg-field__error,
-  .ios-picker__error,
   .ios-group__error,
-  .ios-compose__error,
-  .modal-choice-error,
-  .ui-notice,
-  .form-error {
+  .ios-compose__error {
     animation: none;
   }
 }

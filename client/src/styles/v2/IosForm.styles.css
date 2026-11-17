@@ -337,6 +337,11 @@ button.ios-cell:focus-visible {
 }
 
 /* ---------- Delete confirmation sheet ---------- */
+/* Final deletions: the word to type, under the warning. */
+.ios-delete__type {
+  margin-top: 4px;
+}
+
 .ios-delete {
   display: grid;
   gap: 14px;

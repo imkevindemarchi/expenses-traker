@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft, Save } from "lucide-react";
 import {
   isValidElement,
   useImperativeHandle,
@@ -38,6 +38,10 @@ const FloatingButton: FC<IProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   // v2: a "back" action is shown on its own at the top left on phones, like iOS.
   const isBack = isValidElement(icon) && icon.type === ChevronLeft;
+  // Saving / confirming is the primary action of a page: tinted with the
+  // app colour everywhere (phones and desktop toolbar), submit or not.
+  const isPrimary =
+    type === "submit" || (isValidElement(icon) && (icon.type === Check || icon.type === Save));
   useImperativeHandle(ref, () => buttonRef.current!, []);
 
   return (
@@ -46,6 +50,7 @@ const FloatingButton: FC<IProps> = ({
       ref={buttonRef}
       data-mobile-persistent={persistent || undefined}
       data-nav-back={isBack || undefined}
+      data-primary={isPrimary || undefined}
       type={type}
       aria-label={ariaLabel}
       disabled={disabled}

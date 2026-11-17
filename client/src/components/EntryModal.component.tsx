@@ -31,7 +31,6 @@ import type { Category, Subcategory, Entry } from "../types";
 import Modal from "./Modal.component";
 import Button from "./Button.component";
 import ChoiceList from "./ChoiceList.component";
-import IconButton from "./IconButton.component";
 import InlineDeleteConfirm from "./InlineDeleteConfirm.component";
 import "../styles/v2/Compose.styles.css";
 import "../styles/v2/Expenses.styles.css";
@@ -450,7 +449,7 @@ export default function EntryModal({
         onClose={onClose}
         footer={
           <div className="modal-record-actions flex w-full flex-col gap-3">
-            {confirmingDelete && onDelete ? (
+            {confirmingDelete && onDelete && (
               <InlineDeleteConfirm
                 title={tr(form.kind === "expense" ? "Elimina spesa" : "Elimina entrata")}
                 message={tr("Il movimento verrà eliminato definitivamente.")}
@@ -461,7 +460,8 @@ export default function EntryModal({
                 onCancel={() => setConfirmingDelete(false)}
                 onConfirm={() => void onDelete()}
               />
-            ) : view !== "form" ? (
+            )}
+            {view !== "form" ? (
               <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
                 <Button variant="secondary" disabled={busy} onClick={() => setView("form")}>
                   <ChevronLeft size={17} strokeWidth={2} />
@@ -472,17 +472,15 @@ export default function EntryModal({
               // Same footer as the note details of Alice & Kevin.
               <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
                 {onDelete && (
-                  <IconButton
-                    type="button"
-                    variant="danger"
+<Button
+                    variant="danger-outline"
                     className="mr-auto"
                     disabled={busy}
-                    aria-label={tr("Elimina")}
-                    title={tr("Elimina")}
                     onClick={() => setConfirmingDelete(true)}
                   >
                     <Trash2 size={17} strokeWidth={2} />
-                  </IconButton>
+                    <span>{tr("Elimina")}</span>
+                  </Button>
                 )}
                 <Button variant="secondary" disabled={busy} onClick={onClose}>
                   <X size={17} strokeWidth={2} />
@@ -612,6 +610,7 @@ export default function EntryModal({
           <ChoiceList
             title={tr("Scegli la categoria")}
             advance
+            layout="tiles"
             choices={categoryChoices}
             value={form.category}
             searchPlaceholder={tr("Cerca categoria…")}
@@ -626,6 +625,7 @@ export default function EntryModal({
           <ChoiceList
             title={tr("Scegli la sottocategoria")}
             advance
+            layout="tiles"
             choices={subcategoryChoices}
             value={form.subcategory}
             searchPlaceholder={tr("Cerca sottocategoria…")}

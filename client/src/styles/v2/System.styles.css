@@ -999,37 +999,7 @@ button[data-ui-button].bg-red-500 {
    keep them at the top right, like macOS notifications.
    ========================================================================== */
 @media (max-width: 767px) {
-  .popup-shell.popup-shell {
-    top: auto !important;
-    bottom: calc(var(--lg-tabbar-offset) + 10px);
-    left: max(14px, env(safe-area-inset-left, 0px)) !important;
-    right: max(14px, env(safe-area-inset-right, 0px)) !important;
-    align-items: flex-end;
-    transition: bottom 420ms var(--lg-spring);
-  }
-  html:has(.lg-search-dock) .popup-shell.popup-shell {
-    bottom: calc(var(--lg-tabbar-offset) + 48px + 18px);
-  }
-  html[data-tabbar-hidden] .popup-shell.popup-shell {
-    bottom: calc(max(14px, var(--lg-safe-bottom)) + 10px);
-  }
-  html[data-tabbar-hidden]:has(.lg-search-dock) .popup-shell.popup-shell {
-    bottom: calc(max(14px, var(--lg-safe-bottom)) + 48px + 18px);
-  }
-  html[data-search-focused] .popup-shell.popup-shell {
-    bottom: calc(var(--lg-keyboard-inset, 0px) + 48px + 22px);
-  }
-  .popup-shell .popup-surface {
-    max-width: none;
-    border-radius: 26px !important;
-  }
   /* Rise from below instead of dropping from the top. */
-  .popup-shell .animate-popup-enter {
-    animation: lg-popup-rise 460ms var(--lg-spring) both !important;
-  }
-  .popup-shell .animate-popup-exit {
-    animation: lg-popup-sink 260ms var(--lg-ease) both !important;
-  }
 }
 @keyframes lg-popup-rise {
   from {
@@ -1053,12 +1023,6 @@ button[data-ui-button].bg-red-500 {
     opacity: 0;
     translate: 0 18px;
     scale: 0.96;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .popup-shell .animate-popup-enter,
-  .popup-shell .animate-popup-exit {
-    animation-duration: 1ms !important;
   }
 }
 
@@ -1529,19 +1493,6 @@ html
   html[data-tabbar-hidden] .ios-analytics__period-dock {
     bottom: calc(var(--lg-tabbar-offset) - 2px) !important;
     translate: 0 var(--lg-tabbar-drop);
-  }
-  .popup-shell.popup-shell {
-    transition:
-      translate 380ms var(--lg-ease),
-      bottom 320ms var(--lg-ease);
-  }
-  html[data-tabbar-hidden]:not([data-search-focused]) .popup-shell.popup-shell {
-    bottom: calc(var(--lg-tabbar-offset) + 10px);
-    translate: 0 calc(var(--lg-tabbar-drop) + 2px);
-  }
-  html[data-tabbar-hidden]:not([data-search-focused]):has(.lg-search-dock)
-    .popup-shell.popup-shell {
-    bottom: calc(var(--lg-tabbar-offset) + 48px + 18px);
   }
   /* Only "translate": "will-change: opacity" would make the dock a backdrop
      root, and the tab bar's glass would blur an empty layer instead of the

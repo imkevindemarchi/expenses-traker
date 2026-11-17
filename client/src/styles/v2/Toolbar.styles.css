@@ -471,3 +471,16 @@ html[data-lg-title="offset"] .ui-page-heading.lg-title[data-ui-compact="true"] {
     transition-duration: 160ms, 0s !important;
   }
 }
+
+/* Phones: the primary action (save / confirm) is tinted, submit or not. */
+@media (max-width: 767px) {
+  .mobile-floating-actions .floating-month-button[data-primary]:not([data-nav-back]),
+  .floating-actions .floating-month-button[data-primary]:not([data-nav-back]) {
+    background-color: var(--lg-tint) !important;
+    box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 45%) !important;
+  }
+  .mobile-floating-actions .floating-month-button[data-primary] .floating-month-button__icon,
+  .floating-actions .floating-month-button[data-primary] .floating-month-button__icon {
+    color: #fff !important;
+  }
+}

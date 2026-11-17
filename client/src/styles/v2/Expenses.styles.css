@@ -438,6 +438,47 @@
   color: rgb(255 255 255 / 80%);
 }
 
+/* The first step of a new movement: two large tinted buttons (the choice
+   tiles of the sheet), the icon in a solid circle of its colour. */
+.et-kind-picker:not(.et-kind-picker--compact) .et-kind-toggle {
+  min-height: 156px;
+  padding: 16px;
+  border-radius: 26px;
+  background: color-mix(in srgb, var(--kind-color) 13%, var(--lg-card));
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 5%),
+    inset 0 0 0 0.5px color-mix(in srgb, var(--kind-color) 24%, transparent);
+  transition:
+    background-color 0.25s var(--lg-ease, ease),
+    color 0.25s var(--lg-ease, ease),
+    scale 0.22s var(--lg-spring, ease);
+}
+.et-kind-picker:not(.et-kind-picker--compact) .et-kind-toggle:active:not(:disabled) {
+  scale: 0.96;
+}
+.et-kind-picker:not(.et-kind-picker--compact) .et-kind-toggle__icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+  background: var(--kind-color);
+  color: #fff;
+  box-shadow: 0 10px 22px -12px var(--kind-color);
+}
+.et-kind-picker:not(.et-kind-picker--compact) .et-kind-toggle__label {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.et-kind-picker:not(.et-kind-picker--compact) .et-kind-toggle[aria-pressed="true"] {
+  background: var(--kind-color);
+  box-shadow: 0 14px 30px -18px var(--kind-color);
+}
+.et-kind-picker:not(.et-kind-picker--compact) .et-kind-toggle[aria-pressed="true"] .et-kind-toggle__icon {
+  background: #fff;
+  color: var(--kind-color);
+}
+
 /* Wide screens: the chart and the expenses by category share a row, so they
    take the same height — the taller one sets it, the chart grows to fill its
    card and the category list card stretches to the same bottom edge. */

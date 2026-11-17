@@ -104,11 +104,6 @@ export default function App() {
   const [manageEdit, setManageEdit] = useState<ManageForm | null>(null);
   const [deleteAction, setDeleteAction] = useState<DeleteAction | null>(null);
   useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(() => setNotice(null), 4000);
-    return () => clearTimeout(timer);
-  }, [notice]);
-  useEffect(() => {
     let active = true;
     const controller = new AbortController();
     api<{ user: User }>("/auth/me", { signal: controller.signal })
@@ -373,6 +368,7 @@ export default function App() {
           key={notice.message}
           popup={{ type: notice.error ? "error" : "success", message: tr(notice.message) }}
           isClosing={false}
+          autoCloseMs={4000}
           onClose={() => setNotice(null)}
         />
       )}

@@ -1,6 +1,167 @@
 /* ==========================================================================
    Compose sheets (new notification) — iOS 27 inset grouped content
    ========================================================================== */
+/* ==========================================================================
+   Choice tiles (ChoiceList layout="tiles"): the first choice of a compose
+   sheet as large buttons, like Shortcuts and Fitness in iOS 27. Each tile is
+   tinted with its colour, the icon sits in a solid rounded square, the label
+   is large; a featured choice (the suggested routine) spans the row, filled.
+   ========================================================================== */
+.ios-choice-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .ios-choice-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.ios-choice-tile {
+  --tile-color: var(--row-color, var(--lg-tint));
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: 12px 8px;
+  min-width: 0;
+  min-height: 116px;
+  padding: 14px;
+  border: 0;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--tile-color) 13%, var(--lg-card));
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 5%),
+    inset 0 0 0 0.5px color-mix(in srgb, var(--tile-color) 22%, transparent);
+  color: var(--lg-label);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    scale 220ms var(--lg-spring, ease),
+    box-shadow 200ms ease,
+    background-color 200ms ease;
+}
+.ios-choice-tile:active:not(:disabled) {
+  scale: 0.96;
+}
+.ios-choice-tile:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.ios-choice-tile:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--tile-color) 55%, transparent);
+  outline-offset: 2px;
+}
+.ios-choice-tile[aria-selected="true"] {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 5%),
+    inset 0 0 0 2px var(--tile-color);
+}
+.ios-choice-tile__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--tile-color);
+  color: #fff;
+  box-shadow: 0 8px 18px -10px var(--tile-color);
+}
+.ios-choice-tile__icon svg {
+  width: 22px;
+  height: 22px;
+}
+.ios-choice-tile__go {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tile-color) 18%, transparent);
+  color: var(--tile-color);
+}
+.ios-choice-tile__copy {
+  display: grid;
+  grid-column: 1 / -1;
+  align-self: end;
+  gap: 2px;
+  min-width: 0;
+}
+.ios-choice-tile__copy strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 21px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.ios-choice-tile__copy > span {
+  color: var(--lg-label-2);
+  font-size: 13px;
+  line-height: 17px;
+}
+.ios-choice-tile__badge {
+  justify-self: start;
+  margin-bottom: 2px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tile-color) 18%, transparent);
+  color: var(--tile-color);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+/* Featured: the whole row, filled with its colour (the suggested routine). */
+.ios-choice-tile[data-featured] {
+  grid-column: 1 / -1;
+  min-height: 132px;
+  padding: 16px;
+  background: var(--tile-color);
+  box-shadow: 0 14px 30px -18px var(--tile-color);
+  color: #fff;
+}
+.ios-choice-tile[data-featured] .ios-choice-tile__icon {
+  background: rgb(255 255 255 / 22%);
+  box-shadow: none;
+}
+.ios-choice-tile[data-featured] .ios-choice-tile__go {
+  width: auto;
+  height: 34px;
+  padding: 0 14px;
+  gap: 6px;
+  grid-auto-flow: column;
+  background: #fff;
+  color: var(--tile-color);
+  font-size: 15px;
+  font-weight: 700;
+}
+.ios-choice-tile[data-featured] .ios-choice-tile__copy strong {
+  font-size: 22px;
+  line-height: 26px;
+}
+.ios-choice-tile[data-featured] .ios-choice-tile__copy > span {
+  color: rgb(255 255 255 / 82%);
+}
+.ios-choice-tile[data-featured] .ios-choice-tile__badge {
+  background: rgb(255 255 255 / 22%);
+  color: #fff;
+}
+.ios-choice-tile[data-featured][aria-selected="true"] {
+  box-shadow: 0 14px 30px -18px var(--tile-color);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ios-choice-tile {
+    transition: none;
+  }
+}
+
 .ios-compose {
   display: grid;
   gap: 18px;

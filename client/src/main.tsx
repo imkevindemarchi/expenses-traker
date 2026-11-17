@@ -1,7 +1,6 @@
 import "./styles/NavigationFeedback.styles.css";
 import "./styles/StandaloneSettings.styles.css";
 import "./styles/Scrollbars.styles.css";
-import "./styles/SharedPills.styles.css";
 import { BrowserRouter } from "react-router";
 import { createRoot } from "react-dom/client";
 import { applyGlassClarity, setGlassClarityPersistence } from "./utils/glass-clarity.util";

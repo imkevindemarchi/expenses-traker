@@ -13,12 +13,6 @@ import { useTranslation } from "react-i18next";
 
 import "../styles/Popup.styles.css";
 
-// assets
-import { getLiquidGlassClass } from "../assets/constants";
-
-// hooks
-import { useTheme } from "../hooks";
-
 // types
 type TPopupType = "success" | "warning" | "error";
 type TPopupState = { type: TPopupType; message: string; title?: string };
@@ -26,10 +20,12 @@ type TPopupState = { type: TPopupType; message: string; title?: string };
 interface IProps {
   popup: TPopupState;
   isClosing: boolean;
+  /** Closes itself after this time, with the exit animation (apps without a provider). */
+  autoCloseMs?: number;
   onClose: () => void;
 }
 
-/** Each kind of message: its icon, its title and its colour (Popup.styles.css). */
+/** Each kind of message: its glyph and its title (colours in Popup.styles.css). */
 const POPUP_STYLES: Record<TPopupType, { icon: typeof CircleCheck; titleTranslationKey: string }> =
   {
     success: { icon: CircleCheck, titleTranslationKey: "popup.success" },
@@ -37,129 +33,117 @@ const POPUP_STYLES: Record<TPopupType, { icon: typeof CircleCheck; titleTranslat
     error: { icon: CircleX, titleTranslationKey: "popup.error" },
   };
 
-const SWIPE_CLOSE_THRESHOLD = 18;
+/** Upward drag (px) that dismisses the banner. */
+const SWIPE_CLOSE_THRESHOLD = 24;
+/** Matches the exit animation in Popup.styles.css. */
+const EXIT_MS = 220;
 
-/** Phones show popups at the bottom, above the tab bar (see System.styles.css). */
-const isBottomPlacement = (): boolean => window.matchMedia("(max-width: 767px)").matches;
-
-const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => {
+/**
+ * The snackbar of the three apps, as an iOS 27 banner: a Liquid Glass capsule
+ * that drops in at the top centre (clear of the tab bar, the dock, the
+ * floating buttons and the main actions at the bottom), with the coloured
+ * glyph of its kind, a title and the message. Swipe it up or tap × to dismiss;
+ * it stays while touched.
+ */
+const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, autoCloseMs, onClose }) => {
+  const { t } = useTranslation();
   const [locallyClosing, setLocallyClosing] = useState(false);
-  const isClosing = externallyClosing || locallyClosing;
+  const [offset, setOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHeld, setIsHeld] = useState(false);
+  const touchStartY = useRef<number | null>(null);
   const closeCallback = useRef(onClose);
   useLayoutEffect(() => {
     closeCallback.current = onClose;
   }, [onClose]);
-  const requestClose = () => {
+  const isClosing = externallyClosing || locallyClosing;
+
+  const requestClose = (): void => {
     if (isClosing) return;
-    touchStartYRef.current = null;
+    touchStartY.current = null;
     setIsDragging(false);
     setLocallyClosing(true);
   };
+
+  useEffect(() => {
+    if (!autoCloseMs || isHeld || isClosing) return;
+    const timer = window.setTimeout(() => setLocallyClosing(true), autoCloseMs);
+    return () => window.clearTimeout(timer);
+  }, [autoCloseMs, isHeld, isClosing]);
+
   useEffect(() => {
     if (!locallyClosing) return;
-    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200;
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : EXIT_MS;
     const timer = window.setTimeout(() => closeCallback.current(), delay);
     return () => window.clearTimeout(timer);
   }, [locallyClosing]);
-  const { t } = useTranslation();
-  const { theme } = useTheme();
-
-  const touchStartYRef = useRef<number | null>(null);
-
-  const [translateY, setTranslateY] = useState<number>(0);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   const style = POPUP_STYLES[popup.type];
-
   const Icon = style.icon;
-
-  const defaultTitle: string = t(style.titleTranslationKey);
-  const title: string = popup.title || defaultTitle;
-
+  const title: string = popup.title || t(style.titleTranslationKey);
   const role: "alert" | "status" = popup.type === "success" ? "status" : "alert";
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>): void => {
-    if (isClosing) {
-      return;
-    }
-
-    touchStartYRef.current = event.touches[0].clientY;
+    if (isClosing) return;
+    touchStartY.current = event.touches[0].clientY;
     setIsDragging(true);
+    setIsHeld(true);
   };
-
   const handleTouchMove = (event: TouchEvent<HTMLDivElement>): void => {
-    if (touchStartYRef.current === null || isClosing) {
-      return;
-    }
-
-    const currentY: number = event.touches[0].clientY;
-    const difference: number = currentY - touchStartYRef.current;
-
-    // Phones: the popup sits above the tab bar, so it is swiped down to close.
-    if (isBottomPlacement()) {
-      setTranslateY(Math.max(0, difference));
-      return;
-    }
-
-    // Il popup può essere trascinato solamente verso l'alto.
-    setTranslateY(Math.min(0, difference));
+    if (touchStartY.current === null || isClosing) return;
+    const delta = event.touches[0].clientY - touchStartY.current;
+    // Up follows the finger; down only stretches a little, like a rubber band.
+    setOffset(delta < 0 ? delta : Math.sqrt(delta) * 2);
   };
-
   const handleTouchEnd = (): void => {
-    if (touchStartYRef.current === null || isClosing) {
-      return;
-    }
-
-    touchStartYRef.current = null;
+    if (touchStartY.current === null || isClosing) return;
+    touchStartY.current = null;
     setIsDragging(false);
-
-    if (Math.abs(translateY) >= SWIPE_CLOSE_THRESHOLD) {
+    setIsHeld(false);
+    if (offset <= -SWIPE_CLOSE_THRESHOLD) {
       requestClose();
       return;
     }
-
-    setTranslateY(0);
+    setOffset(0);
   };
-
   const handleTouchCancel = (): void => {
-    touchStartYRef.current = null;
+    touchStartY.current = null;
     setIsDragging(false);
-    setTranslateY(0);
+    setIsHeld(false);
+    setOffset(0);
   };
 
-  const popupStyle: CSSProperties = {
-    transform: `translate3d(0, ${translateY}px, 0)`,
-    opacity: Math.max(0.35, 1 - Math.abs(translateY) / 150),
-    touchAction: "pan-x pan-down",
+  const surfaceStyle: CSSProperties = {
+    translate: `0 ${offset}px`,
+    opacity: offset < 0 ? Math.max(0.3, 1 + offset / 120) : 1,
+    touchAction: "pan-x",
   };
 
   return createPortal(
-    <div className="popup-shell pointer-events-none fixed inset-x-3 top-20 z-9999 flex justify-center sm:inset-x-auto sm:right-5 sm:top-5 sm:justify-end">
+    <div className="lg-toast-shell">
       <div
         role={role}
         aria-live={popup.type === "success" ? "polite" : "assertive"}
         aria-atomic="true"
         data-tone={popup.type}
+        data-closing={isClosing || undefined}
+        data-dragging={isDragging || undefined}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchCancel}
-        style={popupStyle}
-        className={`popup-surface ${
-          isClosing ? "animate-popup-exit" : translateY === 0 ? "animate-popup-enter" : ""
-        } ${
-          isDragging && !isClosing ? "transition-none" : "transition-[transform,opacity] duration-300 ease-out"
-        } ${getLiquidGlassClass(theme)} pointer-events-auto relative isolate flex w-full max-w-sm items-center gap-3 overflow-hidden border select-none sm:max-w-md`}
+        onMouseEnter={() => setIsHeld(true)}
+        onMouseLeave={() => setIsHeld(false)}
+        style={surfaceStyle}
+        className="lg-toast"
       >
-        <span className="popup-surface__icon" aria-hidden="true">
-          <Icon size={19} strokeWidth={2.4} />
+        <span className="lg-toast__icon" aria-hidden="true">
+          <Icon size={18} strokeWidth={2.4} />
         </span>
-
-        <div className="popup-surface__copy">
-          <h3 className="popup-surface__title">{title}</h3>
-          <p className="popup-surface__message">{popup.message}</p>
+        <div className="lg-toast__copy">
+          <p className="lg-toast__title">{title}</p>
+          <p className="lg-toast__message">{popup.message}</p>
         </div>
-
         <button
           type="button"
           aria-label={t("popup.close")}
@@ -167,9 +151,9 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, onClose }) => 
           onTouchStart={(event) => event.stopPropagation()}
           onTouchEnd={(event) => event.stopPropagation()}
           onClick={requestClose}
-          className="popup-surface__close"
+          className="lg-toast__close"
         >
-          <X size={15} strokeWidth={2.4} />
+          <X size={14} strokeWidth={2.6} />
         </button>
       </div>
     </div>,

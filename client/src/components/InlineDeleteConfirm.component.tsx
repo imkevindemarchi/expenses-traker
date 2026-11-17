@@ -1,24 +1,26 @@
-import type { FC } from "react";
-import { Trash2 } from "lucide-react";
-import Button from "./Button.component";
+import type { FC, ReactNode } from "react";
+import DeleteConfirmModal from "./DeleteConfirmModal.component";
 
 interface IProps {
-  /** Names the confirmation for assistive technologies. */
+  /** Title of the confirmation sheet. */
   title: string;
-  /** One short line above the buttons: what is deleted and that it is final. */
+  /** What is deleted and that it is final. */
   message: string;
   confirmLabel: string;
   deletingLabel: string;
   cancelLabel: string;
   isDeleting: boolean;
+  /** The record being deleted, as an iOS row (icon, name, detail). */
+  preview?: { media: ReactNode; title: ReactNode; detail?: ReactNode };
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 /**
- * Delete confirmation inside the footer of the sheet that edits the record,
- * as an iOS action sheet: a short line, then "Delete" (red) and "Cancel"
- * stacked at full width. Shared by every modal with deletion built in.
+ * Deletion asked from inside a sheet (a record's editor or details): the same
+ * confirmation sheet as every other deletion (DeleteConfirmModal, the "discard
+ * workout" sheet of Gym Traker), opened over the sheet; the sheet underneath
+ * keeps its own buttons. Rendered while the confirmation is requested.
  */
 const InlineDeleteConfirm: FC<IProps> = ({
   title,
@@ -27,19 +29,22 @@ const InlineDeleteConfirm: FC<IProps> = ({
   deletingLabel,
   cancelLabel,
   isDeleting,
+  preview,
   onCancel,
   onConfirm,
 }) => (
-  <div className="modal-delete-sheet" role="alertdialog" aria-label={title}>
-    <p className="modal-delete-sheet__message">{message}</p>
-    <Button type="button" variant="danger" disabled={isDeleting} onClick={onConfirm}>
-      {!isDeleting && <Trash2 size={17} strokeWidth={2} />}
-      <span>{isDeleting ? deletingLabel : confirmLabel}</span>
-    </Button>
-    <Button type="button" variant="secondary" disabled={isDeleting} onClick={onCancel}>
-      <span>{cancelLabel}</span>
-    </Button>
-  </div>
+  <DeleteConfirmModal
+    isOpen
+    title={title}
+    warning={message}
+    preview={preview}
+    confirmLabel={confirmLabel}
+    deletingLabel={deletingLabel}
+    cancelLabel={cancelLabel}
+    isDeleting={isDeleting}
+    onClose={onCancel}
+    onConfirm={onConfirm}
+  />
 );
 
 export default InlineDeleteConfirm;

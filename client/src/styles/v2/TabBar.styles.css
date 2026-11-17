@@ -173,6 +173,8 @@
 .lg-more-sheet.liquid-glass-sidebar-motion--closed {
   scale: 0.4 0.25;
   translate: 0 24px;
+  opacity: 0;
+  pointer-events: none;
 }
 .lg-more-sheet.liquid-glass-sidebar-motion--open {
   scale: 1;
@@ -189,11 +191,6 @@
 .lg-more-sheet > aside > div:has(> a .app-brand-logo),
 .lg-more-sheet > aside > div:has(> a > .app-brand-logo) {
   display: none !important;
-}
-.lg-more-sheet .nav-tab-card {
-  min-height: 0 !important;
-  padding: 12px !important;
-  border-radius: var(--lg-radius-md) !important;
 }
 
 /* On phones the logo scrolls away with the page, like an iOS large title,

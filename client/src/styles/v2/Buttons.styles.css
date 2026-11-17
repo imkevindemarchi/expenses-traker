@@ -100,3 +100,37 @@
   border-top: 0 !important;
   background: transparent !important;
 }
+
+/* ==========================================================================
+   Destructive choices in sheets — the "Concludi allenamento" sheet of Gym
+   Traker everywhere:
+   - edit sheets: "Elimina" / "Scarta" is a red tinted capsule with its label
+     (danger-outline), at the left on wide screens and on its own full-width
+     row on phones, above "Annulla" and the main action;
+   - confirmation sheets (DeleteConfirmModal): "Annulla" and the red action as
+     full-width capsules on phones, the action last, in the thumb zone.
+   ========================================================================== */
+.modal-confirm-actions {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.modal-confirm-actions > button {
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+}
+@media (max-width: 639px) {
+  .modal-surface .modal-footer div.modal-confirm-actions.modal-confirm-actions {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .modal-surface .modal-footer div > button[data-ui-button][data-variant="danger-outline"] {
+    grid-column: 1 / -1;
+    margin: 0 !important;
+  }
+}

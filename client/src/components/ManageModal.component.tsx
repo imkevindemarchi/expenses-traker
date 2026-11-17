@@ -17,7 +17,6 @@ import type { Category } from "../types";
 import Modal from "./Modal.component";
 import Button from "./Button.component";
 import ChoiceList from "./ChoiceList.component";
-import IconButton from "./IconButton.component";
 import InlineDeleteConfirm from "./InlineDeleteConfirm.component";
 import "../styles/v2/Compose.styles.css";
 import "../styles/v2/Expenses.styles.css";
@@ -95,7 +94,7 @@ export default function ManageModal({
       }}
       footer={
         <div className="modal-record-actions flex w-full flex-col gap-3">
-          {confirmingDelete && form?.id ? (
+          {confirmingDelete && form?.id && (
             <InlineDeleteConfirm
               title={tr(form.mode === "category" ? "Elimina categoria" : "Elimina sottocategoria")}
               message={tr(
@@ -105,10 +104,20 @@ export default function ManageModal({
               deletingLabel={tr("Eliminazione…")}
               cancelLabel={tr("Annulla")}
               isDeleting={busy}
+              preview={{
+                media:
+                  form.mode === "category" ? (
+                    <Shapes size={20} strokeWidth={2} />
+                  ) : (
+                    <Layers3 size={20} strokeWidth={2} />
+                  ),
+                title: form.name,
+              }}
               onCancel={() => setConfirmingDelete(false)}
               onConfirm={() => void onDelete()}
             />
-          ) : choosingParent ? (
+          )}
+          {choosingParent ? (
             <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
               <Button variant="secondary" onClick={() => setChoosingParent(false)}>
                 <ChevronLeft size={17} strokeWidth={2} />
@@ -120,17 +129,15 @@ export default function ManageModal({
             // left, then cancel and save.
             <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
               {form?.id && (
-                <IconButton
-                  type="button"
-                  variant="danger"
+<Button
+                  variant="danger-outline"
                   className="mr-auto"
                   disabled={busy}
-                  aria-label={tr("Elimina")}
-                  title={tr("Elimina")}
                   onClick={() => setConfirmingDelete(true)}
                 >
                   <Trash2 size={17} strokeWidth={2} />
-                </IconButton>
+                  <span>{tr("Elimina")}</span>
+                </Button>
               )}
               <Button variant="secondary" disabled={busy} onClick={onClose}>
                 <X size={17} strokeWidth={2} />

@@ -84,6 +84,33 @@ const Modal: FC<IProps> = ({
     const timer = window.setTimeout(() => setIsRendered(false), MODAL_EXIT_MS);
     return () => window.clearTimeout(timer);
   }, [isOpen, isRendered]);
+  // While it slides away the sheet keeps what it showed: parents often clear
+  // the record on close (e.g. the item to delete), which made the content
+  // collapse and the sheet jump during the exit animation.
+  const shownRef = useRef({ title, description, footer, children });
+  if (isOpen) shownRef.current = { title, description, footer, children };
+  const shown = isOpen ? { title, description, footer, children } : shownRef.current;
+  // Parents that unmount an open sheet (rendered only while needed) would make
+  // it vanish at once. Leave a static copy behind that plays the same exit
+  // animation, so every sheet closes the same way.
+  const openNodeRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    openNodeRef.current = isOpen && isRendered ? backdropRef.current : null;
+  });
+  useLayoutEffect(
+    () => () => {
+      const node = openNodeRef.current;
+      if (!node?.isConnected || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const ghost = node.cloneNode(true) as HTMLElement;
+      ghost.querySelectorAll("[id]").forEach((element) => element.removeAttribute("id"));
+      ghost.setAttribute("data-closing", "true");
+      ghost.setAttribute("aria-hidden", "true");
+      ghost.inert = true;
+      document.body.appendChild(ghost);
+      window.setTimeout(() => ghost.remove(), MODAL_EXIT_MS + 40);
+    },
+    [],
+  );
   const dragRef = useRef<{ startY: number; startTime: number; offset: number } | null>(null);
   const onCloseRef = useRef(onClose);
   useLayoutEffect(() => {
@@ -149,9 +176,12 @@ const Modal: FC<IProps> = ({
     }
 
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === "Escape" && isClosable) {
-        onCloseRef.current();
-      }
+      if (event.key !== "Escape" || !isClosable) return;
+      // Sheets can be stacked (a confirmation over an editor): Escape closes
+      // only the one on top.
+      const open = document.querySelectorAll(".modal-backdrop:not([data-closing])");
+      if (open.length && open[open.length - 1] !== backdropRef.current) return;
+      onCloseRef.current();
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -287,15 +317,15 @@ const Modal: FC<IProps> = ({
                   id={titleId}
                   className="modal-title wrap-break-word text-xl leading-7 font-semibold tracking-tight sm:text-2xl sm:leading-8"
                 >
-                  {title}
+                  {shown.title}
                 </h2>
 
-                {description && (
+                {shown.description && (
                   <p
                     id={descriptionId}
                     className="modal-description mt-2 wrap-break-word text-sm leading-6"
                   >
-                    {description}
+                    {shown.description}
                   </p>
                 )}
               </div>
@@ -312,15 +342,15 @@ const Modal: FC<IProps> = ({
             </div>
           </div>
 
-          {children && (
+          {shown.children && (
             <div className="modal-content min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
-              {children}
+              {shown.children}
             </div>
           )}
 
-          {footer && (
+          {shown.footer && (
             <div className="modal-footer shrink-0 px-5 py-4 sm:px-7 sm:py-5">
-              <div className="modal-actions">{footer}</div>
+              <div className="modal-actions">{shown.footer}</div>
             </div>
           )}
         </div>

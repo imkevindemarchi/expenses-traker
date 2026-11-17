@@ -125,6 +125,8 @@ const FilterFloatingMenu = <TValue extends string>({
       )
     : options;
   // The reset value ("all") is not an active filter.
+  // Long menus on phones: two compact columns instead of an endless list.
+  const compactMenu = isPhone && menuOptions.length > 8;
   const isMenuValueSelected =
     isSplit && value !== railResetValue && menuOptions.some((option) => option.value === value);
   useLayoutEffect(() => {
@@ -138,12 +140,35 @@ const FilterFloatingMenu = <TValue extends string>({
         offsetLeft: 0,
         offsetTop: 0,
       };
-      const height = panel.current?.offsetHeight ?? menuOptions.length * 56 + 12;
       const anchorRect = container.current.getBoundingClientRect();
+      // The height of the options themselves: the panel's own scrollHeight also
+      // counts its decorations (the glass sheen overflows it by 25% above and
+      // below), which left the menu floating far above its button.
+      const list = panel.current?.firstElementChild as HTMLElement | null | undefined;
+      const panelStyle = panel.current ? getComputedStyle(panel.current) : null;
+      const chrome = panelStyle
+        ? parseFloat(panelStyle.paddingTop) +
+          parseFloat(panelStyle.paddingBottom) +
+          parseFloat(panelStyle.borderTopWidth) +
+          parseFloat(panelStyle.borderBottomWidth)
+        : 0;
+      const natural = list ? list.scrollHeight + chrome : menuOptions.length * 56 + 12;
+      // Phones: the menu never fills the screen. It sits between the top of the
+      // screen and its button (the dock) and scrolls inside when it is long.
+      const viewportTop = viewport.offsetTop ?? 0;
+      const roomAbove = anchorRect.top - viewportTop - 20;
+      const roomBelow = viewportTop + viewport.height - anchorRect.bottom - 20;
+      const cap = isPhone
+        ? Math.max(
+            180,
+            Math.min(viewport.height * 0.6, inDock ? roomAbove : Math.max(roomAbove, roomBelow)),
+          )
+        : viewport.height - 24;
+      const height = Math.min(natural, cap);
       const nextPosition = fitStaticPanel(
         anchorRect,
-        360,
-        Math.min(height, viewport.height - 24),
+        isPhone && menuOptions.length > 8 ? 400 : 360,
+        height,
         viewport,
         inDock
           ? "above"
@@ -165,12 +190,14 @@ const FilterFloatingMenu = <TValue extends string>({
       const positioned = {
         ...nextPosition,
         transformOrigin: `${originX}px ${originY}px`,
+        maxHeight: cap,
         "--menu-close-offset": nextPosition.top < anchor.top ? "8px" : "-8px",
       } as CSSProperties;
       setPosition((previous) =>
         previous.left === positioned.left &&
         previous.top === positioned.top &&
         previous.width === positioned.width &&
+        previous.maxHeight === positioned.maxHeight &&
         previous.transformOrigin === positioned.transformOrigin
           ? previous
           : positioned,
@@ -201,6 +228,22 @@ const FilterFloatingMenu = <TValue extends string>({
       });
     };
     update();
+    // The button can move while the menu is open without any scroll or resize
+    // event: the search dock slides when the tab bar hides or comes back, the
+    // toolbar capsule collapses its other actions, the keyboard opens. Follow
+    // it every frame, so the menu always opens (and stays) next to its button.
+    let tracking = 0;
+    let anchorKey = "";
+    const track = () => {
+      tracking = requestAnimationFrame(track);
+      const rect = container.current?.getBoundingClientRect();
+      if (!rect) return;
+      const key = `${rect.left}|${rect.top}|${rect.width}|${rect.height}`;
+      if (key === anchorKey) return;
+      anchorKey = key;
+      update();
+    };
+    tracking = requestAnimationFrame(track);
     const observer = new ResizeObserver(scheduleUpdate);
     if (panel.current) observer.observe(panel.current);
     window.addEventListener("resize", scheduleUpdate);
@@ -211,6 +254,7 @@ const FilterFloatingMenu = <TValue extends string>({
     document.addEventListener("keydown", escape);
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(tracking);
       observer.disconnect();
       window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("scroll", scheduleUpdate, true);
@@ -219,24 +263,29 @@ const FilterFloatingMenu = <TValue extends string>({
       document.removeEventListener("pointerdown", outside, true);
       document.removeEventListener("keydown", escape);
     };
-  }, [isOpen, menuOptions.length, placement, sortInRail, isSplit, inDock, onClose, onToggle]);
+  }, [isOpen, menuOptions.length, placement, sortInRail, isSplit, inDock, isPhone, onClose, onToggle]);
   const panelNode = createPortal(
     <div
       ref={panel}
       data-floating-menu
       style={{
+        maxHeight: "calc(100dvh - 24px)",
         ...position,
         transform: isOpen
           ? "translateY(0) scale(1)"
           : "translateY(var(--menu-close-offset, 8px)) scale(0.96)",
-        maxHeight: "calc(100dvh - 24px)",
         overflowY: "auto",
+        overscrollBehavior: "contain",
       }}
       aria-hidden={!isOpen}
       inert={!isOpen}
       className={`liquid-glass-panel ${isOpen ? "liquid-glass-panel--open pointer-events-auto opacity-100" : "liquid-glass-panel--closed pointer-events-none opacity-0"} fixed z-9999 overflow-hidden rounded-[22px] border p-1.5 transition-[background-color,border-color,box-shadow,opacity,transform] duration-300 ${getLiquidGlassClass(theme)} ${theme === "light" ? "border-white/70 bg-white/50 shadow-[0_18px_50px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]" : "border-white/10 bg-black/70 shadow-[0_20px_55px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]"}`}
     >
-      <div role="menu" aria-label={ariaLabel} className="grid gap-1">
+      <div
+        role="menu"
+        aria-label={ariaLabel}
+        className={`grid gap-1 ${compactMenu ? "grid-cols-2" : ""}`}
+      >
         {menuOptions.map((option) => {
           const selected = option.value === value,
             count = optionCounts?.[option.value];
@@ -249,7 +298,7 @@ const FilterFloatingMenu = <TValue extends string>({
               title={option.label}
               onClick={() => onChange(option.value)}
               style={selected && option.color ? { backgroundColor: option.color } : undefined}
-              className={`flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-medium transition-colors ${selected ? `${option.color ? "" : "bg-primary"} text-white` : theme === "light" ? "text-black hover:bg-black/5" : "text-white hover:bg-white/7"}`}
+              className={`flex ${compactMenu ? "min-h-10 gap-2 px-2 py-1.5 text-[13px]" : "min-h-11 gap-3 px-3 py-2"} w-full cursor-pointer items-center rounded-2xl text-left text-sm font-medium transition-colors ${selected ? `${option.color ? "" : "bg-primary"} text-white` : theme === "light" ? "text-black hover:bg-black/5" : "text-white hover:bg-white/7"}`}
             >
               {option.icon && (
                 <span
@@ -261,7 +310,7 @@ const FilterFloatingMenu = <TValue extends string>({
                         }
                       : undefined
                   }
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${selected ? "bg-white/15 text-white" : option.color ? "" : "bg-primary/10 text-primary"}`}
+                  className={`flex ${compactMenu ? "size-7" : "size-8"} shrink-0 items-center justify-center rounded-xl ${selected ? "bg-white/15 text-white" : option.color ? "" : "bg-primary/10 text-primary"}`}
                 >
                   {option.icon}
                 </span>

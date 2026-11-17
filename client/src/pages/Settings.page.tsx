@@ -508,6 +508,7 @@ export default function SettingsPage({
           detail: user.email,
         }}
         isDeleting={deleteBusy}
+        requireConfirmWord
         onClose={() => !deleteBusy && setDeleteOpen(false)}
         onConfirm={() => void removeAccount()}
       />

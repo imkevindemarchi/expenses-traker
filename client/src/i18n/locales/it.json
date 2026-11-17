@@ -1,11 +1,4 @@
 {
-  "modalChoice": {
-    "back": "Indietro",
-    "clear": "Azzera selezione"
-  },
-  "loader": {
-    "loading": "Caricamento..."
-  },
   "modal": {
     "close": "Chiudi finestra"
   },
@@ -23,12 +16,10 @@
     }
   },
   "accountMenu": {
-    "defaultUsername": "Amministratore",
     "openMenu": "Apri menu account",
     "closeMenu": "Chiudi menu account",
     "menuLabel": "Menu account",
     "settings": "Impostazioni",
-    "notifications": "Notifiche",
     "logout": "Esci",
     "theme": "Tema",
     "themeOptions": {
@@ -38,55 +29,10 @@
     }
   },
   "navbar": {
-    "home": "Home",
-    "analytics": "Analytics",
-    "users": "Utenti",
-    "ppvs": "PPV",
-    "usersManagement": "Gestione utenti",
-    "ppvsManagement": "Gestione PPV",
-    "categoriesManagement": "Gestione categorie",
     "settings": "Impostazioni",
     "goToHomepage": "Vai alla home",
     "menu": "Menu",
-    "closeMenu": "Chiudi menu",
-    "notifications": {
-      "activeAriaLabel": "{{count}} notifiche attive",
-      "emptyAriaLabel": "Nessuna notifica attiva",
-      "menuAriaLabel": "Notifiche attive",
-      "menuTitle": "Notifiche",
-      "menuSubtitle": "{{count}} notifiche da gestire",
-      "loading": "Caricamento notifiche...",
-      "markAsReadAriaLabel": "Segna come letta",
-      "markAsReadTitle": "Segna come letta",
-      "types": {
-        "subscription_reactivation": "Riattivazione abbonamento",
-        "subscription_removal": "Rimozione abbonamento",
-        "content_to_prepare": "Contenuto da preparare",
-        "message": "Messaggio",
-        "other": "Altro",
-        "upsell": "Upsell PPV"
-      },
-      "empty": {
-        "title": "Tutto sotto controllo",
-        "description": "Non ci sono notifiche attive in questo momento."
-      },
-      "success": {
-        "read": "Notifica di {{name}} confermata correttamente"
-      },
-      "error": {
-        "read": "Impossibile confermare la notifica di {{name}}"
-      }
-    },
-    "userSegments": "Segmenti utenti",
-    "ppvSegments": "Segmenti PPV",
-    "dashboard": "Mensile",
-    "entries": "Movimenti",
-    "management": "Gestione",
-    "annual": "Annuale"
-  },
-  "theme": {
-    "light": "Tema chiaro",
-    "dark": "Tema scuro"
+    "closeMenu": "Chiudi menu"
   },
   "pagination": {
     "previous": "Pagina precedente",
@@ -98,14 +44,6 @@
     "jumpTo": "Vai alla pagina",
     "pageOf": "Pagina {{page}} di {{total}}"
   },
-  "autocomplete": {
-    "placeholder": "Seleziona",
-    "searchPlaceholder": "Cerca...",
-    "emptyMessage": "Nessun risultato",
-    "loadingMessage": "Caricamento...",
-    "removeSelection": "Rimuovi selezione",
-    "clearSearch": "Cancella ricerca"
-  },
   "datePicker": {
     "placeholder": "Seleziona una data",
     "toggleCalendar": "Apri o chiudi il calendario"
@@ -113,12 +51,13 @@
   "common": {
     "cancel": "Annulla",
     "delete": "Elimina",
-    "deleting": "Eliminazione…"
+    "deleting": "Eliminazione…",
+    "confirmWord": "conferma",
+    "typeToConfirm": "Per eliminarlo definitivamente, scrivi «{{word}}»"
   },
   "settings": {
     "appearance": {
       "title": "Aspetto",
-      "description": "Regola il vetro dell'interfaccia, come su iPhone.",
       "glass": "Liquid Glass",
       "glassHint": "Smerigliato è più leggibile; trasparente lascia intravedere il contenuto sotto barre e menu.",
       "frosted": "Smerigliato",

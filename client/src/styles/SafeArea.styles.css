@@ -20,11 +20,6 @@
   .auth-shell-language {
     top: calc(24px + var(--app-safe-top));
   }
-  .popup-shell {
-    top: calc(var(--app-safe-top) + var(--crm-offset, 0px) + 16px);
-    left: max(12px, env(safe-area-inset-left, 0px));
-    right: max(12px, env(safe-area-inset-right, 0px));
-  }
   .floating-actions:not(.above-active-workout) {
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }

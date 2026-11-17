@@ -31,33 +31,6 @@
 /* Delete confirmation in the footer of an edit sheet (InlineDeleteConfirm):
    an iOS action sheet — one short line, then "Delete" in red and "Cancel",
    stacked at full width. No red frame around it. */
-.modal-delete-sheet {
-  display: grid;
-  gap: 10px;
-  width: 100%;
-  animation: modal-delete-sheet-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.modal-surface .modal-footer .modal-delete-sheet.modal-delete-sheet {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-}
-.modal-delete-sheet__message {
-  margin: 0 0 2px;
-  padding: 0 12px;
-  color: var(--lg-label-2);
-  font-size: 13px;
-  line-height: 18px;
-  text-align: center;
-  text-wrap: balance;
-}
-.modal-delete-sheet > button[data-ui-button] {
-  width: 100%;
-  min-height: 50px;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 600;
-}
 @keyframes modal-delete-sheet-in {
   from {
     opacity: 0;
@@ -66,10 +39,5 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .modal-delete-sheet {
-    animation: none;
   }
 }
