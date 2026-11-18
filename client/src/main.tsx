@@ -8,6 +8,7 @@ import { api } from "./api";
 import "./index.css";
 import "./i18n";
 import App from "./App";
+import Bootloader from "./components/Bootloader.component";
 import { ThemeProvider } from "./providers/theme.provider";
 
 import "./styles/SharedTypography.styles.css";
@@ -24,7 +25,9 @@ createRoot(document.getElementById("root")!).render(
   // Commit the destination immediately so its loading UI and navigation stay responsive.
   <BrowserRouter unstable_useTransitions={false}>
     <ThemeProvider>
-      <App />
+      <Bootloader>
+        <App />
+      </Bootloader>
     </ThemeProvider>
   </BrowserRouter>,
 );

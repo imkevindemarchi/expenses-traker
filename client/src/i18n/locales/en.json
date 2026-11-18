@@ -64,5 +64,8 @@
       "clear": "Clear",
       "preview": "Preview"
     }
+  },
+  "loader": {
+    "loading": "Loading..."
   }
 }

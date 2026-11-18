@@ -64,5 +64,8 @@
       "clear": "Trasparente",
       "preview": "Anteprima"
     }
+  },
+  "loader": {
+    "loading": "Caricamento..."
   }
 }
