@@ -1521,3 +1521,17 @@ html
 .lg-field[data-variant="search"][data-disabled] .lg-field__control > * {
   opacity: 0.55;
 }
+
+/* Phones: a tab bar that has stepped aside (search focused, or hidden while
+   scrolling) must not take taps. The dock had pointer-events: none, but the
+   bar and its items set their own "auto", so the invisible items still sat on
+   top of the search field once it moved down: the second tap on the field
+   (double tap, "Paste" on iPhone) opened a tab and closed the keyboard. */
+@media (max-width: 767px) {
+  html[data-search-focused] .lg-tabbar-dock,
+  html[data-search-focused] .lg-tabbar-dock *,
+  html[data-tabbar-hidden] .lg-tabbar-dock,
+  html[data-tabbar-hidden] .lg-tabbar-dock * {
+    pointer-events: none !important;
+  }
+}
