@@ -11,6 +11,7 @@ import { Layers3 } from "lucide-react";
 import { api, ApiError, today } from "./api";
 import type { User, Category, Subcategory, Entry, Summary } from "./types";
 import Layout from "./components/Layout.component";
+import ActivitySnackbar from "./components/ActivitySnackbar.component";
 import Popup from "./components/Popup.component";
 import EntryModal from "./components/EntryModal.component";
 import EntryFiltersModal from "./components/EntryFiltersModal.component";
@@ -363,6 +364,7 @@ export default function App() {
 
   return (
     <CurrencyContext.Provider value={user?.currency ?? "EUR"}>
+      <ActivitySnackbar />
       {notice && (
         <Popup
           key={notice.message}

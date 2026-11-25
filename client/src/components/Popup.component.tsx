@@ -1,4 +1,5 @@
 import {
+  type ComponentType,
   type CSSProperties,
   type FC,
   type TouchEvent,
@@ -6,6 +7,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { CircleCheck, CircleX, TriangleAlert, X } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -13,9 +15,18 @@ import { useTranslation } from "react-i18next";
 
 import "../styles/Popup.styles.css";
 
+// utils
+import {
+  getActivity,
+  handOffActivity,
+  isActivitySettling,
+  subscribeActivity,
+} from "../utils/activity.util";
+
 // types
-type TPopupType = "success" | "warning" | "error";
+type TPopupType = "success" | "warning" | "error" | "activity";
 type TPopupState = { type: TPopupType; message: string; title?: string };
+type TGlyphProps = { size?: number; strokeWidth?: number };
 
 interface IProps {
   popup: TPopupState;
@@ -25,25 +36,37 @@ interface IProps {
   onClose: () => void;
 }
 
+/** The spinning glyph of a change being saved (colours in Popup.styles.css). */
+const ActivityGlyph: FC<TGlyphProps> = ({ size = 18 }) => (
+  <span className="lg-toast__spinner" style={{ width: size, height: size }} />
+);
+
 /** Each kind of message: its glyph and its title (colours in Popup.styles.css). */
-const POPUP_STYLES: Record<TPopupType, { icon: typeof CircleCheck; titleTranslationKey: string }> =
-  {
-    success: { icon: CircleCheck, titleTranslationKey: "popup.success" },
-    warning: { icon: TriangleAlert, titleTranslationKey: "popup.warning" },
-    error: { icon: CircleX, titleTranslationKey: "popup.error" },
-  };
+const POPUP_STYLES: Record<
+  TPopupType,
+  { icon: ComponentType<TGlyphProps>; titleTranslationKey: string }
+> = {
+  success: { icon: CircleCheck, titleTranslationKey: "popup.success" },
+  warning: { icon: TriangleAlert, titleTranslationKey: "popup.warning" },
+  error: { icon: CircleX, titleTranslationKey: "popup.error" },
+  activity: { icon: ActivityGlyph, titleTranslationKey: "popup.saving" },
+};
 
 /** Upward drag (px) that dismisses the banner. */
 const SWIPE_CLOSE_THRESHOLD = 24;
 /** Matches the exit animation in Popup.styles.css. */
 const EXIT_MS = 220;
 
+const getActivityPhase = () => getActivity().phase;
+
 /**
  * The snackbar of the three apps, as an iOS 27 banner: a Liquid Glass capsule
  * that drops in at the top centre (clear of the tab bar, the dock, the
  * floating buttons and the main actions at the bottom), with the coloured
  * glyph of its kind, a title and the message. Swipe it up or tap × to dismiss;
- * it stays while touched.
+ * it stays while touched. While a change is being saved it shows "Saving…"
+ * (ActivitySnackbar); the result then takes the same place without a new
+ * drop-in, and a new save closes the previous message.
  */
 const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, autoCloseMs, onClose }) => {
   const { t } = useTranslation();
@@ -51,12 +74,28 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, autoCloseMs, o
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isHeld, setIsHeld] = useState(false);
+  const isActivity: boolean = popup.type === "activity";
+  // The result of a save replaces the "Saving…" capsule in place.
+  const [isHandoff] = useState<boolean>(() => !isActivity && isActivitySettling());
+  const activityPhase = useSyncExternalStore(subscribeActivity, getActivityPhase);
+  const previousActivityPhase = useRef(activityPhase);
   const touchStartY = useRef<number | null>(null);
   const closeCallback = useRef(onClose);
   useLayoutEffect(() => {
     closeCallback.current = onClose;
   }, [onClose]);
   const isClosing = externallyClosing || locallyClosing;
+
+  useLayoutEffect(() => {
+    if (isHandoff) handOffActivity();
+  }, [isHandoff]);
+
+  useEffect(() => {
+    const previous = previousActivityPhase.current;
+    previousActivityPhase.current = activityPhase;
+    // A new save starts: this message makes room for "Saving…".
+    if (!isActivity && activityPhase === "busy" && previous !== "busy") setLocallyClosing(true);
+  }, [activityPhase, isActivity]);
 
   const requestClose = (): void => {
     if (isClosing) return;
@@ -81,7 +120,8 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, autoCloseMs, o
   const style = POPUP_STYLES[popup.type];
   const Icon = style.icon;
   const title: string = popup.title || t(style.titleTranslationKey);
-  const role: "alert" | "status" = popup.type === "success" ? "status" : "alert";
+  const isPolite: boolean = popup.type === "success" || isActivity;
+  const role: "alert" | "status" = isPolite ? "status" : "alert";
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>): void => {
     if (isClosing) return;
@@ -123,11 +163,13 @@ const Popup: FC<IProps> = ({ popup, isClosing: externallyClosing, autoCloseMs, o
     <div className="lg-toast-shell">
       <div
         role={role}
-        aria-live={popup.type === "success" ? "polite" : "assertive"}
+        aria-live={isPolite ? "polite" : "assertive"}
         aria-atomic="true"
+        aria-busy={isActivity || undefined}
         data-tone={popup.type}
         data-closing={isClosing || undefined}
         data-dragging={isDragging || undefined}
+        data-handoff={isHandoff || undefined}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

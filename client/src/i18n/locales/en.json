@@ -6,7 +6,11 @@
     "success": "Operation completed",
     "warning": "Warning",
     "error": "An error occurred",
-    "close": "Close notification"
+    "close": "Close notification",
+    "saving": "Saving",
+    "savingMessage": "Sending your changes…",
+    "deleting": "Deleting",
+    "deletingMessage": "Removing the data…"
   },
   "languageSelector": {
     "ariaLabel": "Select language",

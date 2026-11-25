@@ -3,6 +3,7 @@ import {
   isValidElement,
   useImperativeHandle,
   useRef,
+  useSyncExternalStore,
   type ButtonHTMLAttributes,
   type FC,
   type ReactNode,
@@ -15,17 +16,25 @@ import { getLiquidGlassClass } from "../assets/constants";
 // hooks
 import { useTheme } from "../hooks";
 
+// utils
+import { getActivity, subscribeActivity } from "../utils/activity.util";
+
 interface IProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
   alwaysVisibleOnMobile?: boolean;
   ariaLabel: string;
+  /** Shows the progress ring (otherwise automatic on the primary action while saving). */
+  busy?: boolean;
   icon: ReactNode;
   ref?: Ref<HTMLButtonElement>;
 }
+
+const getActivityPhase = () => getActivity().phase;
 
 const FloatingButton: FC<IProps> = ({
   ref,
   alwaysVisibleOnMobile = false,
   ariaLabel,
+  busy = false,
   icon,
   className = "",
   disabled = false,
@@ -42,6 +51,12 @@ const FloatingButton: FC<IProps> = ({
   // app colour everywhere (phones and desktop toolbar), submit or not.
   const isPrimary =
     type === "submit" || (isValidElement(icon) && (icon.type === Check || icon.type === Save));
+  const activityPhase = useSyncExternalStore(subscribeActivity, getActivityPhase);
+  // While a change is being saved the primary action keeps its colour and
+  // shows a ring, like the "Saving…" snackbar (utils/activity.util.ts).
+  const isBusy =
+    busy ||
+    (isPrimary && disabled && (activityPhase === "busy" || activityPhase === "settling"));
   useImperativeHandle(ref, () => buttonRef.current!, []);
 
   return (
@@ -51,12 +66,15 @@ const FloatingButton: FC<IProps> = ({
       data-mobile-persistent={persistent || undefined}
       data-nav-back={isBack || undefined}
       data-primary={isPrimary || undefined}
+      data-busy={isBusy || undefined}
+      aria-busy={isBusy || undefined}
       type={type}
       aria-label={ariaLabel}
       disabled={disabled}
       data-glass-theme={theme}
       className={`floating-month-button group relative flex size-15 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border sm:size-18 max-sm:[&_svg]:size-7 disabled:pointer-events-none disabled:opacity-50 ${getLiquidGlassClass(theme)} ${className}`}
     >
+      {isBusy && <span className="floating-month-button__ring" aria-hidden="true" />}
       <span className="floating-month-button__icon relative z-10 flex items-center justify-center text-primary">
         {icon}
       </span>

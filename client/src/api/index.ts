@@ -1,4 +1,5 @@
 import { locale } from "../i18n";
+import { beginActivity, isActivityRequest } from "../utils/activity.util";
 
 import { numberFormatter, dateFormatter } from "../utils/formatters.util";
 export class ApiError extends Error {
@@ -8,10 +9,26 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
-export async function api<T>(
-  path: string,
-  options?: { method?: string; body?: unknown; signal?: AbortSignal },
-): Promise<T> {
+type TApiOptions = {
+  method?: string;
+  body?: unknown;
+  signal?: AbortSignal;
+  /** false: no "Saving…" feedback (background saves). */
+  activity?: boolean;
+};
+/** Every request; one that changes data shows the "Saving…" feedback while it runs. */
+export async function api<T>(path: string, options?: TApiOptions): Promise<T> {
+  const endActivity =
+    options?.activity !== false && isActivityRequest(options?.method, path)
+      ? beginActivity(options?.method)
+      : undefined;
+  try {
+    return await request<T>(path, options);
+  } finally {
+    endActivity?.();
+  }
+}
+async function request<T>(path: string, options?: TApiOptions): Promise<T> {
   const response = await fetch(`/api${path}`, {
     method: options?.method ?? "GET",
     credentials: "same-origin",

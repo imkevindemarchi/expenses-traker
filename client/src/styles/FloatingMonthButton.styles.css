@@ -36,3 +36,34 @@
     transform: none;
   }
 }
+
+/* Saving in progress (utils/activity.util.ts): the primary action keeps its
+   colour instead of fading out and shows a ring, like the "Saving…" snackbar. */
+html body .floating-month-button.floating-month-button[data-busy] {
+  opacity: 1 !important;
+}
+.floating-month-button__ring {
+  position: absolute;
+  inset: 4px;
+  z-index: 11;
+  box-sizing: border-box;
+  border: 2.5px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  color: var(--lg-tint);
+  pointer-events: none;
+  animation: floating-month-button-ring 900ms linear infinite;
+}
+.floating-month-button[data-primary]:not([data-nav-back]) .floating-month-button__ring {
+  color: #fff;
+}
+@keyframes floating-month-button-ring {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-month-button__ring {
+    animation-duration: 2400ms;
+  }
+}

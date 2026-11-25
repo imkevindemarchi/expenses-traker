@@ -55,8 +55,63 @@
 .lg-toast[data-tone="error"] {
   --toast-tone: #ff453a;
 }
+/* A change being saved: the app colour and a spinning ring as the glyph. */
+.lg-toast[data-tone="activity"] {
+  --toast-tone: var(--lg-tint, #0a84ff);
+}
+.lg-toast__spinner {
+  display: block;
+  box-sizing: border-box;
+  border: 2.4px solid rgb(255 255 255 / 35%);
+  border-top-color: #fff;
+  border-radius: 999px;
+  animation: lg-toast-spin 800ms linear infinite;
+}
+@keyframes lg-toast-spin {
+  to {
+    rotate: 360deg;
+  }
+}
 .lg-toast[data-dragging] {
   transition: none;
+}
+/* The result takes the place of "Saving…": same capsule, new glyph and text. */
+.lg-toast[data-handoff] {
+  animation: lg-toast-swap 360ms var(--lg-spring, cubic-bezier(0.3, 1.15, 0.45, 1)) both;
+}
+.lg-toast[data-handoff] .lg-toast__icon {
+  animation: lg-toast-glyph 420ms var(--lg-spring, cubic-bezier(0.3, 1.15, 0.45, 1)) both;
+}
+.lg-toast[data-handoff] .lg-toast__copy {
+  animation: lg-toast-copy 260ms ease both;
+}
+@keyframes lg-toast-swap {
+  from {
+    transform: scale(0.97);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes lg-toast-glyph {
+  from {
+    opacity: 0.4;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lg-toast-copy {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .lg-toast[data-closing] {
   animation: lg-toast-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
@@ -152,7 +207,12 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .lg-toast,
-  .lg-toast[data-closing] {
+  .lg-toast[data-closing],
+  .lg-toast[data-handoff] .lg-toast__icon,
+  .lg-toast[data-handoff] .lg-toast__copy {
     animation-duration: 1ms;
+  }
+  .lg-toast__spinner {
+    animation-duration: 2400ms;
   }
 }
